@@ -1,0 +1,17 @@
+name: Latest blog post workflow
+on:
+  schedule:
+    # 매 시간마다 업데이트 (원하는 주기로 변경 가능)
+    - cron: '0 * * * *'
+  workflow_dispatch: # 수동 실행 버튼
+
+jobs:
+  update-readme-with-blog:
+    name: Update this repo's README with latest blog posts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: gautamkrishnar/blog-post-workflow@master
+        with:
+          # 본인의 벨로그 RSS 주소를 입력하세요
+          feed_list: "https://v2.velog.io/rss/beam0331"
