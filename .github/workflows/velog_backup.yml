@@ -1,12 +1,11 @@
-name: Velog Backup
+name: Velog Auto Backup
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   schedule:
-    - cron: '0 0 * * *' # 매일 오전 9시 (KST)
-  workflow_dispatch: # 수동 실행 버튼 활성화
+    - cron: '0 0 * * *' # 매일 오전 9시(KST)
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,10 +13,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Velog Backup Action
-        uses: gaemi/velog-backup@v0.2.0
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          # 본인의 벨로그 아이디를 입력하세요
-          user_id: '본인의_벨로그_아이디'
-          # 폴더 이름을 지정할 수 있습니다 (기본값은 posts)
-          folder: 'TIL'
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install feedparser
+
+      - name: Run backup script
+        run: python velog_backup.py
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update Velog posts"
+          git push
