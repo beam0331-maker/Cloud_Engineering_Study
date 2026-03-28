@@ -1,0 +1,426 @@
+03.27
+
+git revert가 충돌 나는 이유
+ : 같은 위치의 다른 단어들이 병합 하는 과정에서 어떤 내용을 우선할지 정하지 못하기에 충돌
+ - 대부분의 경우 충돌이 발생한다. 
+
+branch
+: 협업시 각자 하나의 브랜치를 생성하고 작업후 병합하는게 일반적
+
+~ 03.26
+---------------------------------------------------------------------------------------------------
+3. 병합 종류
+
+1) Fast-forward ( 빨리감기 병합 ) 
+ main브랜치에서 분기한 후 (hotfix), hotfix에서 작업을 하고, main 브랜치에서는 추가작업이 병합했을 때
+ fast-forward 방식으로 병합	// main은 아무작업을 안했을때, 메인의 HEAD를 병합하려는 브랜치의 최신 커밋으로 옮기는방식
+
+	실습 : 
+	$ mkdir git_merge
+	$ cd git_merge
+	$ git init
+	
+	# main 작업
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add .
+ 	$ git commit -m "hello commit"	<-- HEAD
+	$ git branch hotfix
+	$ git switch hotfix
+
+	# hotfix 작업
+	$ echo "hello2" >> hello.txt	// main과 싱크가 안맞기 시작한다
+	$ git commit -am "hello2 commit"	<-- HEAD
+	$ git branch main
+
+	# main 작업
+	$ git merge hotfix	# Fast-forward 메시지 확인	// main의 HEAD가 병합하려는 hotfix의 헤드로 옮겨갔다.
+
+	Updating 3822478..83ac846
+	Fast-forward	// fast forward 발생
+	 hello.txt | 1 +
+	 1 file changed, 1 insertion(+)
+
+
+2) 병합 커밋 : main 브랜치에서도 병경사항이 발생된 상태에서 병합방법으로 최종커밋이 필요함.
+
+	# 현재는 main과 hotfix의 버전이 같다
+	
+	# main작업
+	$ touch world.txt
+	$ git add .
+	$ git commit -m "world commit"	
+	$ git switch hotfis
+
+	# hotfix 작업
+	$ toch happy.txt
+	$ git add .
+	$ git commit -m "happy commit"
+	$ git switch main
+	
+
+	# main 작업
+	$ git merge hotfix	# 커밋해야되기 때문에 vsc 오픈되고 커밋메시지 저장 후 close 하면 병합커밋 완료
+
+	Merge made by the 'ort' strategy.	// 병합커밋이 발생하였다
+	 happy.txt | 0
+	 1 file changed, 0 insertions(+), 0 deletions(-)
+	 create mode 100644 happy.txt
+
+	
+
+
+
+3) 병합 충돌 : 같은 파일의 같은라인을 서로 다르게 수정하고 병합할 때 발생함.
+
+	# 실습
+
+	$ mkdir git_conflcit
+	$ cd git_conflcit
+	$ git init
+	
+	# main 작업
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add .
+ 	$ git commit -m "hello commit"
+	$ git branch hotfix
+	$ git switch hotfix
+
+	# hotfix 작업
+	vsc 열고 hello.txt 수정. hello -> hello2로
+	$ echo "hotfix" >> hello.txt
+	$ cat hello.txt
+	hello2
+	hotfix
+	$ git commit -am "hotfix commit"
+	$ git switch main
+
+	# main 작업
+	$ echo main >> hello.txt
+	$ cat hello.txt
+	hello
+	main
+
+	$ git commit -am "main commit"
+	$ git merge hotfix	# 충돌발생, vsc 열고 충돌을 직접 해결(코드 수정). 수정되었기 때문에 커밋해야 됨.
+
+	Auto-merging hello.txt
+	CONFLICT (content): Merge conflict in hello.txt
+	Automatic merge failed; fix conflicts and then commit the result.
+
+	$ cat hello.txt
+	<<<<<<< HEAD	// main 브랜치에서 작업 중 이므로 HEAD는 maim을 의미한다.
+	hello
+	main
+	=======
+	hello2
+	hotfix
+	>>>>>>> hotfix
+
+	$ git commit -am "final commit"	// 커밋을 진행하지 않으면 터미널 상태에서 (main|MERGING) 인걸 확인할 수 있다
+
+---------------------------------------------------------------------------------------------------
+Github 정리
+
+1. 개요
+Git의 원격 저장소를 제공하는 클라우드 서비스. 
+저장소 기능 및 추가 기능도 제공한다. ( CI/CD 기능 지원 : GIthub Actions )
+
+2. github에 저장소 생성
+
+가. 회원가입 및 로그인
+나. 상단의 repositories > New 선택 > creat repositories
+다. 로컬 저장소에서 원격저장소로 데이터를 올리는 방법 (push) 가이드
+	a. 로컬 저장소가 아직 없는 경우
+	
+	echo "# github_test" >> README.md
+	git init
+	git add README.md
+	git commit -m "first commit"
+	git branch -M main	# 브랜치이름 변경 ( master를 쓰던 예전 버전 브랜치를 main으로 변경하기 위해 )
+	git remote add origin https://github.com/beam0331-maker/github_test.git
+	git push -u origin main
+	
+	b. 로컬 저장소가 있는 경우
+	git remote add origin https://github.com/beam0331-maker/github_test.git
+	git branch -M main
+	git push -u origin main
+
+라. 원격 브랜치 보기
+
+	$ git branch	# 로컬 브랜치 보기
+	$ git branch -r	# 원격 브랜치 보기
+	$ git branch -a	# 로컬 + 원격 브랜치 보기
+
+마. 원격 브랜치 삭제 
+	
+	$ git push origgin --delete hotfix
+
+	# 브랜치를 참조할 수 없어 삭제가 실패하는 오류가 발생했다면 다음과 같이 추가작업을 해야된다.
+	error: unable to delete 'hotfix': remote ref does not exist
+     	error: failed to push some refs to 'https://github.com/inky4832/github_test.git'
+		
+	# 원격의 정보를 다시 가져옴
+	# git fetch -p origin ==> 오리진의 최신 정보를 가져온다 ( 수정된 데이터를 적용하는게 아니다 )
+	
+---------------------------------------------------------------------------------------------------
+############################################
+로컬 저장소에 있는 커밋 데이터를 원격 저장소로 보내기
+############################################
+
+1. 	실습1 ( 로컬 저장소 -----------> 원격 저장소로  )
+
+	가. github에 저장소 생성
+		- 아무것도 체크하지 말것
+
+	나. 로컬 저장소 생성하고 커밋
+	$ mkdir git_remote
+	$ cd git_remote
+	$ git init
+	$ touch hello.txt
+	$ echo hello >> hello.txt
+	$ git add .
+	$ git commit -m "hello commit"
+
+	다. 로컬과 원격 연결 및 확인
+	$ git remote add origin https://github.com/beam0331-maker/github_test.git	// github의 주소를 origin이라는 별칭으로 부른다.
+	$ git remote -v	# 원격 연결 상태 확인
+	$ git remote	원격 저장소 별칭 보기
+	origin
+
+	$ git remote rm origin	# 원격 연결 끊기
+
+	라. push 하기
+	$ git remote add origin https://github.com/beam0331-maker/github_test.git	// 위에서 끊은 원격 다시 연결
+	$ git push -u origin main	# -u: upstream, origin의 주소에 main 브랜치가 생성
+				// origin이 main을 -u(바라보게) 하는 코드, 처음 사용한 이후에는
+				// git push로 생략 가능 if 다른 브랜치로 이동해서 작업한다면 다시 한번 더 써줘야한다
+
+---------------------------------------------------------------------------------------------------
+	실습2 ( hotfix 브랜치를 push 하기 )
+	$ git branch hotfix
+	$ git switch hotfix
+	
+	# hotfix 작업
+	$ echo "hello3" >> hello.txt
+	$ git commit -am "hello3 commit"
+	
+	$ git remote -v
+	$ git push -u origin hotfix	# -u: upstream, origin의 주소에 hotfix 브랜치가 생성됨
+	
+	// $ git config user.email
+	// beam0331@gmail.com
+	// 내 로컬 git 유저 메일과 깃허브 계정의 메일이 같아야 정상 작동한다.
+
+	
+	* 최종적으로 병합처리 
+	가. 로컬에서 병합하고 push
+	
+	# main 처리 
+	$ git switch main
+	$ git merge hotfix
+	$ git push -u origin main
+
+	나. 원격에서 병합처리 ( PullRequest :  PR )!!!!!!!!!	// 나중에 협업파트 설명하면서 추가로 설명 예정
+
+---------------------------------------------------------------------------------------------------
+#########################################
+원격 저장소에 있는 커밋데이터를 로컬 저장소로 보내기
+#########################################
+
+방법 2가지
+
+1) git fetch + 로컬에서 병합
+
+	// git fetch origin [ 브랜치명 ]	# 원격의 브랜치에서 커밋 내역만 전달됨
+		
+	# 순서작업은 다음과 같아.	
+	$ git fetch origin main # 원격의 main 브랜치의 내역을 전달됨
+	$ git checkout origin/main
+	$ git merge origin/main main		// 원격 main에 로컬의 maim을 병합한다
+
+	실습: 	// 협업 중에 내가 작업중인 파일을 누군가 변경해서 원격에 push 하여 원격과 로컬의 정보가 다른 상황
+	
+	가. 원격 저장소 생성: yyy
+	나. 로컬 저장소 생성과 push
+	
+	$ mkdir git_fetch
+	$ cd git_fetch
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add .
+	$ git commit -m "hello commit"
+
+	$ git remote add origin https://github.com/beam0331-maker/yyy.git
+	$ git push -u origin main	# 원격과 로컬 sync
+
+	
+	다. 원격 저장소 변경
+	
+	world.txt 파일 추가하고 커밋
+
+	라. 로컬에서 수정 ( 원격 저장소 변경 사태를 아직 모른다고 가정 )
+	
+	$ echo "hello2" >> hello.txt
+	$ git commit -am "hello2 commit"
+	$ git push -u origin main
+	
+	 ! [rejected]        main -> main (fetch first)	// 로컬에서 원격에 추가된 커밋을 모르모 원격에서 병합을 거부
+	error: failed to push some refs to 'https://github.com/beam0331-maker/yyy.git'
+
+	마. 원격의 커밋 정보 얻기
+	( fetch - merge : 작업 내용을 우선으로 확인하고 checkout( == switch ) 이후 merge 하는 단계  )
+
+	$ git fetch origin main # 원격의 커밋 정보만 얻음
+	$ git checkout origin/main	# 원격 커밋정보 얻었기 떄문에 checkout 및 조회 가능
+	Note: switching to 'origin/main'.	// origin/main 브랜치로 이동하게 된다
+
+	$ git log
+
+	$ git switch main		# 병합하기 위해서 main 브랜치로 변경
+	$ git merge main origin/main # main 기준으로 원격 origin/main 병합, vsc 자동으로 오픈되어 커밋메시지 지정
+	
+	$ git log --oneline
+
+
+2) git pull ( git fetch + 로컬에서 병합 )
+
+가. 원격 저장소 변경
+
+happy.txt 추가하고 커밋
+
+나. 로컬에서 pull ( fetch + merge )
+
+	$ git pull origin main
+				
+---------------------------------------------------------------------------------------------------
+#############
+원격 저장소 복사
+#############
+
+1. git clone 명령어 : 
+원격저장소를 일반 디렉터리( git이 관리하지 않는 디렉터리 )에 복사	
+clone하면 새로운 디렉터리(원격 저장소 이름)가 생기고 초기화(git init)까지 됨.
+원격 저장소에 있는 모든 브랜치를 복사하지 않고 기본적으로 main만 복사됨.
+main 제외한 브랜치 복사는 추가작업이 필요함. 
+
+문법: 
+$ git clone https://github.com/beam0331-maker/yyy.git	 		: 로컬에 원격저장소명으로 디렉터리 생성
+$ git clone https://github.com/beam0331-maker/yyy.git [로컬저장소명]	: 지정된 로컬저장소명으로 디렉터리 생성
+
+c:\temp_clone
+
+2. 원격의 hotfix 브랜치 clone 하기 
+
+	$ git checkout origin/hotfix	// 원격의 정보를 가져온 상태지만 나타지 않았으므로 한번은 방문한다
+	$ git switch hotfix
+
+	$ git branch
+
+---------------------------------------------------------------------------------------------------
+Eclipes에서 버전관리
+
+1. 해당 프로젝트를 로컬 저장소로 만들기 
+
+	#cmd
+	| C:\cloud_engineering\Java21_study\eclipse\workspace\HelloTest
+	|
+	| git init <== .git 디렉터리 생성됨
+	| 
+	| git status
+	|
+	| Untracked files:
+	|   (use "git add <file>..." to include in what will be committed)
+	|         .classpath
+	|         .gitignore
+	|         .project
+	|         src/
+	|
+	| # .gitignore 생성하고 내용추가
+	| ==> https://www.toptal.com/developers/gitignore
+	|	
+	| git status
+	| Untracked files:
+	|   (use "git add <file>..." to include in what will be committed)
+	|         .gitignore
+	|         src/
+	| 
+	| git add .
+	| git commit -m "helloTest project"
+	|
+	# 원격 저장소 생성 : java21
+	|
+	| git remote add origin https://github.com/beam0331-maker/java21.git
+	| git push -u origin main
+	| 
+	
+	
+---------------------------------------------------------------------------------------------------
+
+2일차
+
+1. 자바의 데이터 종류
+	2가지 종류가 있음
+	자바입장에서 처리할 수 있는 데이터 종류
+	
+	1) 기본형 데이터(Primitive Data Type: PDT)	(8개)
+				
+		수치형 - 정수형	- byte	(1byte : 8bit)
+						- short	(2byte : 16bit)
+						- int	(4byte : 32bit)
+						- long	(8byte : 64bit)
+						////////////////////////////////////////////
+							-10진수, 2진수, 8진수, 16진수 모두 사용가능
+							  2진수: 0|1 이용 ( 0b 앞에 붙음)	ex. 0b1
+							  8진수: 0~7 이용	 ( 0앞에 붙음)	ex. 01, 07
+							 16진수: 0~9,A,B,C,D,E,F 이용 (0x 앞에 붙음) ex. 0x1, 0xf
+							 
+							- 큰타입의 정수( int(4byte)를 넘어가는 정수)는 반드시 마지막에 대문자 L을 붙임
+							ex. 987231653212123123L
+							- 기본타입은 int(4byte)
+						////////////////////////////////////////////
+						
+				실수형	- float	(4byte : 32bit)
+						- double(8byte : 64bit)
+						////////////////////////////////////////////
+							- float 표현은 반드시 마지막에 F, f 지정해야 됨.
+							  ex. 3.14F, 3.14f
+							- double 표현은 마지막에 D, d 지정가능 
+							  ex. 3.14D, 3.14d
+							  
+							- 기본타입은 double  
+						////////////////////////////////////////////
+						
+		문자 - char(캐릭터) 		(2byte : 16bit)	
+						////////////////////////////////////////////
+							- 전세계의 모든글자 표현이 가능
+							- 하나의 글자를 관리 ( 여러 글자(문자열)관리는 String 클래스가 관리)
+							- 표현은 반드시 '' 지정해야 된다.
+							  ex. '남', '여', 'M', 'F'
+							- 이스케이프문자(escape 문자)
+							  ex. '\n' : 키보드 엔터 효과, 줄내림
+								  '\t' : 키보드 tab
+								  '\"' : " 출력 (코드에서 "은 문자열 처리, 반드시 쌍으로 입력된다)
+								  '\'' : ' 출력 (코드에서 '은 문자 처리, 반드시 쌍으로 입력된다)
+								  '\\' : \ 출력
+						////////////////////////////////////////////
+						
+		논리형 - boolean(불린)	(1byte : 8bit)
+						////////////////////////////////////////////
+							- 참/거짓 데이터 용도
+							- 표현은 true, flase
+						////////////////////////////////////////////
+	
+	2) 참조형 데이터	( 기본형 데이터형 제외한 나머지. Reference Dat Type: RDT )
+		
+		- 클래스
+		- 인터페이스
+		- 배열
+	
+---------------------------------------------------------------------------------------------------
+
+
+
+
+

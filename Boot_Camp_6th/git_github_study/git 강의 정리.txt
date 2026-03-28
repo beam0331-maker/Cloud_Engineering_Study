@@ -1,0 +1,979 @@
+[git]
+
+[1. 환경설정]
+git 명령어 Reference 링크
+https://git-scm.com/docs
+
+vscode는 cmd로 code를 통해 실행할 수 있다.
+C:\Users\사용자>code
+
+버전관리가 브랜치로 관리가 된다.
+최신버전은 master가 maim으로 바뀌었다.
+
+cmd 버전확인
+C:\Users\사용자>[이름] -v
+ex)	Java -version
+	git -v
+
+[2. git 개요]
+- 버전 관리 시스템
+- 리누스 토르발스가 만듬 ( 리눅스 창시자 )
+- 특징 : 
+	로컬 저장소 및 원격 저장소 생성 : git init
+	로컬 저장소에 버전관리할 파일을 생성 및 추가 : git add ( 아직까지는 버전 생성 안됨 )
+	버전관리할 파일의 버전 생성 : git commit + 커밋 메세지가 반드시 설정(ex. "update 코드 추가")
+	버전 히스토리 확인 : git log
+	버전간 비교 : git diff 
+	특정버전으로 되돌아가기 : git reset, git revert
+	새로운 브랜치 생성 ( 이전 브랜치에 영향을 및지지 않음 ) : git branch 브랜치명
+	브랜치 병합 : git merge	
+	로컬 저장소에 브랜치를 원격 저장소에 보내기 가능 : git push
+
+[3. Git이 사용하는 기본 텍스트 편집기 설정]
+에디터 수정 참고 
+https://git-scm.com/book/en/v2/Appendix-C%3A-Git-Commands-Setup-and-Config
+git config --global core.editor "code --wait" <= git commit 명령어만 사용하면 자동을 vsc 오픈됨
+
+[4. 전역 사용자 등록]
+
+git bash 에서 작업
+-------------------------
+ls	# 디렉터리 목록보기
+ls -al	# 자세하게 디렉터리 목록보기
+
+clear	# 화면 지우기
+pwd	# 현재 위치
+mkdir 디렉터리명	#디렉터리 생성	
+cd 디렉터리 	#디렉터리 변경
+rm -rf 디렉터리명	# 디렉터리 강제 삭제 
+rm 파일명 파일명2 ...	# 파일 삭제 
+
+touch 파일명	# 파일생성
+
+echo 문자열 		# 문자열 콘솔 출력
+echo 문자열 >> 파일 	# 콘솔에 출력되는 문자열을 파일에 추가 ( append ), redirection 가능
+echo -n 문자열 >> 파일	# 콘솔에 출력되는 문자열을 파일에 추가 ( append, 같은 줄에 추가됨 )
+echo 문자열 >   파일 	# 콘솔에 출력되는 문자열을 파일에 덮어쓰기
+
+cat 파일명	# 파일내용 보기
+-------------------------
+
+1. 전역 사용자 설정
+
+$ git config --global user.name "beam0331"
+$ git config --global user.email "beam0331@gmail.com" # 반드시 git hub 계정과 일치
+
+c:\사용자\계정명 .gitconfig 파일에 저장됨
+[core]
+	editor = code--wait
+[user]
+	name = beam0331
+	email = beam0331@gmail.com
+
+2. 전역 생성자 확인
+
+$ git config user.name
+$ git config user.email
+
+3. 전역 사용자 삭제 ( git 사용중 꼬이면 그냥 .gifconfig를 다시 만드는게 편하다 )
+$ git config --global user.name --unset "beam0331"
+$ git config --global user.email --unset "beam0331@gmail.com"
+---------------------------------------------------------------------
+###################
+로컬 저장소 생성 및 관리
+###################
+
+*  git 관련 상태 3가지 
+
+		git add test.txt				git commit
+작업 디렉터리   -------------------------> 스테이지( staging area ) -------------------------> 로컬 저장소
+ex. git_tutorial			test.txt					test.txt 버전으로 관리됨.
+	text.txt( 관리 대상 )							( 해시값으로 관리 : 40글자 )
+	a.txt
+	b.txt
+
+1. 저장소 생성
+
+명령어:  git init
+
+실습순서:
+	$ mkdir git_tutorial
+	$ cd git_tutorieal
+	$ git init		# 저장소 생성, .git 폴더가 생성 되어 있다.  // .git 폴더를 삭제하면 작업 디렉터리의 관리를 그만둔다는 의미이다
+							    // 경로상에 (main) 이라는 브랜치가 생성된걸 확인 할 수 있다.
+	
+2. 저장소 상태확인
+
+	$ git status	# 3가지 상태 확인
+
+	On branch main	# 현재 mian 브랜치에 있음
+	No commits yet	# 아직 커밋한 파일이 없다
+	nothing to commit (create/copy files and use "git add" to track) # 커핏할 파일도 없다.
+
+	# 파일 생성
+	touch hello.txt
+
+	On branch main	# 현재 mian 브랜치에 있음
+	No commits yet	# 아직 커밋한 파일이 없다
+	Untracked files:	# git이 한번도 버전관리 되지 않은 파일의미
+	  (use "git add <file>..." to include in what will be committed)
+	        hello.txt
+	nothing added to commit but untracked files present (use "git add" to track)
+
+3. 추적시킬 파일 등록( 스테이징, 스테이지에 올린다. indxe 등록한다 라고 함)
+
+문법 : 
+git add 파일명, 파일명, .... #지정된 파일명 스테이징
+git add .	# 현재 디렉터리 모든 파일을 스테이징
+
+
+		 git add hello.txt	
+작업 디렉터리   -------------------------> 스테이지( staging area ) -------------------------> 로컬 저장소
+ex. git_tutorial			hello.txt
+hello.txt( untracked file )							
+
+실습 
+	$ git add hello.txt
+	$ git status
+
+	On branch main	# 현재 mian 브랜치에 있음
+	No commits yet	# 아직 커밋한 파일이 없다
+	Changes to be committed:	# hello.txt를 앞으로 버전관리 할 것.
+	  (use "git rm --cached <file>..." to unstage)
+	        new file:   hello.txt
+
+	
+	#unstage		// 스테이지 에어리어에서 삭제( 실제 삭제 X )	
+	$ git rm --cached hello.txt
+	$ git status
+
+4. 버전 생성
+
+문법:
+	git commit + 커밋 메시지 지정
+	git commit -m 커밋메시지 파일명 <== 전역사용자 정보가 같이 추가된다
+
+		 git add hello.txt				git commit -m "메시지"
+작업 디렉터리   -------------------------> 스테이지( staging area ) -------------------------> 로컬 저장소
+ex. git_tutorial			hello.txt					hello.txt 버전 생성
+hello.txt( untracked file )		
+
+실습:
+	$ git commit -m "first commit"
+	[main (root-commit) 422f2b1] first commit
+	1 file changed, 0 insertions(+), 0 deletions(-)	# 파일 하나가 변경되었다.	// insertion, deletions : 내용이 추가, 삭제 되었다.
+	create mode 100644 hello.txt
+
+	$ git status
+	On branch main
+	nothing to commit, working tree clean		# 버전으로 만들 파일이 없고, 작업 디렉토리(working tree)도
+						   수정사항이 없이 깨끗하다.
+	$ git log	# 커밋 목록 보기
+	commit 422f2b15194a4e398e235d28259a71b2c4a0d33c	# 해시값 ( 40글자 )
+	(HEAD -> main)	# HEAD는 가장 마지막 커밋 참조	// 마지막 커밋의 브랜치가 main 이다 
+	Author: beam0331 <beam0331@gmail.com>	# 작성자 정보
+	Date:   Thu Mar 26 11:45:55 2026 +0900	# 커밋 시간
+
+	    first commit 				# 커밋 메시지
+
+	$ echo "hello" >> hello.txt	# 내용추가
+	
+	$ git status	// git status에서 나타는 상태는 untrackted( 버전관리X ) or modified( 버전관리O ) 이다.
+	On branch main
+	Changes not staged for commit:
+	  (use "git add <file>..." to update what will be committed)
+	  (use "git restore <file>..." to discard changes in working directory)
+	        modified:   hello.txt	# 버전관리된 적(tracked = 추적된적)이 있기 때문에 modified로 출력됨.
+
+	no changes added to commit (use "git add" and/or "git commit -a")
+
+
+		 git add hello.txt				git commit -m "메시지"
+작업 디렉터리   -------------------------> 스테이지( staging area ) -------------------------> 로컬 저장소
+ex. git_tutorial			hello.txt					hello.txt 버전 1개 생성 ( first commit )
+hello.txt ( modified file )
+
+	현재 상태에서 할 수 있는 2가지 작업은 다음과 같다 => add or restore
+
+	1. 스테이지징 ( git add )
+
+		 git add hello.txt				
+작업 디렉터리   -------------------------> 스테이지( staging area ) -------------------------> 로컬 저장소
+ex. git_tutorial			hello.txt					hello.txt 버전 1개 생성 ( first commit )
+hello.txt
+	
+	$ git add hello.txt
+	$ git status
+	On branch main
+	Changes to be committed:
+	  (use "git restore --staged <file>..." to unstage)
+	        modified:   hello.txt
+
+	$ git restore --staged hello.txt	// add를 통해 스테이징 된 상태를 취소한것 != 파일의 수정된 내용을 취소
+	On branch main
+	Changes not staged for commit:
+	  (use "git add <file>..." to update what will be committed)
+	  (use "git restore <file>..." to discard changes in working directory)
+	        modified:   hello.txt
+
+	no changes added to commit (use "git add" and/or "git commit -a")
+	
+	$ cat hello.txt
+	hello	# git add만 되돌리기됨. hello.txt 수정 사항응 유지됨
+
+	$ git add hello.txt
+	$ git commit -m "second commit"
+	[main cf49ff4] second commit
+	 1 file changed, 1 insertion(+)		# 파일 하나 변경됨, 하나가 추가됨 = 값이 추가됨.
+	$ git status
+
+	$ git log
+	commit cf49ff4d0a728d6e97e8b414c68fe134aae8acc0 (HEAD -> main)	// HEAD가 가장 최신 커밋( second commit )으로 변경됨.
+	Author: beam0331 <beam0331@gmail.com>
+	Date:   Thu Mar 26 13:29:25 2026 +0900
+
+	    second commit
+
+	commit 422f2b15194a4e398e235d28259a71b2c4a0d33c
+	Author: beam0331 <beam0331@gmail.com>
+	Date:   Thu Mar 26 11:45:55 2026 +0900
+
+	    first commit
+
+
+	2. 변경사항 취소 ( git restore : 작업디렉터리에서 했던 작업 취소 )	// 각 상황에 따른 삭제 명령이 다르다( commit 삭제, 버전 삭제)
+
+작업 디렉터리   -------------------------> 스테이지( staging area ) -------------------------> 로컬 저장소
+ex. git_tutorial								hello.txt 버전 1개 생성 ( first commit )
+hello.txt ( modified file )
+		$ git restore hello.txt
+		$ cat hello.txt	<== ehco hello >> hello.txt 작업이 취소 되었다.
+		$ git status
+		On branch main
+		nothing to commit, working tree clean
+
+------------------------------------------------------------------------------------------------------------------------------------------	
+
+* 정리 
+
+		git add hello.txt		git commit -m "메시지"
+작업 디렉터리 -------------------------> 스테이지 -------------------------> 로컬 저장소
+- hello.txt 추가			hello.txt
+- hello 문자열 추가
+
+$ git restore hello.txt( hello 문자열 취소 )
+$ git restore --staged hello.txt ( git add 취소 )
+
+------------------------------------------------------------------------------------------------------------------------------------------	
+
+	# git add와 git commit 한꺼번에 ( 반드시 tracked 파일이어야 된다 ==> 한번은 commit된 파일이어야 한다. )
+
+	$ git commit -a -m "메시지"
+	$ git commit -am "메시지"
+
+------------------------------------------------------------------------------------------------------------------------------------------	
+5. 버전 확인
+	$ git log
+	$ git log --oneline	# 로그를 한줄로 볼 수 있다.
+	f0d19b5 (HEAD -> main) some commit
+	8b1784d thrid commit
+	cf49ff4 second commit
+	422f2b1 first commit
+
+	$ git log -p	# 변경 내용 출력 , 빠져나오기 : q ,  Pagedown, 화살표 키
+	--- a/hello.txt	// 이전 정보
+	+++ b/hello.txt	// 수정된 정보
+	@@ -1,2 +1,3 @@
+	 hello
+	 hello2
+	+hello3	// 해당 커밋해서 병경된 내용.
+
+	$ git log --relative-date	# 현재 시간 기준으로 commit 경과된 시간 출력
+
+	C:\Users\JeongBeomseok\git_tutorial\.git\refs\heads\main	# main 브랜치의 최신 commit 정보가 저장
+								   .git\HEAD가 참조
+
+	C:\Users\JeongBeomseok\git_tutorial\.git\objdects	# 해시값에 해당되는 40글자 중  앞 2글자에 해당하는 폴더를
+							   만들고 나머지 38글자는 폴더 안에 저장해서 해시값을 관리
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+6. 커밋 수정 ( --amend )
+
+- 특징은 커밋을 만든 즉시 수정 가능하 ( 커밋이후 수정을 하지 않았다면 ).
+ex) 포함해야될 파일이 누락되거나, 커밋 메세지 수정
+
+
+	실습 : 
+	$ git commit -m "some commit"
+	$ touch world.txt
+	$ git add world.txt
+	$ git commit --amend	# 자동으로 vsc 가 열리고 커밋메시지를 수정할 수 있다.
+				   커밋메시지 수정 후 저장하고 파일 close하면 됨.
+
+	$ git log
+
+------------------------------------------------------------------------------------------------------------------------------------------	
+7. 변경사항 비교
+				git diff
+	----------------------------------------------------------------------------
+
+작업 디렉터리 -------------------------> 스테이지 -------------------------> 로컬 저장소
+				   <------------------------------------>	해시값3 (HEAD)
+					git diff --staged		해시값2
+								해시값1
+	        <------------------------------------------------------------------->
+			git diff HEAD ( git diff + git diff --staged )
+				
+
+- git diff: 작업 디렉터리와 저장소 비교
+- git diff --staged : 스테이지와 저장소비교
+- git diff HEAD : git diff + git diff --staged 모두 포함
+- git diff 해시값1 해시값2 : 해시값1, 2를 비교한다
+
+	실습:
+	$ mkdir git_diff
+	$ cd git_diff
+	$ git init	# .git 폴더 생성
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add hello.txt
+	$ git commit -m "first commit"
+	
+	# 작업 디렉터리 수정
+	$ echo "hello2" >> hello.txt
+	diff --git a/hello.txt b/hello.txt
+	index ce01362..97531f3 100644
+	--- a/hello.txt
+	+++ b/hello.txt
+	@@ -1 +1,2 @@
+	 hello
+	+hello2
+
+	# 스테이지와 저장소 비교
+	$ git add hello.txt
+	$ git diff --staged
+	// 이때 git diff 만 하면 작업 디렉토리와 스테이지 사이에 변경점이 없으므로 아무것도 뜨지 않는다.
+	$ git diff --staged
+	diff --git a/hello.txt b/hello.txt
+	index ce01362..97531f3 100644
+	--- a/hello.txt
+	+++ b/hello.txt
+	@@ -1 +1,2 @@
+	 hello
+	+hello2
+
+	# 작업 디렉터리( hello3 ) + 스테이지( hello2 ) + 저장소 비교( hello )
+	$ echo hello3 >> hello.txt	// 디렉터로와 스테이지의 변경점 추가
+	$ git diff HEAD
+	diff --git a/hello.txt b/hello.txt
+	index ce01362..3cea797 100644
+	--- a/hello.txt
+	+++ b/hello.txt
+	@@ -1 +1,3 @@
+	 hello
+	+hello2	// 스테이지 <-----> 저장소
+	+hello3	// 작업 디렉토리 <-----> 스테이지
+	
+	# 해시값 비교
+	$ git commit -m "hello2 commit"
+	$ git add hello.txt
+	$ git commit -m "hello3 commit"
+
+	$ git log --oneline
+	fee14ba (HEAD -> main) hello3 commit
+	4eb113e hello2.txt
+	53225b3 first commit
+
+
+	$ git diff fee14ba 53225b3	// 첫번째 커밋과 가장 최신 커밋을 비교
+	diff --git a/hello.txt b/hello.txt
+	index 3cea797..ce01362 100644
+	--- a/hello.txt
+	+++ b/hello.txt
+	@@ -1,3 +1 @@
+	 hello
+	-hello2	
+	-hello3	// hello2, hello3 가 누락되어 있다.
+
+------------------------------------------------------------------------------------------------------------------------------------------	
+8. 불필요한 파일 제외
+
+문법 :
+	.gitignore 파일에 제외하고자 하는 파일 및 디렉터리 명시가능
+
+		// 아래 처럼 입력하면 해달 디렉터리의 모든 내용이 add 된다
+		git add .
+작업 디렉터리 -------------------------> 스테이지 -------------------------> 로컬 저장소
+-hello.txt. 추가 
+hellot.txt
+hello.txt.bak
+sercuret.txt
+/tmp
+
+실습:
+	$ mkdir temp
+	$ touch secrets.txt
+
+	$ git add .
+	On branch main
+	Changes to be committed:
+	  (use "git restore --staged <file>..." to unstage)
+	        new file:   secrets.txt	// temp 파일이 비어 있는 상태라 표시되지 않음
+
+	$ touch .gitignore
+	$ touch secrets2.txt
+	$ echo "secrets2.txt" >> .gitignore
+
+	$ git status
+	On branch main
+	Changes to be committed:
+	  (use "git restore --staged <file>..." to unstage)
+	        new file:   .gitignore	// secrests2가 무시되고 add되었다.
+	        new file:   secrets.txt
+
+	오타가 아니어도 .gitignore 안될 때는 캐시 때문임.
+	해결 : git rm -r --cached
+
+	.gitignore 제공 사이트
+	나중에 eclips 또는 Intellij 또는 vsc 버전관리시 사용
+	https://www.toptal.com/developers/gitignore
+
+------------------------------------------------------------------------------------------------------------------------------------------
+9.  작업 되돌리기 
+
+						
+						
+	작업 디렉터리 -------------------------> 스테이지 -------------------------> 로컬 저장소
+	hello.txt 수정			         <------------------------->
+						git reset --soft HEAD^ | 해시값 ( git commit 되돌리기 )
+							   // HEAD^ : 가장최근 해시값
+			  <------------------------------------------------------->
+				git reset --mixed HEAD^ | 해시값 	( git add 되돌리기 )
+	         <------------------------------------------------------------------------>
+				git reset --hard HEAD^ | 해시값 	( 작업디렉터리 수정 전까지 되돌리기 )
+
+	# 커밋 이전 상태 되돌리기
+
+	git restore hello.txt	 	<== 작업 디렉토리의 작업 되돌리기
+	git restore --staged hello.txt 	<== git add 되돌리기
+	
+
+	# 커밋 이후 상태 되돌리기 ( 이전 커밋 히스토리 정보가 삭제됨 )
+	git reset --soft HEAD^ | 해시값 	( git commit 되돌리기 )
+	git reset --mixed HEAD^ | 해시값 	( git add 되돌리기 )
+	git reset --hard HEAD^ | 해시값 	( 작업디렉터리 수정 전까지 되돌리기 )
+
+	실습:
+	$ mkdir git_reset
+	$ cd git_reset
+	$ git init
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add hello.txt
+	$ git commit -m "hello commit"
+
+	$ echo "hello2" >> hello.txt
+	$ git commit -am "hello2 commit"
+
+	$ echo "hello3" >> hello.txt
+	$ git commit -am "hello3 commit"
+
+	$ git log --oneline
+	1d054c8 (HEAD -> main) hello3 commit
+	21b6c83 hello2 commit
+	549149b hello commit
+
+	# hello.txt 파일에 hello3 문자열 추가까지 되돌리기 => 가장 마지막 커밋(가장 최신커밋) 삭제 
+	$ git reset --hard HEAD^
+	
+	$ git log --oneline
+	21b6c83 (HEAD -> main) hello2 commit	// hello2로 되돌아가 있다.
+	549149b hello commit
+
+	$ cat hello.txt	// hello2가 입력되었던 버전으로 되돌아가 있다.
+	hello
+	hello2
+
+	
+	# git add 되돌리기
+	$ git reset --mixed HEAD^	// 가장 마지막 커밋을 스테이징 전 상태로 되돌린다( add가 필요한 상태 )
+
+	$ git log --oneline
+	549149b (HEAD -> main) hello // HEAD는 이전 커밋으로 바뀜
+	$ git status
+	On branch main
+	Changes not staged for commit:
+	  (use "git add <file>..." to update what will be committed)
+	  (use "git restore <file>..." to discard changes in working directory)
+	        modified:   hello.txt
+
+	$ git commit -am "hello2 commit"
+
+	# git commit 되돌리기
+	$ git reset --soft HEAD^
+
+	$ git log --oneline
+	549149b (HEAD -> main) hello commit	
+	
+
+	실행결과: 
+		이전의 커밋정보가 삭제됨.
+		이전 작업의 히스토리가 안남음.
+		이전 커밋 시점으로 가는것.
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+	# 커밋이후 상태 되돌리기 ( 이전 커밋 히스토리 정보 유지됨 ) 
+	
+	문법 :
+ 		git revert 해시값 # 기존 커밋 시점으로 가는것이 아니라 
+				새로운 커밋을 만들어서 기존 히스토리 유지
+				추가될 커밋의 메세지가 필요함 => vsc 오픈됨
+				충돌이 발생될 수 있음. ( 해결: 원하는 내용으로 바꾸고 저장 )
+		
+	
+	실습:
+	$ mkdir git_revert
+	$ cd git_reset
+	$ git init
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add hello.txt
+	$ git commit -m "hello commit"
+	$ echo "hello2" >> hello.txt
+	$ git commit -am "hello2 commit"
+
+	$ git revert 6201822	# 기준이 필요한데 처음 만든 커밋은 기준이 없기 때문에 안됨.
+				반드시 2번째 이후부터 지정.
+	  hint: git add/rm	# git add 선택하면 hello.txt 유지
+			# git rm 선택하면 hello.txt 삭재
+	
+	$ git add .
+	$ git revert --continue	# vsc 열림. 커밋 메시지 작성하고 파일 저장.
+				 만약 vsc 안열리면 git config --global core.editor "code --wait 다시 실행
+
+	$ git log --oneline
+	$ git revert --abort	# git revert 중단하기
+
+------------------------------------------------------------------------------------------------------------------------------------------
+########
+브랜치 
+########
+
+1. 기본 브랜치 
+	- main 브랜치가 자동으로 제공 ( git init 할 때 )
+	- 과거에는 master 브랜치가 기본이었음. 현재는 사용 안함
+	- 각 브랜치는 독립적으고 관리된다!!!!!!!!!!!!
+
+2. 기본 명령어 
+	$ git branch : 브랜치 목록 보기
+	* main	// * 은 현재 작업 중인 브랜치를 의미한다
+	$ git branch 브랜치명 : 새로운 브랜치 생성
+	$ git branch -M 브랜치명 : 브랜치 이름 변경, 변경할 브랜치에서 작업
+	$ git branch -D 브랜치명 : 브랜치 강제 삭제, 다른 브랜치에서 작업
+	$ git switch 브랜치명 : 브랜치 변경
+	$ git checkout 브랜치며: 브랜치 변경 (OLD)
+
+	$ git switch -C 브랜치명 : 브랜치를 생성하면서 해당 브랜치로 변경됨
+	$ git log main..hotfix : main 기준으로 hotfix 차이점 출력
+	$ git merge 브랜치명 : 현재 브랜치 기준으로 입력된 브랜치를 병합한다.
+
+
+
+	실습:
+ 	$ mkdir git_branch
+	$ cd git_branch
+	$ git init
+	$ touch hello.txt
+	$ echo hello >> hello.txt
+	$ git add hello.txt
+	$ git commit -m "hello commit"	// 최초의 커밋이 있어야 main 브랜치가 생성된다
+
+	$ git branch hotfix	# hotfix 이름의 새로운 브랜치 생성
+	$ git branch
+	  hotfix	// 새롭게 생성된 브랜치
+	* main
+	
+	# main 브랜치에서 작업
+	$ git branch -M master
+	
+	# main 브랜치에서 작업
+	$ git branch -D hotfix
+
+	# main 브랜치에서 hotfix로 변경
+	$ git switch hotfix
+	$ git checkout hotfix
+
+	# feature 브랜치 만들면서 변경
+	$ git switch -C feature  
+
+	# hotfix에 새로운 작업 추가
+	$ git switch hotfix
+	$ echo "hello2" >> hello.txt
+	$ git commit -am "hello2 commit" <== main과 hotfix가 다름.
+
+	$ git log --oneline
+	4ce7a24 (HEAD -> hotfix) hello2 commit
+	e638c78 (main, feature) hello commit
+
+	# main 기준으로 hotfix 차이점 출력
+	$ git log main..hotfix
+	
+
+	# main에서 작업. main에 브랜치변경 작업을 병합
+	$ git merge hotfix
+	$ git branch -D hotfix <==  병합후에는 hotfix 브랜치 삭제, git reflog로 복구 가능 but 복잡하다
+	
+	---------------------------------------------------------------------------------------------------
+3. 병합 종류
+
+1) Fast-forward ( 빨리감기 병합 ) 
+ main브랜치에서 분기한 후 (hotfix), hotfix에서 작업을 하고, main 브랜치에서는 추가작업이 병합했을 때
+ fast-forward 방식으로 병합	// main은 아무작업을 안했을때, 메인의 HEAD를 병합하려는 브랜치의 최신 커밋으로 옮기는방식
+
+	실습 : 
+	$ mkdir git_merge
+	$ cd git_merge
+	$ git init
+	
+	# main 작업
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add .
+ 	$ git commit -m "hello commit"	<-- HEAD
+	$ git branch hotfix
+	$ git switch hotfix
+
+	# hotfix 작업
+	$ echo "hello2" >> hello.txt	// main과 싱크가 안맞기 시작한다
+	$ git commit -am "hello2 commit"	<-- HEAD
+	$ git branch main
+
+	# main 작업
+	$ git merge hotfix	# Fast-forward 메시지 확인	// main의 HEAD가 병합하려는 hotfix의 헤드로 옮겨갔다.
+
+	Updating 3822478..83ac846
+	Fast-forward	// fast forward 발생
+	 hello.txt | 1 +
+	 1 file changed, 1 insertion(+)
+
+
+2) 병합 커밋 : main 브랜치에서도 병경사항이 발생된 상태에서 병합방법으로 최종커밋이 필요함.
+
+	# 현재는 main과 hotfix의 버전이 같다
+	
+	# main작업
+	$ touch world.txt
+	$ git add .
+	$ git commit -m "world commit"	
+	$ git switch hotfis
+
+	# hotfix 작업
+	$ toch happy.txt
+	$ git add .
+	$ git commit -m "happy commit"
+	$ git switch main
+	
+
+	# main 작업
+	$ git merge hotfix	# 커밋해야되기 때문에 vsc 오픈되고 커밋메시지 저장 후 close 하면 병합커밋 완료
+
+	Merge made by the 'ort' strategy.	// 병합커밋이 발생하였다
+	 happy.txt | 0
+	 1 file changed, 0 insertions(+), 0 deletions(-)
+	 create mode 100644 happy.txt
+
+	
+
+
+
+3) 병합 충돌 : 같은 파일의 같은라인을 서로 다르게 수정하고 병합할 때 발생함.
+
+	# 실습
+
+	$ mkdir git_conflcit
+	$ cd git_conflcit
+	$ git init
+	
+	# main 작업
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add .
+ 	$ git commit -m "hello commit"
+	$ git branch hotfix
+	$ git switch hotfix
+
+	# hotfix 작업
+	vsc 열고 hello.txt 수정. hello -> hello2로
+	$ echo "hotfix" >> hello.txt
+	$ cat hello.txt
+	hello2
+	hotfix
+	$ git commit -am "hotfix commit"
+	$ git switch main
+
+	# main 작업
+	$ echo main >> hello.txt
+	$ cat hello.txt
+	hello
+	main
+
+	$ git commit -am "main commit"
+	$ git merge hotfix	# 충돌발생, vsc 열고 충돌을 직접 해결(코드 수정). 수정되었기 때문에 커밋해야 됨.
+
+	Auto-merging hello.txt
+	CONFLICT (content): Merge conflict in hello.txt
+	Automatic merge failed; fix conflicts and then commit the result.
+
+	$ cat hello.txt
+	<<<<<<< HEAD	// main 브랜치에서 작업 중 이므로 HEAD는 maim을 의미한다.
+	hello
+	main
+	=======
+	hello2
+	hotfix
+	>>>>>>> hotfix
+
+	$ git commit -am "final commit"	// 커밋을 진행하지 않으면 터미널 상태에서 (main|MERGING) 인걸 확인할 수 있다
+
+---------------------------------------------------------------------------------------------------
+Github 정리
+
+1. 개요
+Git의 원격 저장소를 제공하는 클라우드 서비스. 
+저장소 기능 및 추가 기능도 제공한다. ( CI/CD 기능 지원 : GIthub Actions )
+
+2. github에 저장소 생성
+
+가. 회원가입 및 로그인
+나. 상단의 repositories > New 선택 > creat repositories
+다. 로컬 저장소에서 원격저장소로 데이터를 올리는 방법 (push) 가이드
+	a. 로컬 저장소가 아직 없는 경우
+	
+	echo "# github_test" >> README.md
+	git init
+	git add README.md
+	git commit -m "first commit"
+	git branch -M main	# 브랜치이름 변경 ( master를 쓰던 예전 버전 브랜치를 main으로 변경하기 위해 )
+	git remote add origin https://github.com/beam0331-maker/github_test.git
+	git push -u origin main
+	
+	b. 로컬 저장소가 있는 경우
+	git remote add origin https://github.com/beam0331-maker/github_test.git
+	git branch -M main
+	git push -u origin main
+
+라. 원격 브랜치 보기
+
+	$ git branch	# 로컬 브랜치 보기
+	$ git branch -r	# 원격 브랜치 보기
+	$ git branch -a	# 로컬 + 원격 브랜치 보기
+
+마. 원격 브랜치 삭제 
+	
+	$ git push origgin --delete hotfix
+
+	# 브랜치를 참조할 수 없어 삭제가 실패하는 오류가 발생했다면 다음과 같이 추가작업을 해야된다.
+	error: unable to delete 'hotfix': remote ref does not exist
+     	error: failed to push some refs to 'https://github.com/inky4832/github_test.git'
+		
+	# 원격의 정보를 다시 가져옴
+	# git fetch -p origin ==> 오리진의 최신 정보를 가져온다 ( 수정된 데이터를 적용하는게 아니다 )
+	
+---------------------------------------------------------------------------------------------------
+############################################
+로컬 저장소에 있는 커밋 데이터를 원격 저장소로 보내기
+############################################
+
+1. 	실습1 ( 로컬 저장소 -----------> 원격 저장소로  )
+
+	가. github에 저장소 생성
+		- 아무것도 체크하지 말것
+
+	나. 로컬 저장소 생성하고 커밋
+	$ mkdir git_remote
+	$ cd git_remote
+	$ git init
+	$ touch hello.txt
+	$ echo hello >> hello.txt
+	$ git add .
+	$ git commit -m "hello commit"
+
+	다. 로컬과 원격 연결 및 확인
+	$ git remote add origin https://github.com/beam0331-maker/github_test.git	// github의 주소를 origin이라는 별칭으로 부른다.
+	$ git remote -v	# 원격 연결 상태 확인
+	$ git remote	원격 저장소 별칭 보기
+	origin
+
+	$ git remote rm origin	# 원격 연결 끊기
+
+	라. push 하기
+	$ git remote add origin https://github.com/beam0331-maker/github_test.git	// 위에서 끊은 원격 다시 연결
+	$ git push -u origin main	# -u: upstream, origin의 주소에 main 브랜치가 생성
+				// origin이 main을 -u(바라보게) 하는 코드, 처음 사용한 이후에는
+				// git push로 생략 가능 if 다른 브랜치로 이동해서 작업한다면 다시 한번 더 써줘야한다
+
+---------------------------------------------------------------------------------------------------
+	실습2 ( hotfix 브랜치를 push 하기 )
+	$ git branch hotfix
+	$ git switch hotfix
+	
+	# hotfix 작업
+	$ echo "hello3" >> hello.txt
+	$ git commit -am "hello3 commit"
+	
+	$ git remote -v
+	$ git push -u origin hotfix	# -u: upstream, origin의 주소에 hotfix 브랜치가 생성됨
+	
+	// $ git config user.email
+	// beam0331@gmail.com
+	// 내 로컬 git 유저 메일과 깃허브 계정의 메일이 같아야 정상 작동한다.
+
+	
+	* 최종적으로 병합처리 
+	가. 로컬에서 병합하고 push
+	
+	# main 처리 
+	$ git switch main
+	$ git merge hotfix
+	$ git push -u origin main
+
+	나. 원격에서 병합처리 ( PullRequest :  PR )!!!!!!!!!	// 나중에 협업파트 설명하면서 추가로 설명 예정
+
+---------------------------------------------------------------------------------------------------
+#########################################
+원격 저장소에 있는 커밋데이터를 로컬 저장소로 보내기
+#########################################
+
+방법 2가지
+
+1) git fetch + 로컬에서 병합
+
+	// git fetch origin [ 브랜치명 ]	# 원격의 브랜치에서 커밋 내역만 전달됨
+		
+	# 순서작업은 다음과 같아.	
+	$ git fetch origin main # 원격의 main 브랜치의 내역을 전달됨
+	$ git checkout origin/main
+	$ git merge origin/main main		// 원격 main에 로컬의 maim을 병합한다
+
+	실습: 	// 협업 중에 내가 작업중인 파일을 누군가 변경해서 원격에 push 하여 원격과 로컬의 정보가 다른 상황
+	
+	가. 원격 저장소 생성: yyy
+	나. 로컬 저장소 생성과 push
+	
+	$ mkdir git_fetch
+	$ cd git_fetch
+	$ touch hello.txt
+	$ echo "hello" >> hello.txt
+	$ git add .
+	$ git commit -m "hello commit"
+
+	$ git remote add origin https://github.com/beam0331-maker/yyy.git
+	$ git push -u origin main	# 원격과 로컬 sync
+
+	
+	다. 원격 저장소 변경
+	
+	world.txt 파일 추가하고 커밋
+
+	라. 로컬에서 수정 ( 원격 저장소 변경 사태를 아직 모른다고 가정 )
+	
+	$ echo "hello2" >> hello.txt
+	$ git commit -am "hello2 commit"
+	$ git push -u origin main
+	
+	 ! [rejected]        main -> main (fetch first)	// 로컬에서 원격에 추가된 커밋을 모르모 원격에서 병합을 거부
+	error: failed to push some refs to 'https://github.com/beam0331-maker/yyy.git'
+
+	마. 원격의 커밋 정보 얻기
+	( fetch - merge : 작업 내용을 우선으로 확인하고 checkout( == switch ) 이후 merge 하는 단계  )
+
+	$ git fetch origin main # 원격의 커밋 정보만 얻음
+	$ git checkout origin/main	# 원격 커밋정보 얻었기 떄문에 checkout 및 조회 가능
+	Note: switching to 'origin/main'.	// origin/main 브랜치로 이동하게 된다
+
+	$ git log
+
+	$ git switch main		# 병합하기 위해서 main 브랜치로 변경
+	$ git merge main origin/main # main 기준으로 원격 origin/main 병합, vsc 자동으로 오픈되어 커밋메시지 지정
+	
+	$ git log --oneline
+
+
+2) git pull ( git fetch + 로컬에서 병합 )
+
+가. 원격 저장소 변경
+
+happy.txt 추가하고 커밋
+
+나. 로컬에서 pull ( fetch + merge )
+
+	$ git pull origin main
+				
+---------------------------------------------------------------------------------------------------
+#############
+원격 저장소 복사
+#############
+
+1. git clone 명령어 : 
+원격저장소를 일반 디렉터리( git이 관리하지 않는 디렉터리 )에 복사	
+clone하면 새로운 디렉터리(원격 저장소 이름)가 생기고 초기화(git init)까지 됨.
+원격 저장소에 있는 모든 브랜치를 복사하지 않고 기본적으로 main만 복사됨.
+main 제외한 브랜치 복사는 추가작업이 필요함. 
+
+문법: 
+$ git clone https://github.com/beam0331-maker/yyy.git	 		: 로컬에 원격저장소명으로 디렉터리 생성
+$ git clone https://github.com/beam0331-maker/yyy.git [로컬저장소명]	: 지정된 로컬저장소명으로 디렉터리 생성
+
+c:\temp_clone
+
+2. 원격의 hotfix 브랜치 clone 하기 
+
+	$ git checkout origin/hotfix	// 원격의 정보를 가져온 상태지만 나타지 않았으므로 한번은 방문한다
+	$ git switch hotfix
+
+	$ git branch
+
+---------------------------------------------------------------------------------------------------
+Eclipes에서 버전관리
+
+1. 해당 프로젝트를 로컬 저장소로 만들기 
+
+	#cmd
+	| C:\cloud_engineering\Java21_study\eclipse\workspace\HelloTest
+	|
+	| git init <== .git 디렉터리 생성됨
+	| 
+	| git status
+	|
+	| Untracked files:
+	|   (use "git add <file>..." to include in what will be committed)
+	|         .classpath
+	|         .gitignore
+	|         .project
+	|         src/
+	|
+	| # .gitignore 생성하고 내용추가
+	| ==> https://www.toptal.com/developers/gitignore
+	|	
+	| git status
+	| Untracked files:
+	|   (use "git add <file>..." to include in what will be committed)
+	|         .gitignore
+	|         src/
+	| 
+	| git add .
+	| git commit -m "helloTest project"
+	|
+	# 원격 저장소 생성 : java21
+	|
+	| git remote add origin https://github.com/beam0331-maker/java21.git
+	| git push -u origin main
+	| 
+		
+---------------------------------------------------------------------------------------------------
+
+
+
+
