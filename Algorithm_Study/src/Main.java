@@ -2,25 +2,37 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args)  throws IOException {
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine());
+
         StringBuilder sb = new StringBuilder();
 
-        for(int i = 0 ; i < n ; i++){
-            char[] charArr = br.readLine().toCharArray();
-            int count =0;
-
-            for(int j = 0 ; j < charArr.length ; j++){
-                if('(' == charArr[j]) count++;
-                else count--;
-
-                if(count < 0 ) break;
-            }
-            if(count !=0 ) sb.append("NO").append('\n');
-            else sb.append("YES").append("\n");
+        while (true) {
+            char[] line = br.readLine().toCharArray();
+            if (line[0] == '.') break;
+            if (isCheck(line)) sb.append("yes").append("\n");
+            else sb.append("no").append("\n");
         }
-
         System.out.println(sb);
+    }
+
+    static boolean isCheck(char[] line) {
+        HashMap<Character, Character> map = new HashMap<>();
+        map.put('(',')');
+        map.put('{','}');
+        map.put('[',']');
+
+        Stack<Character> stack = new Stack<>();
+        List<Character> keylist = new ArrayList<>(map.keySet());
+
+        for (char c : line) {
+            if(keylist.contains(c))
+                stack.push(map.get(c));
+            else if(c == ')'|| c == '}'||c == ']'){
+                if(stack.isEmpty() || stack.pop() != c)
+                    return  false;
+            }
+        }
+        return stack.isEmpty();
     }
 }
