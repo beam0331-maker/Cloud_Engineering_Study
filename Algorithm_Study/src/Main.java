@@ -5,34 +5,48 @@ public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringBuilder sb = new StringBuilder();
+        int n = Integer.parseInt(br.readLine());
 
-        while (true) {
-            char[] line = br.readLine().toCharArray();
-            if (line[0] == '.') break;
-            if (isCheck(line)) sb.append("yes").append("\n");
-            else sb.append("no").append("\n");
-        }
-        System.out.println(sb);
-    }
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        Stack<Integer> stack = new Stack<>();
+        List<Integer> queueList = new ArrayList<>();
 
-    static boolean isCheck(char[] line) {
-        HashMap<Character, Character> map = new HashMap<>();
-        map.put('(',')');
-        map.put('{','}');
-        map.put('[',']');
-
-        Stack<Character> stack = new Stack<>();
-        List<Character> keylist = new ArrayList<>(map.keySet());
-
-        for (char c : line) {
-            if(keylist.contains(c))
-                stack.push(map.get(c));
-            else if(c == ')'|| c == '}'||c == ']'){
-                if(stack.isEmpty() || stack.pop() != c)
-                    return  false;
+        int nowTicketNum = 1;
+        for (int i = 0; i < n; i++) {
+            int queueTicketNum = Integer.parseInt(st.nextToken());
+            if (queueTicketNum == nowTicketNum) {
+                queueList.add(queueTicketNum);
+                nowTicketNum++;
+            } else {
+                stack.push(queueTicketNum);
             }
+
+            while (!stack.isEmpty()){
+                if(stack.peek()==nowTicketNum){
+                    queueList.add(stack.pop());
+                    nowTicketNum++;
+                }
+                else break;
+
+            }
+
         }
-        return stack.isEmpty();
+
+        while (!stack.isEmpty()) {
+            queueList.add(stack.pop());
+        }
+
+        System.out.println(isCheck(queueList));
+
     }
+
+    static String isCheck(List<Integer> list) {
+        int n = list.size();
+        for (int i = 1; i <= n; i++) {
+            if(i != list.get(i-1))
+                return "Sad";
+        }
+        return "Nice";
+    }
+
 }
