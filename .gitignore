@@ -3,6 +3,9 @@
 
 *.exe
 
+### Boot_Camp ###
+/Boot_Camp_6th/Java21_study/workshop/
+
 ### Eclipse ###
 .metadata
 bin/
