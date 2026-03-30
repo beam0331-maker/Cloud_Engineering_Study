@@ -6,6 +6,8 @@ import re
 VELOG_ID = "beam0331"
 RSS_URL = f"https://v2.velog.io/rss/{VELOG_ID}"
 
+TARGET_DIR = "velog_backup/posts"
+
 def backup_velog():
     feed = feedparser.parse(RSS_URL)
     if not os.path.exists("posts"):
@@ -14,7 +16,7 @@ def backup_velog():
     for entry in feed.entries:
         # 파일명으로 사용할 수 없는 문자 제거
         clean_title = re.sub(r'[\\/*?:"<>|]', "", entry.title)
-        file_path = f"posts/{clean_title}.md"
+        file_path = os.path.join(TARGET_DIR, f"{clean_title}.md")
         
         # 이미 존재하는 파일은 건너뛰기
         if os.path.exists(file_path):
