@@ -33,7 +33,7 @@ jobs:
           pip install feedparser
 
       - name: Run backup script
-        run: python velog_backup.py
+        run: python Velog_Backup/velog_backup.py
 
       - name: Commit and Push
         run: |
