@@ -6,7 +6,7 @@ import re
 VELOG_ID = "beam0331"
 RSS_URL = f"https://v2.velog.io/rss/{VELOG_ID}"
 
-TARGET_DIR = "velog_backup/posts"
+TARGET_DIR = "Velog_backup/posts"
 
 def backup_velog():
     feed = feedparser.parse(RSS_URL)
