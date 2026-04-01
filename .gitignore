@@ -7,6 +7,7 @@
 /Boot_Camp_6th/Java21_study/workshop/
 
 ### Eclipse ###
+.metadata/
 .metadata
 bin/
 tmp/
@@ -18,6 +19,12 @@ local.properties
 .settings/
 .loadpath
 .recommenders
+
+# 굳이 올리지 않아도 될것들 
+.metadata/
+bin/
+*.class
+eclipse/configuration/
 
 # External tool builders
 .externalToolBuilders/

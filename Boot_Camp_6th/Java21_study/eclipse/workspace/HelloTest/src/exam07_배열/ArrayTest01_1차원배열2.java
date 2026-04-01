@@ -12,6 +12,10 @@ public class ArrayTest01_1차원배열2 {
 			System.out.printf("name[%d] = %s\n", i, name[i]);
 		}
 		
+		// 향상된 for문
+		for(String s : name) {
+			System.out.println(s);
+		}
 		
 
 	}
