@@ -5,9 +5,16 @@
 
 ### Boot_Camp ###
 /Boot_Camp_6th/Java21_study/workshop/
+/Boot_Camp_6th/Java21_study/eclipse/
+!Boot_Camp_6th/Java21_study/eclipse/workspace/
+!Boot_Camp_6th/Java21_study/eclipse/workspace/HelloTest/
+!Boot_Camp_6th/Java21_study/eclipse/workspace/HelloTest/src/
+!Boot_Camp_6th/Java21_study/eclipse/workspace/java_workshop/
+!Boot_Camp_6th/Java21_study/eclipse/workspace/java_workshop/src/
 
 ### Eclipse ###
 .metadata/
+*.class
 .metadata
 bin/
 tmp/
