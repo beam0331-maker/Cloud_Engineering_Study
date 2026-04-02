@@ -19,6 +19,9 @@
 !/Boot_Camp_6th/Java21_study/eclipse/workspace/HelloTest/
 !/Boot_Camp_6th/Java21_study/eclipse/workspace/java_workshop/
 
+/Algorithm_Study/*
+!/Algorithm_Study/src/
+
 ### Eclipse ###
 .metadata/
 *.class
