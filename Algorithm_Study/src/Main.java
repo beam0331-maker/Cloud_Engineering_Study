@@ -6,19 +6,58 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         int n = Integer.parseInt(br.readLine());
-        Queue<Integer> queue = new LinkedList<>();
-        for(int i = 0; i<n ;i++){
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            if(st.countTokens() == 2){
-                st.nextToken();
-                queue.add(Integer.parseInt(st.nextToken()));
-            }
+        Deque<Integer> deque = new LinkedList<>();
 
-            queue.
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < n; i++) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            String comd = st.nextToken();
+
+            switch (comd) {
+                case "push":
+                    deque.add(Integer.parseInt(st.nextToken()));
+                    break;
+
+                case "pop":
+                    if (!deque.isEmpty()) {
+                        sb.append(deque.pollFirst()).append("\n");
+
+                    } else {
+                        sb.append(-1).append("\n");
+                    }
+                    break;
+                case "size":
+                    sb.append(deque.size()).append("\n");
+                    break;
+                case "empty":
+                    if (deque.isEmpty()) {
+                        sb.append(1).append("\n");
+                    } else {
+                        sb.append(0).append("\n");
+                    }
+                    break;
+                case "front":
+                    if (!deque.isEmpty()) {
+                        sb.append(deque.peekFirst()).append("\n");
+                    } else {
+                        sb.append(-1).append("\n");
+                    }
+                    break;
+                case "back":
+                    if (!deque.isEmpty())
+                        sb.append(deque.peekLast()).append("\n");
+                    else
+                        sb.append(-1).append("\n");
+                    break;
+
+
+            }
 
 
         }
 
+        System.out.println(sb);
 
     }
 
