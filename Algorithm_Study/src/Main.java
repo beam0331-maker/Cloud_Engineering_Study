@@ -1,12 +1,14 @@
 import java.io.*;
 import java.util.*;
 
-class Node() {
+class Node {
 
     private int data;
-    private int index;
+    private int size;
     private Node next;
     private Node pre;
+
+    public Node(){};
 
     public Node(int data) {
         setData(data);
@@ -28,12 +30,26 @@ class Node() {
         this.next = next;
     }
 
+    private Node getPre() {
+        return pre;
+    }
+
+    private void setPre(Node node){
+        this.pre = node;
+    }
+
     public void push(int data) {
-        Node node = this;
-        if (node.getNext() != null) {
-            node = node.getNext();
+        this.size++;
+        Node head = this;
+        Node node = new Node(data);
+        if (head.getNext() == null) {
+            head.setNext(node);
+            head.setPre(node);
         } else {
-            node.getNext(new Node(data));
+            Node lastNode = head.getPre();
+            lastNode.setNext(node);
+            lastNode.setPre(null);
+            head.setPre(node);
         }
 
     }
@@ -41,38 +57,25 @@ class Node() {
     public int pop() {
         int n = this.next.getData();
         this.next = this.next.getNext();
+        this.size--;
         return n;
     }
 
     public int size() {
-        int count = 0;
-        Node node = this;
-        if (node.getNext() != null) {
-            count++;
-        }
-        return count;
+        return this.size;
     }
 
+    public boolean empty() {
+        return getNext() == null;
 
-    public int empty() {
-        if (getNext() == null) {
-            return 1;
-        } else {
-            return 0;
-        }
     }
 
     public int front() {
-        return this.next.data;
+        return this.next.getData();
     }
 
     public int back() {
-        Node node = this;
-        if (node.nextNode() = !null) {
-            node = node.nextNode();
-        } else {
-            return node.getData();    // private 이므로 접근 불가할 수도 있음.
-        }
+        return this.pre.getData();
     }
 
 }
@@ -83,7 +86,7 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         int n = Integer.parseInt(br.readLine());
-        Deque<Integer> deque = new LinkedList<>();
+        Node head = new Node();
 
         StringBuilder sb = new StringBuilder();
 
@@ -93,37 +96,37 @@ public class Main {
 
             switch (comd) {
                 case "push":
-                    deque.add(Integer.parseInt(st.nextToken()));
+                    head.push(Integer.parseInt(st.nextToken()));
                     break;
 
                 case "pop":
-                    if (!deque.isEmpty()) {
-                        sb.append(deque.pollFirst()).append("\n");
+                    if (!head.empty()) {
+                        sb.append(head.pop()).append("\n");
 
                     } else {
                         sb.append(-1).append("\n");
                     }
                     break;
                 case "size":
-                    sb.append(deque.size()).append("\n");
+                    sb.append(head.size()).append("\n");
                     break;
                 case "empty":
-                    if (deque.isEmpty()) {
-                        sb.append(1).append("\n");
-                    } else {
+                    if (!head.empty()) {
                         sb.append(0).append("\n");
+                    } else {
+                        sb.append(1).append("\n");
                     }
                     break;
                 case "front":
-                    if (!deque.isEmpty()) {
-                        sb.append(deque.peekFirst()).append("\n");
+                    if (!head.empty()) {
+                        sb.append(head.front()).append("\n");
                     } else {
                         sb.append(-1).append("\n");
                     }
                     break;
                 case "back":
-                    if (!deque.isEmpty())
-                        sb.append(deque.peekLast()).append("\n");
+                    if (!head.empty())
+                        sb.append(head.back()).append("\n");
                     else
                         sb.append(-1).append("\n");
                     break;
