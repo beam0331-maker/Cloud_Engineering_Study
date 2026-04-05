@@ -1,6 +1,83 @@
 import java.io.*;
 import java.util.*;
 
+class Node() {
+
+    private int data;
+    private int index;
+    private Node next;
+    private Node pre;
+
+    public Node(int data) {
+        setData(data);
+    }
+
+    private int getData() {
+        return data;
+    }
+
+    private void setData(int data) {
+        this.data = data;
+    }
+
+    private Node getNext() {
+        return next;
+    }
+
+    private void setNext(Node next) {
+        this.next = next;
+    }
+
+    public void push(int data) {
+        Node node = this;
+        if (node.getNext() != null) {
+            node = node.getNext();
+        } else {
+            node.getNext(new Node(data));
+        }
+
+    }
+
+    public int pop() {
+        int n = this.next.getData();
+        this.next = this.next.getNext();
+        return n;
+    }
+
+    public int size() {
+        int count = 0;
+        Node node = this;
+        if (node.getNext() != null) {
+            count++;
+        }
+        return count;
+    }
+
+
+    public int empty() {
+        if (getNext() == null) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public int front() {
+        return this.next.data;
+    }
+
+    public int back() {
+        Node node = this;
+        if (node.nextNode() = !null) {
+            node = node.nextNode();
+        } else {
+            return node.getData();    // private 이므로 접근 불가할 수도 있음.
+        }
+    }
+
+}
+
+
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
