@@ -1,4 +1,4 @@
-package worshop04;
+package workShop04;
 
 import java.util.Arrays;
 import java.util.Random;

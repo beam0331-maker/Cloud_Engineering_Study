@@ -22,6 +22,8 @@
 /Algorithm_Study/*
 !/Algorithm_Study/src/
 
+/Velog_Backup/벨로그용 프롬프트.txt
+
 ### Eclipse ###
 .metadata/
 *.class

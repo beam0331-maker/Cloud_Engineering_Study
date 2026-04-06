@@ -1,4 +1,4 @@
-package worshop04;
+package workShop04;
 
 public class ArrayTest02 {
 
