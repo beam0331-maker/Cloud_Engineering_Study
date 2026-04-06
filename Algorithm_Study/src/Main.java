@@ -1,81 +1,79 @@
 import java.io.*;
 import java.util.*;
 
-class Node {
-
+class Node{
     private int data;
-    private int size;
     private Node next;
     private Node pre;
 
-    public Node(){};
-
-    public Node(int data) {
-        setData(data);
-    }
-
-    private int getData() {
-        return data;
-    }
-
-    private void setData(int data) {
+    Node(){}
+    Node(int data){
         this.data = data;
     }
 
-    private Node getNext() {
+    public int getData () {
+        return data;
+    }
+
+    public Node getNext () {
         return next;
     }
 
-    private void setNext(Node next) {
-        this.next = next;
+    public void setNext (Node node){
+        next = node;
     }
 
-    private Node getPre() {
+    public Node getPre () {
         return pre;
     }
 
-    private void setPre(Node node){
-        this.pre = node;
+    public void setPre (Node pre){
+        this.pre = pre;
     }
 
-    public void push(int data) {
-        this.size++;
-        Node head = this;
-        Node node = new Node(data);
-        if (head.getNext() == null) {
-            head.setNext(node);
-            head.setPre(node);
-        } else {
-            Node lastNode = head.getPre();
+}
+
+class NodeMgr{
+
+    private Node head;
+    private Node tail;
+
+    public NodeMgr() {
+        this.head = new Node();
+        this.tail = new Node();
+        head.setNext(tail);
+        tail.setPre(head);
+    }
+
+
+    public void cardSet ( int n){
+        for (int i = 1; i <= n; i++) {
+            Node node = new Node(i);
+            Node lastNode = tail.getPre();
             lastNode.setNext(node);
-            lastNode.setPre(null);
-            head.setPre(node);
+            node.setNext(tail);
+            tail.setPre(node);
         }
-
     }
 
-    public int pop() {
-        int n = this.next.getData();
-        this.next = this.next.getNext();
-        this.size--;
-        return n;
-    }
+    public int suffle () {
+        int result = 0;
 
-    public int size() {
-        return this.size;
-    }
-
-    public boolean empty() {
-        return getNext() == null;
-
-    }
-
-    public int front() {
-        return this.next.getData();
-    }
-
-    public int back() {
-        return this.pre.getData();
+        while (head.getNext() != tail.getPre()) {
+            Node dropNode = head.getNext();
+            Node goBackNode = dropNode.getNext();
+            head.setNext(goBackNode);
+            if (goBackNode.getNext() == tail) break;
+            else {
+                Node lastNode = tail.getPre();
+                head.setNext(goBackNode.getNext());
+                lastNode.setNext(goBackNode);
+                goBackNode.setNext(tail);
+                tail.setPre(goBackNode);
+            }
+        }
+        result = head.getNext().getData();
+        return result;
     }
 
 }
@@ -83,62 +81,11 @@ class Node {
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        int n = Integer.parseInt(br.readLine());
-        Node head = new Node();
-
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < n; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            String comd = st.nextToken();
-
-            switch (comd) {
-                case "push":
-                    head.push(Integer.parseInt(st.nextToken()));
-                    break;
-
-                case "pop":
-                    if (!head.empty()) {
-                        sb.append(head.pop()).append("\n");
-
-                    } else {
-                        sb.append(-1).append("\n");
-                    }
-                    break;
-                case "size":
-                    sb.append(head.size()).append("\n");
-                    break;
-                case "empty":
-                    if (!head.empty()) {
-                        sb.append(0).append("\n");
-                    } else {
-                        sb.append(1).append("\n");
-                    }
-                    break;
-                case "front":
-                    if (!head.empty()) {
-                        sb.append(head.front()).append("\n");
-                    } else {
-                        sb.append(-1).append("\n");
-                    }
-                    break;
-                case "back":
-                    if (!head.empty())
-                        sb.append(head.back()).append("\n");
-                    else
-                        sb.append(-1).append("\n");
-                    break;
-
-
-            }
-
-
-        }
-
-        System.out.println(sb);
-
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        NodeMgr mgr = new NodeMgr();
+        mgr.cardSet(n);
+        System.out.println(mgr.suffle());
     }
 
 }
