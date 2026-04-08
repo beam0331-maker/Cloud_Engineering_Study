@@ -4,22 +4,24 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine());
-        int[] q = new int[2 * n];
+        StringTokenizer st = new StringTokenizer(br.readLine());
+
+        int n = Integer.parseInt(st.nextToken());
+        int k = Integer.parseInt(st.nextToken());
+
+        ArrayDeque<Integer> deque = new ArrayDeque<>(n);
         for (int i = 0; i < n; i++) {
-            q[i] = i + 1;
+            deque.add(i + 1);
         }
-        int head = 0;
-        int tail = n;
-
-        // 문제에서 마지막 1장이 남을때 까지 이므로 tail - head은 1이 남을때 까지 진행된다.
-        // tail이 한번 증가할때 head는 두번 증가하므로 진행과정중에 1칸까지 따라잡힌다.
-        while ((tail - head) > 1) {
-            head++;
-            q[tail++] = q[head++];
+        StringJoiner sj = new StringJoiner(", ", "<", ">");
+        while (!deque.isEmpty()) {
+            for (int i = 1; i < k ; i++) {
+                deque.add(deque.poll());
+            }
+            sj.add(deque.poll().toString());
         }
 
-        System.out.println(q[head]);
+        System.out.println(sj);
     }
 
 }
