@@ -228,9 +228,21 @@
 					사용자 정의 예외클래스
 						
 		ex. 
-			class	InSufficentBalanceException extends Exception{
-				String s
-				public InSufficentBalanceException(String s){
-					this.s = s;
+			public class InSufficentBalaceException extends Exception{
+
+				public InSufficentBalaceException(String message) {
+					super(message);
 				}
-			}
+		}
+
+5. 상속관계의 throws 관련
+			
+	부모: 
+			pulic void a() throws 예외클래스 {}	
+	
+	자식:
+			
+			@Override
+			pulic void a() {}			<== 자식에서는 부모가 throws 한 예외클래스와 같거나
+												 계층적으로 하위클래스만 지정 가능.
+												 즉 축소되는 방향으로 지정

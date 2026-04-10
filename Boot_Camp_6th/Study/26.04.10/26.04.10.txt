@@ -1,0 +1,180 @@
+-------------------------------------------------
+2026.04.10
+
+6. 런타임계열 vs 비런타임계열
+	
+	1) 런타임계열
+		- RuntimeException
+				- ArithmeticException
+				- ArrayIndexOutofBoundsException
+				- NullPointerException
+		- 실행시 예외가 발생됨 (******************)
+		- try-catch 또는 throws 방법으로 예외처리를 안함.
+		  조건체크로 예외처리가 가능하다.
+		
+	2) 비런타임계열
+		- IOException: 파일 읽기/쓰기 연동 작업등
+		- SQLException: DB 연동
+		- 컴파일시 예외가 발생됨(******************)
+		  반드시 try-catch또는 thrwos 방법으로 예외처리를 해야됨.
+		  
+/////////////////////////////////////////////////
+
+1. 제네릭스 ( Generics )
+	
+	1) 개념
+		- 다양한 타입을 다루는 메서드 및 클래스 
+		- 컴파일 시점 (*)에 타입체크를 해서 예외를 미리 알 수 있도록 지원.
+		
+	2) 장점
+		- 저장하는 데이터 타입 안정성 확보( 저장하는 데이터형을 제한 가능 )
+		- 형변환 불필요
+		
+	3) 제네릭스 표현 방법( 타입 파라미터라고 부름 )
+		<T>, <E>, <T,R>
+		- <T>: Referenc Type 의미
+			ex. <String>, <Integer>
+		- <E>: Element 의미
+		- <T,R>: Return Type 의미
+			ex. <String, Integer>	// 파라미터: String, 리턴: Integer
+		- <K,V>: Key, Value
+			
+	4) 특징
+		- <T>가 컴파일 시전(*)에 실제 지정된 타입으로 치환됨
+		- 클래스, 인터페이스, 메서드 파라미터에 사용 가능
+		- static 사용불가, 객체생성불가
+		
+2. 컬렉션 API
+	
+	1) 용도: 데이터 저장
+				/////////////////////////
+					자바의 데티어 저장
+					- 변수
+					- 배열
+						크기 변경 불가
+						같은 데이터만 저장가능
+						지원되는 메서드 없음. ( Arrays 유틸리티 이용했음 )
+					- 컬렉션 API
+				/////////////////////////
+	
+	2) 특징
+		- 크기변경 가능( StringBuilder와 비슷 )
+		- 다른 데이터 저장가능 ( 모든 데이터 저장 가능 )
+		  제네릭스이용해서 특정 데이터만 한정 가능 (************)
+		- 자체적으로 지원되는 메서드가 많음
+		
+	3) 종류 ( java.util 패키지 )
+		
+							Collection<E>(인터페이스)							Map<K,V>(인터페이스)
+										|														|
+										|														|
+					   ----------------------------							HashMap<K,V>		
+						|									|
+			Set<E> (인터페이스)			List<E>(인터페이스)
+						|									|
+						|									|
+					HashSet<E>					ArrayList<E>
+							
+							
+  4) 데이터 저장 방식(자료구조)에 따른 종류
+	  
+	  가. Set계열
+			- 저장되는 데이터 순서가 없음
+			- 중복저장이 불가(한번만 저장됨)
+			
+			용도: 중복제거용으로 사용 가능
+			
+	  나. Lsit계열
+			- 저장되는 데이터 순서가 있음
+			- 중복저장이 가능			
+	  
+	  다. Map계열
+			- Set, List는 데이터 (Value)만 저장함.
+			- Map계열은 이름(Key, name)과 데이터(Value) 쌍으로 저장.
+			- key를 통한 value 검색 성능이 매우 우수함.
+
+// exam10_method5_가변인자
+3. 메서드 파라미터 사용시 가변인자 ( Variable Arguments )
+	
+	일반 메서드	: pblic void a (int a){}
+		a(10);
+		a(100);
+	가변인자 메서드 : pblic void a2 (int .... a){} <== 배열로 관리
+		a2(1);
+		a2(1,2,3);
+		
+		System.out.printf("%s %d", "홍길동", 20);
+		System.out.printf("%s ", "홍길동");
+
+4. 표준 API 함수적 인터페이스 //[본문추가 항목]: 왜 이런 이름을 가지게 되었는지 첨부해서 외우기 쉽게 작성
+   
+    @FunctionalInterface 어노테이션이 지원됨.
+    따라서 추상메서드 반드시 한개만 존재함.
+
+   1) 개념
+     - 메서드의 동작 방식에 따른 4가지 종류가 있음.
+       가. 파라미터 없고 리턴값 없는 경우: 지원안됨
+		 
+       나. 파라미터 있고 리턴값 없는 경우:
+					
+				Consumer<T>			: 파라미터 한개(T 타입)                               
+				BiConsumer<T,U>	: 파라미터 두개(T,U)
+			   IntConsumer			: 파라미터 한개(int 타입)
+			   DoubleConsumer		: 파라미터 한개(double 타입)
+			   LongConsumer		: 파라미터 한개(long 타입)
+			   ObjDoubleConsumer	: 파라미터 두개(T,double)		   
+
+       다. 파라미터 없고 리턴값 있는 경우:
+		 
+				Supplier<T>			: 리턴 T
+            BooleanSupplier	: 리턴타입 boolean
+			   DoubleSupplier		: 리턴타입 double
+			   LongSupplier		: 리턴타입 long                            
+
+       라. 파라미터 있고 리턴값 있는 경우: 
+				
+				# 범용적
+				Function<T,R>				: 파라미터 한개(T 타입), 리턴 R
+			   DoubleFunction<R>			: 파라미터 한개(double), 리턴 R
+			   
+				DoubleToIntFunction		: 파라미터 한개(double), 리턴 int
+			   DoubleToLongFunction		: 파라미터 한개(double), 리턴 long
+				ToDoubleFunction<T>		: 파라미터 한개(T 타입), 리턴 double
+				
+				BiFunction<T,U,R>			: 파라미터 두개(T,U) , 리턴 R
+				ToDoubleBiFunction<T,U>	: 파라미터 두개(T,U), 리턴 double
+				---------------------------------------------------------
+				Operator APi			: Function을 상속받는다.	
+		      
+				UnaryOperator<T>		: 파라미터 한개(T), 리턴 T
+				DoubleUnaryOperator 	: 파라미터 한개(double), 리턴 double
+				IntUnaryOperator 		: 파라미터 한개(int), 리턴 int
+				
+				BinaryOperator<T>		: 파라미터 두개(T,T) , 리턴 T
+				DoubleBinaryOperator	: 파라미터 두개(double,double) , 리턴 double
+				IntBinaryOperator		: 파라미터 두개(int, int), 리턴 int
+            ---------------------------------------------------------
+			   Predicate API		: 리턴값이 무조건 boolean으로 반화됨.
+
+				Predicate<T>		: 파라미터 한개(T), 리턴 boolean
+				DoublePredicate	: 파라미터 한개(double), 리턴 boolean
+				IntPredicate		: 파라미터 한개(int), 리턴 boolean
+				LongPredicate		: 파라미터 한개(long), 리턴 boolean
+
+				BiPredicate<T,U>	: 파라미터 두개(T,U) , 리턴 boolean
+			   ---------------------------------------------------------  
+				
+	 - 위에서 제공된 기능이외의 기능이 필요하면 직접 구현해야됨.	
+    - 위 4가지 기능을 가진 인터페이스 (Stream의 중간처리, 최종처리에 사용할 수 있는 )를 API로 제공됨.
+  
+  2) java.util.function 패키지
+
+
+5. Stream API //
+
+  - 컬렉션 API와 관련 있음.
+    현재 컬렉션 API(Set,List,Map)들은 저장,수정,삭제,조회,크기등 기본적인 기능들만 포함하는 메서드만 지원됨.
+
+  - 컬렉션 API에서 필요한 기능은 통계처리(합계,평균,최대,최소),필터링,정렬,중복제거 작업등이 필요함 ( DB는 예전부터 지원되는 기능들임 )
+    JDK 버전업되면서 이러한 기능들을 포함한 Stream API 제공됨.4. MySQL
+[예습할것] Stream: 안그래도 찾아볼것이었음, MySQL 다시 해보기...
