@@ -1,48 +1,41 @@
 import java.io.*;
 import java.util.*;
-class Node{
-	int movePos;
-	int index;
-	Node(int movePos, int index){
-		this.movePos = movePos;
-		this.index = index;
-	}
-}
 public class Main {
     public static void main(String[] args) throws IOException {
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringJoiner sj = new StringJoiner(" ");
+		StringBuilder sb = new StringBuilder();
+
 		int n = Integer.parseInt(br.readLine());
-
 		StringTokenizer st = new StringTokenizer(br.readLine());
+		StringTokenizer nums = new StringTokenizer(br.readLine());
 
-		ArrayDeque<Node> deque = new ArrayDeque<>(n);
 
+// 0일때 큐, 1일때 스택
+// 0 -> flase, 1-> true
+// 0 일때 튀어나온 숫자는 1일때 통과하고 0일때 다시 입력된다.
+// 입력을 스택 튀어나오는건 큐...?
+// deque의 사이즈가 변하면 안된다. 반드시 0의 갯수만큼 유지 시켜야 된다.
 
-		for(int i = 0 ; i <n ; i++){
-			deque.add(new Node(Integer.parseInt(st.nextToken()),i));
-		}
+		ArrayDeque<Integer> qeueStack = new ArrayDeque<Integer>();
 
-		for(int i = 1 ; i <= n ; i++){
-			Node node = deque.poll();
-			int pos = node.movePos;
-			sj.add(String.valueOf(node.index+1));
-			if(deque.isEmpty()) break;
-
-			if(pos > 0){
-				for(int j = 0; j < Math.abs(pos) -1 ; j++){
-					deque.addLast(deque.pollFirst());
-				}
-			}else if(pos < 0){
-				for(int j = 0 ; j < Math.abs(pos) ; j++){
-					deque.addFirst(deque.pollLast());
-				}
+		while(st.hasMoreTokens()){
+			int num = Integer.parseInt(nums.nextToken());
+			String check = st.nextToken();
+			if(check.equals("0")){
+				qeueStack.addLast(num);
 			}
 		}
 
-		System.out.println(sj);
+		int m = Integer.parseInt(br.readLine());
+		st = new StringTokenizer(br.readLine());
+		while(st.hasMoreTokens()){
+			int token = Integer.parseInt(st.nextToken());
+			qeueStack.addFirst(token);
+			sb.append(qeueStack.pollLast()).append(" ");
+		}
 
+		System.out.println(sb);
 
 	}
 
