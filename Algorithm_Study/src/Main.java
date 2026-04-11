@@ -1,65 +1,49 @@
 import java.io.*;
 import java.util.*;
-
+class Node{
+	int movePos;
+	int index;
+	Node(int movePos, int index){
+		this.movePos = movePos;
+		this.index = index;
+	}
+}
 public class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine());
-        ArrayDeque<Integer> deque = new ArrayDeque<>();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int cmd = Integer.parseInt(st.nextToken());
-            switch (cmd){
-                case 1 :
-                    deque.addFirst(Integer.parseInt(st.nextToken()));
-                    break;
-                case 2:
-                    deque.addLast(Integer.parseInt(st.nextToken()));
-                    break;
-                case 3:
-                    if(!deque.isEmpty()){
-                        sb.append(deque.pollFirst()).append("\n");
-                    }else {
-                        sb.append(-1).append("\n");
-                    }
-                    break;
-                case 4:
-                    if(!deque.isEmpty()){
-                        sb.append(deque.pollLast()).append("\n");
-                    }else {
-                        sb.append(-1).append("\n");
-                    }
-                    break;
-                case 5:
-                    sb.append(deque.size()).append("\n");
-                    break;
-                case 6 :
-                    if(deque.isEmpty())
-                        sb.append(1).append("\n");
-                    else
-                        sb.append(0).append("\n");
-                    break;
-                case 7:
-                    if(!deque.isEmpty()){
-                        sb.append(deque.peekFirst()).append("\n");
-                    }else {
-                        sb.append(-1).append("\n");
-                    }
-                    break;
-                case 8:
-                    if(!deque.isEmpty()){
-                        sb.append(deque.peekLast()).append("\n");
-                    }else {
-                        sb.append(-1).append("\n");
-                    }
-                    break;
-            }
 
-        }
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringJoiner sj = new StringJoiner(" ");
+		int n = Integer.parseInt(br.readLine());
 
-        System.out.println(sb);
+		StringTokenizer st = new StringTokenizer(br.readLine());
 
-    }
+		ArrayDeque<Node> deque = new ArrayDeque<>(n);
+
+
+		for(int i = 0 ; i <n ; i++){
+			deque.add(new Node(Integer.parseInt(st.nextToken()),i));
+		}
+
+		for(int i = 1 ; i <= n ; i++){
+			Node node = deque.poll();
+			int pos = node.movePos;
+			sj.add(String.valueOf(node.index+1));
+			if(deque.isEmpty()) break;
+
+			if(pos > 0){
+				for(int j = 0; j < Math.abs(pos) -1 ; j++){
+					deque.addLast(deque.pollFirst());
+				}
+			}else if(pos < 0){
+				for(int j = 0 ; j < Math.abs(pos) ; j++){
+					deque.addFirst(deque.pollLast());
+				}
+			}
+		}
+
+		System.out.println(sj);
+
+
+	}
 
 }
