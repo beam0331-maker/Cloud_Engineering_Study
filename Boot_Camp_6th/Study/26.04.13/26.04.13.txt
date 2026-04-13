@@ -43,6 +43,15 @@
     JDK 버전업되면서 이러한 기능들을 포함한 Stream API 제공됨.4. MySQL
 	 
 	1) 컬렉션 또는 배열에서 Stream 얻기
+		
+		가. 컬렉션
+			list.stream()
+			set.stream()
+		
+		나. 배열
+			Arrays.stream(배열)
+			Stream.of(배열)
+		
 	2) 중간처리 작업
 		- 정렬
 		- 필터링
@@ -68,3 +77,7 @@
 		- 컬렉션 변화( set -> List )
 		- 반복처리 ( forEach (Consumer)메서드)
 	
+	4) Optional
+		용도: 컬렉션에 값이 있는 경우에는 괜찮지만
+				값이 없는 경우 메서드 호출시 오류가 발생한다.
+				오류를 방지하기 위함.
