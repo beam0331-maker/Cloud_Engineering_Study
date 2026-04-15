@@ -1,0 +1,8 @@
+use worshop;
+
+SELECT 
+	STUDENT_NO as '학번', STUDENT_NAME as '이름', ENTRANCE_DATE as '입학년도'
+FROM tb_student
+WHERE
+	DEPARTMENT_NO = 002
+ORDER BY ENTRANCE_DATE;
