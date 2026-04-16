@@ -1,0 +1,446 @@
+-------------------------------------------------
+2026.04.26
+
+1. 조인(join)	// [프롬프터 contact]정처기에서 여집합, 차집합으로 설명됨. 조인 결과 레코드 갯수 표로 정리하기, 정처기 참고해서
+https://dev.mysql.com/doc/refman/8.0/en/join.html
+
+joined_table: {
+    table_reference {[INNER | CROSS] JOIN | STRAIGHT_JOIN} table_factor [join_specification]
+	 table_reference {LEFT|RIGHT} [OUTER] JOIN table_reference join_specification
+    table_reference NATURAL [INNER | {LEFT|RIGHT} [OUTER]] JOIN table_factor
+}
+
+	1) query ( select ) 작업 3가지
+	
+		- projection: 컬럼 선택, select 절
+		- selection: 레코드 선택, where 절
+		- join: 두개 이상의 테이블에서 projection, selection 처리
+		
+		
+	2) 용도
+		- 원하는 데이터가 여러 테이블에 부산되어 있는 경우에
+		  테이블을 연결(join)해서 데이터를 조회하는 방법.
+		  
+	3) 종류1 (********) 	
+		
+		가. inner 조인(일반적으로 의미하는 조인)
+			- 테이블간의 연결고리(데이터가 일치)가 있는 데이터만 출력하는 방식.
+			  즉 일치하지 않으면 누락됨
+		나. outer 조인
+			- inner 조인 + 누락된 데이터까지 포함해서 출력하는 방식
+	
+	
+	4) 종류2
+	
+		가. ANSI 조인
+			- DBMS 독립적
+			
+		나. 비 ANSI 조인
+			- DBMS 의존적
+			
+	5) 종류3
+		
+		가. equi조인
+			- 값이 정확하게 일치하는 방식으로 조인
+			- 연산자로 사용하면 동등연산자 ( = ) 사용
+		
+		나. non-equi조인
+			- 값이 정확하게 일치하지는 않는 방식으로 조인
+			- 연산자로 사용하면 between A and B 사용 ( 부등 연산자 )
+
+3. ANSI 조인
+
+	1) cross 조인
+	
+		문법:
+			SELECT
+			FROM 테이블1 CROSS JOIN 테이블2
+			
+		동작:
+			테이블1의 하나의 레코드와 테이블2의 모든 레코드가 연결된다
+			조인된 결과는 데이터로서 사용불가
+			최종 레코드는 테이블1 갯수 * 테이블2 갯수 만큼 결과가 출력된다.
+			
+	2) natural 조인 // inner join에 속한다
+	
+		문법1:
+			SELECT
+			FROM 테이블1 NATURAL JOIN 테이블2;
+			
+		문법2 :
+			SELECT [별칭1.]컬럼, [별칭2.]컬럼, ... 
+			FROM 테이블1 [별칭1] NATURAL JOIN 테이블2 [별칭2];
+			
+		동작: 테이블1과 테이블2의 공통컬럼을 찾아서 조인한다.
+				만약 공통컬럼이 없다면 조인 불가.
+				만약 공통컬럼이 2개라면 쌍으로 비교해서 조인.
+		
+		단점: 어떤 컬럼으로 조인되었는지 추가로 확인하는 작업이 필요하다. ( 가독성이 떨어짐 )
+				공통컬럼의 존재를 알고 있어야 사용가능하다.
+		
+		현재 조인조건: natural join
+		검색조건: where 절
+		
+		문법3:
+			SELECT [별칭1.]컬럼, [별칭2.]컬럼, ... 
+			FROM 테이블1 [별칭1] NATURAL JOIN 테이블2 [별칭2]
+			WHERE ;
+			
+	3) USING 절 // inner join에 속한다
+					
+		문법:
+			SELECT [별칭1.]컬럼, [별칭2.]컬럼, ... 
+			FROM 테이블1 [별칭1] NATURAL JOIN 테이블2 [별칭2] USING(공통컬럼)
+			// (join_colum_list), USING에서는 별칭 사용 불가
+			[WHERE]
+			[GROUP BY]
+			[HAVING]
+			[ODER BY]
+		
+		동작:
+			테이블1과 테이블2에서 USING에 설정된 공통컬럼으로 조인한다.
+		
+		특징:
+			별칭을 사용해 컬럼을 호출할 경우 에러가 발생한다.	//[알아볼것]: sql에서 별칭으로 컬럼에 접근하는 방법
+			컬럼명이 같을때 사용가능
+			
+	4) ON 절 ( 범용적 )
+		
+		문법:
+			SELECT [별칭1.]컬럼, [별칭2.]컬럼, ... 
+			FROM 테이블1 [별칭1] NATURAL JOIN 테이블2 [별칭2] ON 조건
+			// ON에서 조건으로 사용한 컬럼은 SELECT 절에서 테이블을 지정해야한다.
+			[WHERE]
+			[GROUP BY]
+			[HAVING]
+			[ODER BY]
+			
+		ex.
+			SELECT ename, sal, dname, loc, e.deptno	--	공통 컬럼의 소속 지정
+			FROM emp e JOIN dept d ON e.deptno  = d.deptno;	-- equi조인
+			
+		특징:
+			ON에서 조건식이 명시되므로 가독성이 높아진다.
+			조건식으로 컬럼이 필터링 되므로 컬럼명이 달라도 조인이 가능하다.
+			
+			
+		# non-equi조인
+		
+		ex. emp와 salgrade
+		
+			SELECT *
+			FROM emp e JOIN salgrade s ON e.sal BETWEEN s.losal AND	s.hisal;
+			
+		# 3개 조인
+		
+			a. NATURAL JOIN	// 3개의 테이블에 공통된 컬럼이 존재해야한다.
+			
+			ex.
+				SELECT *
+				FROM t1 NATURAL JOIN t2 
+						  NATURAL JOIN t3;					  
+			
+			b. USING
+		
+			ex. 
+				SELECT *
+				FROM t1 JOIN t2 USING(join_colum_list)
+						  JOIN t3 USINT(join_colum_list);
+			
+			c. ON
+			ex. 
+				SELECT *
+				FROM t1 JOIN t2 ON 조건식
+						  JOIN t3 ON 조건식;
+						  
+		ex. 사원명, 부서번호, 부서명, sal, sal등급 출력하시오
+		
+		SELECT ename, deptno, dname, sal, grad
+		FROM emp e JOIN dept USING(deptno)
+					  JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal;
+					  
+		SELECT ename, e.deptno, dname, sal, grad
+		FROM emp e JOIN dept d ON e.deptno = d.deptno
+					  JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal;
+					  
+3. OUTER JOIN
+	
+	- 기본적으로 JOIN은 INNER를 의미한다 (일치하는 데이터만 출력됨)
+	  but, 일치하지 않는 데이터까지 포함해서 조인하는 방식임.
+	  
+	문법:
+	
+		SELECT
+		FROM t1 { LEFT | RIGHT } [OUTER] JOIN t2 { ON | USING }
+		
+		- LEFT : t1 레코드는 모두 출력
+		- RIGHT: t2 레코드는 모두 출력
+		
+		# Oracle에서는 LEFT | RIGHT | FULL 3가지 OUTER JOIN 을 지원한다
+		
+	ex.
+		SELECT *
+		FROM  emp RIGHT OUTER JOIN dept USING(deptno);
+		
+		SELECT *
+		FROM  emp RIGHT OUTER JOIN dept ON emp.deptno = dept.deptno;	
+		
+		SELECT *
+		FROM  emp e RIGHT OUTER JOIN dept d ON e.deptno = d.deptno;	
+		
+		--  신입사원
+		insert into emp (empno, ename,job,mgr,hiredate,sal,comm,deptno)
+		values ( 9000, '홍길동', 'SALESMAN', 7499, NOW(), 700, 0, null );	// deptno -> null : 부서배치 안받음
+		commit; 
+		
+		SELECT *
+		FROM  emp e LEFT OUTER JOIN dept d ON e.deptno = d.deptno;
+		
+		# MySQL에서 누락된 양쪽 테이블 모두 보기
+		
+		- UNION | UNION ALL ( 중복제거 | 중복포함 ) 
+			
+		SELECT *
+		FROM  emp e LEFT OUTER JOIN dept d ON e.deptno = d.deptno
+		
+		UNION 
+		
+		SELECT *
+		FROM  emp e RIGHT OUTER JOIN dept d ON e.deptno = d.deptno;
+		
+		// 하나의 문장이다.
+		
+		
+4. SELF 조인
+	
+	개념: 하나의 테이블에서 자신이 자신의 테이블로 조인하는 방법
+	
+	ex. 사원명과 관리자명 출력
+	
+	SELECT e.ename as '사원' , m.ename as '매니저'
+	FROM emp e JOIN emp m ON e.mgr = m.empno;
+/////////////////////////////////////////////////
+
+5. 서브쿼리( subquery )	
+	
+	1) 개념
+		원하는 데이터를 한 번의 select만으로 안될때
+		여러번의 select문을 사용해서 원하는 결과를 얻음.
+		
+	ex. SMITH 사원보다 더 많은 sal을 받는 사원 출력
+	
+		작업1 > SELECT 사원의 sal 검색 -> 800 가정
+				  
+				SELECT sal
+				FROM emp
+				WHERE ename = 'SMITH';
+				  
+		작업1 > SELECT empno, ename, sal
+				  FROM emp
+				  WHERE sal > 800;
+				  
+		작업1과 작	업1를 합치면 subQuery 문법이 된다
+	
+		최종 subquery문:
+				
+				-- 메인쿼리
+				SELECT empno, ename, sal
+				FROM emp
+				WHERE sal > (	-- 서브쿼리
+						SELECT sal
+						FROM emp
+						WHERE ename = 'SMITH');
+						
+	1) 특징
+		- 서브쿼리는 반드시 '()'를 가짐 ( '()'가 없는 SELET이 메인 쿼리 )
+		- 서브쿼리가 먼저 실행되고 그 결과값을 이용해서 main query가 실행됨
+		- 서브쿼리가 사용가능한 위치는 거의 모든곳에서 사요이 가능
+		  ex. WHERE, HAVING, FROM, INSERT, DELETE, UPDATE, CREATE, ...
+		  
+	ex1. emp테이블에서 사원번호가 7521 의 업무와 동일하고 급여가 7934보다 많은 사원의 정보(사원번호,이름,job,hiredate,sal)출력?
+	
+		SELECT empno, job, hiredate, sal 
+		FROM emp
+		WHERE 
+		job = ( SELECT job
+				  FROM emp
+				  WHERE empno = 7521)
+		AND
+		sal > ( SELECT sal
+				  FROM emp
+				  WHERE empno = '7934');
+				  
+	ex2. emp테이블에서 급여의 평균보다 적은 급여를 받는 사원 정보 출력(사원번호,이름,job,hiredate,sal)?
+		
+		SELECT empno, ename, job, hiredate,sal
+		FROM emp
+		WHERE 
+		sal < ( SELECT AVG(sal)
+				  FROM emp);
+				  
+				  
+	ex3.  emp테이블에서 20번 부서의 최소급여보다 많은 모든 부서를 출력? (부서명, 최소급여)
+
+		SELECT deptno, dname, min(sal)
+		FROM emp e JOIN dept d USING(deptno)
+		GROUP BY deptno
+		HAVING min(sal) > (
+			SELECT min(sal)
+			FROM emp
+			WHERE deptno = 20);
+	
+	3) 연산자
+		
+		가. 단일행 연산자
+			
+			- 서브쿼리가 실행된 후 하나의 행(단일행)이 리턴하는 경우에 사용
+			- 비교연산자 (=, > , >= , <, <=)
+		
+		나. 복수행 연산자	//[회고 point] any,all 키워드와 min, max 중에 처리속도의 차이에 중점을 둔 장단첨 
+			
+			- 서브쿼리가 실행된 후 여러 행(복수행)이 리턴하는 경우에 사용
+			- IN, ANY, ALL EXISTS
+			
+			- ANY: 서브쿼리 결과 중에 하나라도 만족하는 경우 [최소값보다 클때, 최대값보다 작을때]
+				ex. 
+					최소값보다 큰	: < ANY()	<==>	SELECT MAX()
+					최대값보다 작은: > ANY()	<==>	SELECT MIN()
+					
+			- ALL: 서브쿼리 결과의 모든 값을 만족하는 경우 [최소값보다 작은, 최대값보다 큰]
+				ex. 
+					최소값보다 작은: < ALL()	<==>	SELECT MIN()
+					최대값보다 큰	: > ALL()	<==>	SELECT MAX()
+			
+	
+			ex1. emp테이블에서 업무별로 최소급여를 받는 사원정보 출력(사원번호,이름,job,hiredate,sal)
+			
+				SELECT empno, ename, job, hiredate, sal 
+				FROM emp
+				WHERE sal IN (
+					SELECT min(sal)
+					FROM emp
+					GROUP BY job);
+				
+			ex2. emp 테이블에서 job이 manager인 사원의 최소급여보다 적은 급여를 받는 사원 정보 (사원번호,이름,job,hiredate,sal)			
+	
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal < (
+					SELECT min(sal)
+					FROM emp
+					WHERE job = 'MANAGER');
+				
+			# 최소값보다 작은
+			
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal < ALL (		// All 내부 서브쿼리의 결과의 모든 값보다 작은 값
+					SELECT sal
+					FROM emp
+					WHERE job = 'MANAGER');		
+			
+				  
+			ex3. emp 테이블에서 job이 manager인 사원의 최소보다 많은 급여를 받는 사원 정보 (사원번호,이름,job,hiredate,sal)				  
+				  
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal > (
+					SELECT MIN(sal)
+					FROM emp
+					WHERE job = 'MANAGER');
+				
+			# 최소값보다 많은: 서브쿼리 결과 중에 하나라도 만족하면 (이때 하나 == 최소값) 
+			
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal > ANY (
+					SELECT MAX(sal)
+					FROM emp
+					WHERE job = 'MANAGER');
+				
+				
+			ex4. emp 테이블에서 job이 manager인 사원의 최대급여보다 적은 급여를 받는 사원 정보 (사원번호,이름,job,hiredate,sal)				  
+				
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal < (
+					SELECT MAX(sal)
+					FROM emp
+					WHERE job = 'MANAGER');				
+				
+			 # 최대값보다 적은: 서브쿼리 결과 중에 하나라도 만족하면 (이때 하나 == 최대값) 
+			 
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal < (
+					SELECT sal
+					FROM emp
+					WHERE job = 'MANAGER');
+				
+				  
+			ex5. emp 테이블에서 job이 manager인 사원의 최대급여보다 많은 급여를 받는 사원 정보 (사원번호,이름,job,hiredate,sal)				  
+				  
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal > (
+					SELECT MAX(sal)
+					FROM emp
+					WHERE job = 'MANAGER');
+				
+			# 최대값보다 큰
+			
+				SELECT empno, ename, job, hiredate, sal
+				FROM emp
+				WHERE sal > ALL (
+					SELECT sal
+					FROM emp
+					WHERE job = 'MANAGER');
+			
+			
+	4) exists 연산자
+	
+		문법:
+				SELECT 
+				FROM
+				WHERE EXISTS (서브쿼리);
+				
+		동작: 서브쿼리 실행결과에 따라 main query가 실행된다 
+				결과가 없다면 main query는 실행되지 않음
+				
+		ex.
+			SELECT *
+			FROM emp
+			WHERE EXISTS (
+				SELECT ename
+				FROM emp
+				WHERE sal = 800);
+
+6. 인라인뷰 (inline-view)
+	
+	- 개념: 
+			SELECT
+			FROM (서브쿼리) <== 서브쿼리
+		
+	- 목적: 성능향상
+	
+	ex. emp와 dept테이블에서 부서별 sal총합과 평균을 출력? 
+		
+		일반 쿼리:
+		
+			select e.deptno, sum(sal), round(avg(sal)), count(*)
+			from emp e join dept d ON e.deptno = d.deptno
+			group by deptno 
+			
+			emp:  15개, dept: 4개
+		
+		인라인뷰:
+		
+			SELECT e.deptno, total_sum, total_avg, cnt
+			FROM ( 
+				SELECT deptno, SUM(sal), total_sum, ROUND(AVG(sal)), total_avg, COUNT(*) cnt
+				FROM emp
+				GROUP BY deptno) e JOIN dept d ON e.deptno = d.deptno; 
+			
+			인라인: 4개, dept: 4개
+-------------------------------------------------
+	
