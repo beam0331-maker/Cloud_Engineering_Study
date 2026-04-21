@@ -1,6 +1,0 @@
-use workshop;
-
-SELECT STUDENT_NO, STUDENT_NAME, STUDENT_SSN
-FROM tb_student 
-WHERE  STUDENT_NO like 'a2%' and STUDENT_ADDRESS like '전주%' and ABSENCE_YN = 'n'
-ORDER BY STUDENT_NAME ;

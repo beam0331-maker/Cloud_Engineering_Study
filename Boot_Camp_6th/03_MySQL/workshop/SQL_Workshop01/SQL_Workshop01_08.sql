@@ -1,6 +1,0 @@
-use workshop;
-
-SELECT CLASS_NO
-FROM tb_class
-WHERE PREATTENDING_CLASS_NO is not null
-ORDER BY DEPARTMENT_NO;
