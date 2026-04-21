@@ -6,25 +6,28 @@
 ### Boot_Camp ###
 
 
-# 2. eclipse 폴더 자체는 무시하지 않고 '내용물'만 무시합니다.
+# 1. 상위 eclipse 폴더의 모든 내용 무시
 /Boot_Camp_6th/eclipse/*
 
-# 3. 이제 그 안에서 우리가 필요한 workspace 폴더만 예외로 둡니다.
-!/Boot_Camp_6th/eclipse/workspace/*
-!/Boot_Camp_6th/eclipse/workshop/*
+# 2. workspace와 workshop 폴더 자체는 접근할 수 있도록 예외 설정
+!/Boot_Camp_6th/eclipse/workspace/
+!/Boot_Camp_6th/eclipse/workshop/
 
-# 4. workspace 안의 모든 것도 일단 무시했다가 필요한 프로젝트만 엽니다.
-/Boot_Camp_6th/eclipse/workshop/*
-!/Boot_Camp_6th/eclipse/workshop/HelloTest/src
-!/Boot_Camp_6th/eclipse/workshop/JdbcTest/src
+# 3. 각 폴더 내부의 프로젝트들 중 src 폴더만 살리기
+# (이미지에 보이는 실제 폴더명과 일치시켰습니다)
 
+# [workspace 하위]
+/Boot_Camp_6th/eclipse/workspace/*
+!/Boot_Camp_6th/eclipse/workspace/HelloTest/src/
+!/Boot_Camp_6th/eclipse/workspace/JdbcTest/src/
+
+# [workshop 하위]
 /Boot_Camp_6th/eclipse/workshop/*
-!/Boot_Camp_6th/eclipse/workshop/HelloTest/src
-!/Boot_Camp_6th/eclipse/workshop/java_workshop/src
-!/Boot_Camp_6th/eclipse/workshop/WorkShop05/src
-!/Boot_Camp_6th/eclipse/workshop/WorkShop06/src
-!/Boot_Camp_6th/eclipse/workshop/WorkShop07/src
-!/Boot_Camp_6th/eclipse/workshop/JdbcWorkShop/src
+!/Boot_Camp_6th/eclipse/workshop/java_workshop/src/
+!/Boot_Camp_6th/eclipse/workshop/JdbcWorkShop/src/
+!/Boot_Camp_6th/eclipse/workshop/WorkShop05/src/
+!/Boot_Camp_6th/eclipse/workshop/WorkShop06/src/
+!/Boot_Camp_6th/eclipse/workshop/WorkShop07/src/
 
 /Algorithm_Study/*
 !/Algorithm_Study/src/
