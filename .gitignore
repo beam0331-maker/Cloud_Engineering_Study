@@ -19,12 +19,12 @@
 !/Boot_Camp_6th/eclipse/workshop/JdbcTest/src
 
 /Boot_Camp_6th/eclipse/workshop/*
-!/Boot_Camp_6th/eclipse/workshop/HelloTest/src/
-!/Boot_Camp_6th/eclipse/workshop/java_workshop/src/
-!/Boot_Camp_6th/eclipse/workshop/WorkShop05/src/
-!/Boot_Camp_6th/eclipse/workshop/WorkShop06/src/
-!/Boot_Camp_6th/eclipse/workshop/WorkShop07/src/
-!/Boot_Camp_6th/eclipse/workshop/JdbcWorkShop/src/
+!/Boot_Camp_6th/eclipse/workshop/HelloTest/src
+!/Boot_Camp_6th/eclipse/workshop/java_workshop/src
+!/Boot_Camp_6th/eclipse/workshop/WorkShop05/src
+!/Boot_Camp_6th/eclipse/workshop/WorkShop06/src
+!/Boot_Camp_6th/eclipse/workshop/WorkShop07/src
+!/Boot_Camp_6th/eclipse/workshop/JdbcWorkShop/src
 
 /Algorithm_Study/*
 !/Algorithm_Study/src/
