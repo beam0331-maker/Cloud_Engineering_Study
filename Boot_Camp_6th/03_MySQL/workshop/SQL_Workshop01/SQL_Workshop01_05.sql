@@ -1,0 +1,5 @@
+use workshop;
+
+SELECT DEPARTMENT_NAME, CATEGORY
+FROM tb_department
+WHERE CAPACITY >= 20 and CAPACITY <= 30;

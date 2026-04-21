@@ -1,0 +1,175 @@
+-------------------------------------------------
+2026.04.03
+
+- 생성자와 공통점
+			* 반드시 호출해야 됨(*****************)
+			* 호출해서 메서드 작업이 끝나면 반드시 호출한 곳으로 돌아온다.(리턴(return)한다고 부름)
+				
+				생성자호출방법: 
+					외부 클래스에서 호출: Cat c = new Cat();
+					내부 크래스에서 호출: this(); 생성자 첫라인에서 호출.
+				
+				
+				메서드호출방법: 
+					외부 클래스에서 호출: 객체생성후
+												 Cat c = new Cat();
+												 c.메서드명(아규먼트);
+					내부 클래스에서 호출: this.메서드([값,...]);
+
+3) 메서드의 파라미터와 리턴값의존재 여분에 따른 4가지 형식
+		
+		문법: pubcli 리턴타입 메서드명([변수,...]){
+			문장1;
+			...
+			[return 값]
+		}
+		
+		가. 파라미터 없고 리턴값 없는 경우
+			public class Test{
+				public void method(){
+					문장1;
+				}
+			}
+			
+			사용: Test t = new Test();
+					t.method();
+		
+		나. 파라미터 있고 리턴값 없는 경우
+			public class Test{
+				public void method(int n, String s){
+					문장1;
+				}
+			}
+			사용: Test t = new Test();
+					t.method(10,"홍길동");
+		
+		다. 파라미터 없고 리턴값 있는 경우
+			public class Test{
+				public int method(){
+					문장1;					
+					return 10:	# 값은 기본형가능, 참조형 가능
+				}
+				
+				public int[] method2(){
+					문장1;					
+					return new int[]{1,2,3}:	
+				}
+				
+				public Cat method3(){
+					문장1;					
+					return new Cat("야옹이",2,"암컷");
+				}
+			}
+			사용: Test t = new Test();
+					int result = t.method();					
+					int[] num = t.method2();
+					Cat c = t.mehot3();
+			// 리턴으로 값으로 받는 메서드 ==> getter 메서드
+		
+		라. 파라미터 있고 리턴값 있는 경우
+			public class Test{
+				public int method(int n, int n2){
+					문장1;
+					return n+n2;
+				}
+			}
+			사용: Test t = new Test();
+					int num = t.method(1,2);
+					
+					
+	4) 오버로딩(overloading)메서드 가능
+		- 하나의 클래스에 동일한 이름의 메서들 여러개 사용가능.
+		  단, 식별하기 위해서 argument list는 달라야 한다.
+		- 목작: 재사용성
+		
+		  ex.
+				public void a(){}
+				publc int a(){} // 오류발생 식별이 호출할때 리턴의 방식의 식별이 불가능
+				public void a(int n){}
+				public void a(String s){}
+				public void a(intn n, String s){}
+				public void a(String s, int n){}
+				
+	5) call by value와 call by reference
+	
+		개념: 메서드 호출시 전달되는 인자값이 기본형과 참조형에 따라서 전달 받은 메서드에서 처리 방식이 달라짐
+		
+		가. call by value
+			메서드 호출 시 전달되는 인자값이 기본형을 전달할 수 있음.
+			핵심: 값을 전달(***)
+			
+		나. call by reference
+			메서드 호출시 전달되는 인자값이 참조형을 전달하는 것을 의미.
+			핵심: 주소값을 전달(***)
+			
+활용:
+
+				기본형, 참조형									기본형, 참조형							기본형, 참조형
+TestMain <---------------------> servivce 클래스 <------------------> DAO 클래스 <-------------------> 데이터베이스
+(main())
+
+// 회고_REF: 메서드의 return 형태에 따라서 어떤경우에 어떤 형태의 리턴을 쓰는가
+//	실습 java 파일 참조하기 exam10_method3/Cat.java
+//
+---------------------------------------------
+10. static 키워드 ( 정적 )
+	
+	1) 개념: 
+				객체생성과 무관함 특징증로 프로그램 실행시 적용되는 기술임.
+				
+				
+				
+프로그램 시작 ---------------------------------------> 프로그램 종료		
+		
+								객체생성 시점
+				전						|				후
+			(static)					|(instance, 인스턴스, Heap영역) 
+			- 클래스					|			- 생성자		
+			- 변수					|			- 인스턴스변수
+			- 메서드					|			- 메서드
+										|
+										|
+									  new
+	특징:							  				특징: 반드시 객체 생성이 필요
+	프로그램 실행시 자동생성						new 할때마다 매번 생성됨
+	(독자적으로 메모리에 올라갈 수 있음)		this 키워드 사용 가능
+	한번만 생성됨(클래스, 변수, 메서드)			
+	this 사용 불가, 인스턴스변수, 일반메서드 사용불가
+	method area 메모리 저장(클래스 정보 저장, 상수값, 문자열)
+
+// 벨로그 작성시 exam11_stastic/StaticTest.java 참조할것
+	
+	2) static 키워드 적용 대상
+		
+		가. 클래스
+			 ex. public static class 클래스명{}
+				단, 중첩 클래스에서만 가능
+					
+					public class A{						
+						static class B{
+							
+						}
+					}
+ 			 - 사용방법: 클래스명으로 접근
+
+			
+		나. 변수
+			 ex. static int num;
+			 - 메서드 밖에서 선언 + static 지정
+			 - 생성시점: 프로그램 실행시
+				생성시점: 프로그램 종료시
+				생성횟수: 단 한번만 생성
+			 - 사용용도: 누적용
+		
+		다. 메서드
+			 ex. public static void a(){}
+				  public static main(String args[]){}	# // static이기 때문에 독자적으로 메모리에 올라갈 수 있음
+			 
+			 - 생성시점: 프로그램 실행시
+			 - 소멸시점: 프로그램 종료시
+			 - 사용용도: 객체생성이 사용
+			 - 사용방법: 클래스명.메서드
+				ex. Integer.parseInt();
+				
+// 자바 클래스 다이어그램 작성법도 추가해볼것
+				 

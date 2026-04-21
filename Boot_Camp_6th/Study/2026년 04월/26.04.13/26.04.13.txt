@@ -1,0 +1,83 @@
+-------------------------------------------------
+2026.04.13
+
+	2) java.util.function 패키지
+		
+		가. Consumer: 리턴없고 매개변수만 있는경우
+		나. Supplier: 리턴있고 파라미터 없는경우
+		다. Function: 리턴있고 파라미터 있는경우 ( 범용성 )
+			 파라미터 타입과 리턴타입을 사용자가 임의로 지정이 가능
+		라. Operatro 계열: Function과 상속관계,
+			 파리미터와 리턴타입이 모두 동일함.
+		마. Predicat: 리턴있고 파라미터 있는경우. 리턴 값은 반드시 boolean
+						  Stream API의 필터링에서 사용됨.
+						  
+						  * 논리연산자에 해당하는 메서드 사용 가능
+						  &&: and()
+						  ||: or()
+						  ! : negate()
+		
+		바. 추가 개념
+			- Function(Operator) 및 Cunsumer 사용시 작업들 연결이 가능.
+			- andThen() 메서드 사용
+			ex. "hello" 입력받고 글자수를 세고, 글자수를 다시 전달받아서 10 더함.
+			
+		사. 메서드 참조 ( method reference )				 
+			
+			개념: 람다표현식에서 사용했던 문장을 축약한 표현식.
+			
+			1) ststic 메서드:		클래스::메서드명
+			
+			2) 인스턴스메서드:	참조변수::메서드
+									단, 문자열은 String::메서드 
+			
+			3) new 생성자 ():		클래스::new
+			4) System.out.println(): System.out::println
+			
+5. Stream API
+
+  - 컬렉션 API와 관련 있음.
+    현재 컬렉션 API(Set,List,Map)들은 저장,수정,삭제,조회,크기등 기본적인 기능들만 포함하는 메서드만 지원됨.
+
+  - 컬렉션 API(배열)에서 필요한 기능은 통계처리(합계,평균,최대,최소),필터링,정렬,중복제거 작업등이 필요함 ( DB는 예전부터 지원되는 기능들임 )
+    JDK 버전업되면서 이러한 기능들을 포함한 Stream API 제공됨.4. MySQL
+	 
+	1) 컬렉션 또는 배열에서 Stream 얻기
+		
+		가. 컬렉션
+			list.stream()
+			set.stream()
+		
+		나. 배열
+			Arrays.stream(배열)
+			Stream.of(배열)
+		
+	2) 중간처리 작업
+		- 정렬
+		- 필터링
+		- 가공
+			ex) 대문자, 소문자, 부분열 ...
+		- skip
+		- limit
+		
+		# map vs flatMap
+		
+			가. map
+				=> map(Function<T,R>)
+					하나의 파라미터가 전달되어 하나의 리턴
+					
+			나. flatMap
+				=> flatMap(Function<T, stream>)
+					하나의 파라미터가 전달되어 여러개의 값을 가진 Stream으로 반환
+					ex. "a/b/c" ===> [a,b,c]
+		
+		
+	3) 최종처리
+		- 합계, 평균, 최대값, 최소값, 갯수
+		- 컬렉션 변화( set -> List )
+		- 반복처리 ( forEach (Consumer)메서드)
+	
+	4) Optional
+		용도: 컬렉션에 값이 있는 경우에는 괜찮지만
+				값이 없는 경우 메서드 호출시 오류가 발생한다.
+				오류를 방지하기 위함.

@@ -1,0 +1,213 @@
+-------------------------------------------------
+Jdbc _ 강좌정리
+
+JDBC ( Java Database Connectivity )
+
+1. 개념
+	
+	-  자바프로그램언어와 DBMS연동하는 기술로서 DBMS에 독립적임
+	
+									JDBC
+	자바프로그램 <------------------------> DBMS(MySQL, Oracle, MA-SQL, DB2,....)
+	
+2. 특징
+	
+	- DBMS종류와 무관하게 일관된 방법으로 접근이 가능 (DBMS에 독립적임)
+	  어떤 DMBS건 동일한 메서드로 접근한다
+	- JDBC는 비런타임 계열의 예외(SQLException)가 발생한다 -> thy-catch, throws로 예외처리해야한다.
+	- JDBC는 기본적으고 auto commit임. ( 필요시 비활성화 가능 )
+	- 일반 standart alone 환경 및 웹 환경에서도 JDBC 사용가능
+	
+3. 일관된 방법 구현
+
+	1) 자바쪽에서 인터페이스 제공
+		내부에 추상메서드(ex. public abstract void connect();)
+	2) 인터페이시를 DMBS 벤더에 제공
+	3) 벤더에서 클래스를 만들때 인터페이스를 구현
+		ex. public class Oracle implements Connection{
+				public void connect(){}
+		}
+			public class MySQL implemnets Connection(){
+				public void connect() {}
+		}
+	4) 각 벤더마다 클래스파일들이 만들어지고 이 클래스파일들(*.jar)과
+		자바 프로그램이 연동함.
+		# *.jar 파일을 드라이버(driver)라고 부름.
+	5) 벤더에서 제공해준 드라이버(dirver,jar파일)를 자바프로그램에서 사용할 수 있도록 설정이 필요함.
+	
+	
+	자바프로그램												DBMS
+	------------------------------------------------------
+	java.sql.Connection										MYSQL
+	java.sql.PreparedStatement								Oracle
+																	MS-SQL
+																	...
+																	
+4. mysql 드라이버 다운로드 및 eclipse에서 설정
+
+	1) mysql 드라이버.
+		https://dev.mysql.com/downloads/connector/j
+		
+		드라이버 명 : mysql-connector-j-8.0.33.jar
+		
+	2) eclipse에서 드라이버 설정 ( 외부 jar파일을 인식시키는 작업: build pat)
+		
+		프로젝트생성 > 생성한 프로젝트 오른쪽 클릭 > build path >  Configure build path ... >
+		3번째 탭의 libraries > Classpath > Add Externals Jar... > 드라이버선택
+		
+5. JDBC 연동
+
+	1) mysql 접속 정보 4가지
+		
+		String dirver = "com.mysql.cj.jdbc.Driver";	// 핵심이 되는 클래스명
+		String url = "jdbc:mysql://localhost:3306/testdb";
+		String userid = "root";
+		String passwd = "1234";
+		
+		
+	2) 드라이버 로딩
+	- "com.mysql.cj.jdbc.Driver"를 메모리에 올리는 작업의미.
+		그런데 메모리에 올려야되는 클래스명이 문자열로 되어 있다. 
+		// [찾아볼것] forName을 사용하는 이유
+		
+		try{
+			Class.forName(driver); // Class.forName(com.mysql.cj.jdbc.Driver);	
+		} catch(ClassNotFoundException e){
+			System.err.println("드라이버를 찾을 수 없습니다. jar 파일 설정을 확인하세요.");
+		}
+				
+	- ClassNotFoundException 예외가 발생되고, try-catch 필수로 처리해야된다.
+	
+	3) Connection 맺기
+		
+		- java와 mysql 연결하는 것을 의미
+		
+		java.sql.Connection;
+		java.sql.DriverMager;
+		
+		Connection con = DriverMager.getConnection(url, userid, passwd);
+		SQLExeption 예외가 발생되고, try-catch 필수로 처리해야된다.
+		
+		
+										  [Connection con]
+						--------------------------------------------
+		java프로그램 	<--------------- sql ----------------->	MySql
+						--------------------------------------------
+	4) sql문 작성
+		
+		- 수업에서 배웠던 모든 sql문 사용가능. (ex. 함수, 조인, 서브쿼리, DML, DDL, ... )
+		- 쿼리 끝의 ;은 반드시 제외 //[찾아볼것] 왜 ; 없어도 되는지
+		
+			String sql = "select deptno, danme, loc from dept";
+			
+			string sql = "insert into dept (deptno, dname, loc) values (50, '인사','서울')";
+	
+	5) PreparedStatment 얻기 ( sql문 전달 객체 )
+		
+			java.sql.PreparedStatment;
+			
+			PreparedStatment pstmt = con.preparstatment(sql);
+			
+			SQLExeption 예외가 발생되고, try-catch 필수로 처리해야된다.			
+		
+	6) sql문 전송
+		
+		가. DML (insert, delete, update)
+		
+			- int n = pstmt.executeUpdate();	// n: 변경된 리코드 갯수
+			
+			- SQLExeption 예외가 발생되고, try-catch 필수로 처리해야된다.		
+			
+		나. Select 문
+			/////////////////////////////////////////////////
+			ex.
+          select deptno,dname,loc from dept;
+	
+				실행결과:
+							deptno   dname       loc   <== 컬럼헤더
+							-----------------------------
+							10       ACCOUNTING  NEW YORK
+							20       RESEARCH    DALLAS
+			/////////////////////////////////////////////////
+
+			java.sql.ResultSet;	// select의 결과 테이블 참조가 가능하다
+			
+			- ResultSet rs = pstmt.executeQuery();	// 참조변수 rs는 컬럼헤더를 가르킨다.
+			- SQLExeption 예외가 발생되고, try-catch 필수로 처리해야된다.		
+
+			rs --> 		deptno   dname       loc   <== 컬럼헤더
+							-----------------------------
+							10       ACCOUNTING  NEW YORK
+							20       RESEARCH    DALLAS
+							
+			while(rs.next()){	// 다음 행의 유무에 따라 boolean값을 리턴
+			//  열선택
+				int deptno = rs.getInt("deptno"); 		// == rs.getInt(1);
+				String dname = rs.getString("dname");	// == rs.getInt(2);
+				String loc = rs.getString("loc");	 	// == rs.getInt(3);
+			}
+			
+	7) 외부자원은 모두 반남 ( close 작업)
+		
+		- 사용 순서
+			Connection con;
+			PreparedStatment pstmt;
+			ResultSet rs;
+			
+		- close 순서는 사용순서 역순으로 해야 된다.
+			rs.close();
+			pstmtm.close();
+			con.close();
+		- SQLExeption 예외가 발생되고, try-catch 필수로 처리해야된다.		
+		
+// [회고REF] 실습하는 과정에서 비밀번호가 계속 거부되는 상황이 발생함 
+// 해결은 했지만원인이 되는건 추정단계 mysqlD가 복수로 존재했던게 원인일 수 있음
+// 정확한 원인과 해결책 찾아서 작성하기
+6. 트랜잭션 처리
+
+	- JDBC의 DML은 auto commit임.
+	
+		Connection con = DriverManager.getConnection(url, userid, passwd);
+		
+		try{
+			con.setaAutoCommit(false); = // 기본은 ture				
+			
+			// insert문		
+			// update문
+			
+			con.commit();
+		}catch(){
+			con.rollback();
+		}
+		
+7. 레이어(Layer) 나누기 //[더 찾아볼것] 데이터 스트림과 코드 구조 확실히 알아둘것
+	- DB 연동
+	1) 4가지 정보
+	2) 드라이버로딩: Class.forName()
+	3) Connection 맺기
+	4) sql작성
+	5) PreparedStatement 작성
+	6) sql 전송
+	7) close작업
+
+
+	dept 테이블는 다루는 시스템
+								  1,2,3,7(con.close) 작업		4,5,6,7(나머지 close)
+										로직, 트랜잭션처리			
+									connection만 얻고 close			(DB연동)
+	presentation layer	|	 	servive layer			|	persistence layer	| MySQL
+								|									|							|
+		main()				| (인터페이스)					| DeptDAO.java			|
+  DetpSelectMain.java	| DeptService.java			| DeptDTO.java(dept테이블의 레코드 저장용)
+								| (인터페이스 구현 클래스)	|
+								| DeptServiceImpl.java		|
+
+
+// - presentation layer	: 화면에 보이는 레이어
+	- servive layer		: 
+		로직, 트랜잭션 처리 						  
+		Connetction 이 실제로 연결된다. con(connection)은 
+		service - persistence / persistence - DB 두 번 필요하다. close도 이 계층에서 실행된다.
+	- persistence layer	:  DB연동 -- 연결을 유지한다(지속성)
+	
+	# 각 Layer 별로 데이터 전달할 때 사용하는 패턴( DTO 패턴: Data Transfer Object )

@@ -1,0 +1,491 @@
+-------------------------------------------------
+2026.04.15
+
+1. 함수(Funtion)
+	
+	용도: 자바의 메서드처럼 기능처리
+			-> 데이터 가공담당.
+			
+	종류:
+		
+		가. 단일행 함수
+			- 함수가 행단위로 적용 실행결과는 레코드 갯수만큼 나옴				
+			 
+			-  데이터에 따른 분류
+				a. 문자데이터				
+				b. 수치데이터
+				c. 날짜데이터
+				d. 이외
+				
+			- 중첩이 가능함 				
+				함수( 함수(값))
+				ex. char_length(trim(str));	// 데이터 타입에 유의해서 중첩을 해야한다
+					 char_length(round(정형)); // 오류
+					
+		나. 그룹 함수
+			- 전체테이블 또는 명시된 그룹단위(ex. 부서별, job별)로 적용
+			  실행결과는 전체테이블은 결과가 하나만 나옴
+			  명시적으로 그룹으로 묶으면 그룹의 개수만큼 나옴.
+			
+			- 합계, 평균, 최대/최소, 개수
+-------------------------------------------------
+	
+2. 문자열 함수
+	https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/string-functions.html
+	
+	1) 대문자/소문자s
+		lower(ename)
+		upper(ename)
+		
+	2) 연결
+		- CONCAT(str1, str2,...)
+		ex. 
+			SELECT CONCAT('My', 'S', 'QL');
+				-> 'MySQL'
+		
+		- CONCAT_WS(separator,str1,str2,...)	
+		ex. 
+			SELECT CONCAT_WS(',', 'First name', 'Second name', 'Last Name');
+				-> 'First name,Second name,Last Name'
+				
+	3) 특정문자채우기
+						 10글자로
+		ex. 'hello' ----------> 'hello     '
+		
+		- LPAD(str,len,padstr)
+		ex.
+			SELECT LPAD('hi',4,'??');
+			-> '??hi'
+			SELECT LPAD('hi',1,'??');
+			-> 'h'
+				
+		- RPAD(str,len,padstr)		
+		ex.
+			SELECT RPAD('hi',5,'?');
+			-> 'hi???'
+			SELECT RPAD('hi',1,'?');
+			-> 'h'
+				
+	4) 부분열
+		SUBSTR과 SUBSTRIN은 동의어(synonym)
+		- SUBSTR(str,pos [,len]) == SUBSTRING(str,pos [,len])
+		// pos의 위치를 포함한다.
+		
+		- SUBSTR(str,pos,len)
+		ex. 
+			SELECT SUBSTRING('Quadratically',5,6);
+			-> 'ratica
+		
+		- LEFT(str,len)
+		ex.
+			SELECT LEFT('foobarbar', 5);
+         -> 'fooba'
+			
+		- RIGHT(str,len)
+		ex.
+			SELECT RIGHT('foobarbar', 4);
+			-> 'rbar'
+		
+	5) 길이 
+	
+		- LENGTH(str) : 지정된 str의 byte 개수 -> 영문자는 1byte
+														 -> 한글은 3byte
+		- CHAR_LENGTH(str): 지정된 str의 개수
+		
+	6) 치환
+	
+		- REPLACE(str,from_str,to_str)
+		ex.
+			SELECT REPLACE('www.mysql.com', 'w', 'Ww');
+			-> 'WwWwWw.mysql.com'
+		
+		- INSERT(str,pos,len,newstr)
+		ex. 
+			SELECT INSERT('Quadratic', 3, 4, 'What');
+			-> 'QuWhattic'
+	
+	7) 특정문자의 위치
+	
+		- INSTR(str,substr)
+			없으면 0반환 (자바의 indexOf는 -1 반환)
+		ex.
+			SELECT INSTR('foobarbar', 'bar');
+			-> 4
+			SELECT INSTR('xbar', 'foobar');
+			-> 0 
+	
+	8) 공백제거
+		
+		- LTRIM(str): 왼쪽공백제거
+		ex.
+			SELECT LTRIM('  barbar');
+        -> 'barbar'
+		  
+		- RTRIM(str): 오른쪽공백제거
+		ex.
+			SELECT RTRIM('barbar   ');
+        -> 'barbar'
+		
+		- TRIM([remstr FROM] str): 양쪽공백제거
+		ex.
+			SELECT TRIM('  bar   ');
+        -> 'bar'
+		  
+	9) 특정문자 제거
+	
+		- TRIM([{BOTH | LEADING | TRAILING} [remstr] FROM] str)
+	
+		BOTH		: 양쪽에서 특정 문자 삭제
+		LEADING	: 왼쪽에서 특정 문자 삭제
+		TRAILING	: 오른쪽 특정 문자삭제
+		
+		ex.
+			SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx');
+			-> 'barxxx'
+			SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx');
+			-> 'bar'
+		
+	10) 반복 출력
+	
+		- REPEAT(str,count)
+	
+		ex.
+			SELECT REPEAT('MySQL', 3);
+			-> 'MySQLMySQLMySQL'
+			
+	11) 반대로
+	
+		- REVERSE(str)
+		
+		ex.
+			SELECT REVERSE('abc');
+			-> 'cba'
+			
+	12) 공백반화
+
+		- SPACE(N)
+		
+		ex.
+			SELECT SPACE(6);
+			-> '      '
+			
+	13) 정수값을 포맷을 가진 문자열로 출력
+	
+		- FORMAT(X,D[,locale])	// locale: 화폐단위
+		ex.
+			SELECT FORMAT(12332.123456, 4);
+			-> '12,332.1235'
+			SELECT FORMAT(12332.1,4);
+			-> '12,332.1000'
+			SELECT FORMAT(12332.2,0);
+			-> '12,332'
+			SELECT FORMAT(12332.2,2,'ko_kr'); # 기본 locale: en_us
+			-> '12.332,20'
+-------------------------------------------------
+			
+3. 숫자함수
+https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/numeric-functions.html
+
+	1) 절대값
+	
+		- ABS(X)
+		ex.
+			SELECT ABS(2);
+			-> 2
+			SELECT ABS(-32);
+			-> 32
+		
+	
+	2) 부호
+		- SIGN(X)
+		ex.
+			SELECT SIGN(-32);
+			-> -1
+			SELECT SIGN(0);
+			-> 0
+			SELECT SIGN(234);
+			-> 1
+			
+	3) 반올림
+		- ROUND(X), ROUND(X,D)
+		ex.
+			SELECT ROUND(1.58);
+			-> 2
+			SELECT ROUND(1.298, 1);
+			-> 1.3
+		  
+	4) 절삭(버림)
+		- TRUNCATE(X,D)
+		ex.
+			SELECT TRUNCATE(1.223,1);
+			-> 1.2
+			SELECT TRUNCATE(1.999,0);
+			-> 1
+			SELECT TRUNCATE(122,-2);
+			-> 100
+			
+	5) ceil, floor : 소수점을 가진 값을 정수로 변경
+		
+		- CEIL(X) : 지정된 값과 같거나 큰 정수로 리턴( CEILING(X)과 동의어(synonym)이다 )
+		  
+		ex. 
+			SELECT CEILING(1.23), CEILING(-1.23);
+        -> 2, -1
+		  
+		- FLOOR(X) : 지정된 값과 같거나 작은 정수로 리턴
+		ex.
+			SELECT FLOOR(1.23), FLOOR(-1.23);
+        -> 1, -2
+		  
+	6) 나머지 
+	
+		- MOD(N,M), N % M, N MOD M ( oracle % 사용불가 : oracle은 와일드카드로 인식)
+		ex.
+			SELECT MOD(234, 10);
+			-> 4
+			SELECT 253 % 7;
+			-> 1
+			SELECT MOD(29,9);
+			-> 2
+			SELECT 29 MOD 9;
+			-> 2
+-------------------------------------------------			
+4. 날짜 함수 ( 비 ANSI 문법 )
+
+	1) 현재날짜와 시간
+		
+		- NOW([fsp]): 'YYYY-MM-DD-hh:mm:ss'	
+		// LOCALTIME(), LOCALTIME, LOCALTIMESTAMP, LOCALTIMESTAMP() 동의어
+						  시간을 구하는 시점이 SQL문 실행시점(select 호출 시점)
+						  
+		- SYSDATE()	: 'YYYY-MM-DD-hh:mm:ss'
+						  시간을 구하는 시점이 함수 호출시점.(SLEEP 사용시 시간 달라짐)
+		ex.
+			SELECT NOW();
+        -> '2007-12-15 23:50:26'
+			SELECT NOW() + 0;			// 숫자 형태로 출력된다.
+        -> 20071215235026.000000
+		  
+	2) 현재날짜
+		
+		- CURDATE() // CURRENT_DATE, CURRENT_DATE()는 동의어이다
+		ex.
+			SELECT CURDATE();
+        -> '2008-06-13'
+			SELECT CURDATE() + 0;
+        -> 20080613
+	
+	3) 현재시간
+	
+		- CURTIME([fsp]) // CURRENT_TIME(), CURRENT_TIME는 동의어
+		  : 'hh:mm:ss' or hhmmss 
+		ex.
+			SELECT CURTIME()
+			-> '19:25:37'
+			SELECT CURTIME() + 0
+			-> 192537 
+			SELECT CURTIME(3)
+			-> '19:25:37.840'
+			
+	4) 날짜 더하기
+	
+		- ADDDATE(date,days)	//  DATE_ADD()와 동의어
+		  ADDDATE(date,INTERVAL expr unit) // date 기준으로 expr을 unit단위로 더해라
+													  // unit의 종류:
+													  // DAY | WEEK | MONTH | QUARTER | YEAR
+												     // SECOND | MINUTE | HOUR
+		ex.
+			SELECT ADDDATE('2008-01-02', 31);
+        -> '2008-02-02'
+
+			SELECT ADDDATE('2008-01-02', INTERVAL 31 DAY);	
+        -> '2008-02-02'
+		  
+	5) 날짜 빼기 
+	
+		- SUBDATE(expr,days) : expr에서 days 빼기	//  DATE_SUB()와 동의어
+		  SUBDATE(date,INTERVAL expr unit)
+	
+		ex.
+			SELECT SUBDATE('2008-01-02 12:00:00', 31);
+        -> '2007-12-02 12:00:00	
+
+			SELECT DATE_SUB('2008-01-02', INTERVAL 31 DAY);
+        -> '2007-12-02'
+	
+	6) 날짜 차이
+	
+		- DATEDIFF(expr1,expr2) : returns expr1 − expr2	// 일 단위로 리턴된다.
+		ex.
+			SELECT DATEDIFF('2007-12-31 23:59:59','2007-12-30');
+        -> 1
+
+		- TIMESTAMPDIFF(unit,datetime_expr1,datetime_expr2):
+		  unit 단위로 차이를 알려준다
+		  
+		ex. 
+			SELECT TIMESTAMPDIFF(MONTH,'2003-02-01','2003-05-01');
+        -> 3
+			SELECT TIMESTAMPDIFF(YEAR,'2002-05-01','2001-01-01');
+        -> -1
+			SELECT TIMESTAMPDIFF(MINUTE,'2003-02-01','2003-05-01 12:05:55');
+        -> 128885
+		  
+	7) 특정 월의 마지막 날
+	
+		- LAST_DAY(date)
+		ex. 
+		SELECT LAST_DAY('2003-02-05');
+        -> '2003-02-28'
+		SELECT LAST_DAY('2003-03-32');
+        -> NULL
+		  
+	8) 지정된 날짜에서 년/월/일/시/분/초 따로 추출
+	
+		- EXTRACT(unit FROM date)
+		ex.
+		SELECT EXTRACT(YEAR FROM '2019-07-02');
+			-> 2019
+		SELECT EXTRACT(YEAR_MONTH FROM '2019-07-02 01:02:03');
+        -> 201907
+		SELECT EXTRACT(DAY_MINUTE FROM '2019-07-02 01:02:03');
+        -> 20102
+		  
+	9) 날짜 ----> 문자열 (***************)
+		
+		- DATE_FORMAT(date,format) //[foramt과 unit 표로 정리하기]
+		ex. format: '%Y-%m-%d %H:$I:%S'
+					 : '%Y년-%m월-%d일'
+			SELECT DATE_FORMAT(now(),'%Y-%m-%d %H:$I:%S');
+			->
+	
+	10) 문자열 ----> 날짜 (***************)
+	
+		- STR_TO_DATE(str,format) // format: str의 형식을 의미한
+		ex.
+			SELECT STR_TO_DATE('01,5,2013','%d,%m,%Y');
+        -> '2013-05-01'
+			SELECT STR_TO_DATE('May 1, 2013','%M %d,%Y');
+        -> '2013-05-01'
+-------------------------------------------------
+		  
+5. 조건함수
+https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/flow-control-functions.html
+
+	1) IF(expr1,expr2,expr3)
+		: If expr1 is TRUE IF() returns expr2. Flase returns expr3.
+	ex.
+		SELECT IF(1>2,2,3);
+        -> 3
+		  
+	2) case ( 자바의 switch(동등비교) 또는 다중 if(부등비교)문과 비슷 )	// ANSI
+		
+		- 동등비교:
+		CASE value WHEN compare_value THEN result 
+					  [WHEN compare_value THEN result ...] 
+					  [ELSE result] 
+					  END
+					  
+		ex. job에 따른 실수령 출력			// CLERK -> sal * 1.1
+													// SALESMAN -> sal * 1.2
+		SELECT EMPNO, ENAME, JOB, SAL, 	// MANAGER -> sal * 1.3
+		CASE JOB 								// ANALYST -> sal * 1.4
+		WHEN 'CLERK' THEN SAL*1.1			
+		WHEN 'SALESMAN' THEN SAL*1.2
+		WHEN 'MANAGER' THEN SAL*1.3
+		WHEN 'ANALYST' THEN SAL*1.4
+		ELSE sal
+		END as '실수령'
+		from emp;
+		
+		
+		
+		- 부등비교:
+		CASE WHEN condition THEN result 
+			 [WHEN condition THEN result ...]
+			 [ELSE result] 
+			 END
+			 
+		ex. sal에 따른 직금
+		// sal > 3000 --> 이사
+		// sal > 2500 --> 과장
+		이외 --> 사원급
+		
+		ex. 
+		
+		SELECT EMPNO, ENAME, JOB, SAL, 	
+		CASE							
+		WHEN SAL > 3000 THEN '이사'		
+		WHEN SAL > 2000 THEN '과장'
+		ELSE '사원'
+		END as '직급'
+		from emp;
+-------------------------------------------------
+
+6. 형변환 함수
+https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/cast-functions.html
+
+
+	1) CAST()
+		-  CAST(expr AS type [ARRAY]) : expr값을 type으로 변환 //[type 정리할것]
+		ex. 
+		SELECT CAST(10 AS CHAR)		
+		SELECT CAST('10' AS FLOAT)		
+		SELECT CAST('10' AS UNSIGNED)
+		SELECT CAST('2010-02-23' AS DATE)		
+-------------------------------------------------
+
+7. 그룹함수
+https://docs.oracle.com/cd/E17952_01/mysql-8.0-en/aggregate-functions-and-modifiers.html
+
+	1) 함수종류
+	
+		SUM([DISTINCT] expr) [over_clause]	: 합계
+		AVG([DISTINCT] expr) [over_clause]	: 평균
+		MAX([DISTINCT] expr) [over_clause]	: 최대값
+		MIN([DISTINCT] expr) [over_clause]	: 최소값
+		COUNT(expr) [over_clause]				: 레코드 개수, 기본적으로 null을 제외하고 카운트함
+		COUNT(*) 									: 전체 레코드 개수, null을 포함해서 카운트
+		
+	2) 그룹함수는 그룹별로 적용된다.
+	
+	3) 그룹별로 만든 방법
+	
+		가. 명시적
+		
+			 SELECT {컬럼|그룹합수} // SELECT는 거의 마지막에 열을 정의한다.
+			 FROM						# 1번
+			 [WHERE]					# 2번
+			 [GROUP BY {컬럼}]	# 3번
+			 [HAVING {조건식}]	# 4번
+			 [ORDER BY];		
+			 
+			ex.
+				SELECT JOB, SUM(SAL), AVG(SAL)
+				FROM emp
+				GROUP BY job;		// job 별로
+				
+				SELECT DEPTNO, SUM(sal), AVG(SAL), max(sal), min(sal), count(sal), count(comm)
+				FROM emp
+				GROUP BY DEPTNO;	// 부서 별로
+				HAVING SUM(SAL) > 9000;
+			
+			특징: 
+				- GROUP BY 표현식 (컬럼명|별칭|위치) # Oracle에서는 컬럼명만 허용한다.
+				- SELECT에 일반 컬럼을 사용하려면 반드시 GROUP BY로 설정한 컬럼만 가용이 가능하다 (*****)
+				ex.				
+					SELECT DEPTNO, JOB, SUM(sal), count(sal), count(comm)
+					FROM emp
+					GROUP BY DEPTNO, JOB;	// 부서, JOB 별로 ->  연도별 - 월별 로 묶는 경우
+				- WHERE 절에서는 그룹함수 사용불가.	// [정처기] : where은 튜플행에 대한 연산
+																// baving은 속성(열)에 대한 연산...확인 필요
+									
+		나. 묵시적
+		
+			- GROUP BY로 지정하지 않으면 자동으로 전체 레코드를 가진 하나의 그룹으로 묶임
+		ex.
+			SELECT SUM(sal), AVG(SAL), MAX(sal), MIN(sal), COUNT(sal)
+			FROM emp;
+	
+	
+	

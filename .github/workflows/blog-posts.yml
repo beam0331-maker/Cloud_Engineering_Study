@@ -1,0 +1,25 @@
+name: Latest blog post workflow
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  update-readme-with-blog:
+    name: Update this repo's README with latest blog posts
+    runs-on: ubuntu-latest
+    env:
+      # Node.js 24 강제 사용으로 경고 제거
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pull velog posts
+        uses: gautamkrishnar/blog-post-workflow@master # v1 대신 master 사용
+        with:
+          # 본인의 벨로그 RSS 주소 (아이디 부분 꼭 확인!)
+          feed_list: "https://v2.velog.io/rss/beam0331"
+          # 리스트가 들어갈 파일 명시
+          readme_path: "./README.md"
+          max_post_count: 5
