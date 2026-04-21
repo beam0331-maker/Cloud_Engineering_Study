@@ -181,9 +181,18 @@ JDBC ( Java Database Connectivity )
 		}
 		
 7. 레이어(Layer) 나누기 //[더 찾아볼것] 데이터 스트림과 코드 구조 확실히 알아둘것
+	- DB 연동
+	1) 4가지 정보
+	2) 드라이버로딩: Class.forName()
+	3) Connection 맺기
+	4) sql작성
+	5) PreparedStatement 작성
+	6) sql 전송
+	7) close작업
+
 
 	dept 테이블는 다루는 시스템
-	
+								  1,2,3,7(con.close) 작업		4,5,6,7(나머지 close)
 										로직, 트랜잭션처리			
 									connection만 얻고 close			(DB연동)
 	presentation layer	|	 	servive layer			|	persistence layer	| MySQL
