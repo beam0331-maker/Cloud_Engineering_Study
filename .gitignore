@@ -6,28 +6,13 @@
 ### Boot_Camp ###
 
 
-# 1. 상위 eclipse 폴더의 모든 내용 무시
-/Boot_Camp_6th/eclipse/*
-
-# 2. workspace와 workshop 폴더 자체는 접근할 수 있도록 예외 설정
-!/Boot_Camp_6th/eclipse/workspace/
-!/Boot_Camp_6th/eclipse/workshop/
-
-# 3. 각 폴더 내부의 프로젝트들 중 src 폴더만 살리기
-# (이미지에 보이는 실제 폴더명과 일치시켰습니다)
-
-# [workspace 하위]
+# 1. 특정 경로의 '내용물'만 무시 (폴더 자체는 Git이 들어갈 수 있게 함)
 /Boot_Camp_6th/eclipse/workspace/*
-!/Boot_Camp_6th/eclipse/workspace/HelloTest/src/
-!/Boot_Camp_6th/eclipse/workspace/JdbcTest/src/
-
-# [workshop 하위]
 /Boot_Camp_6th/eclipse/workshop/*
-!/Boot_Camp_6th/eclipse/workshop/java_workshop/src/
-!/Boot_Camp_6th/eclipse/workshop/JdbcWorkShop/src/
-!/Boot_Camp_6th/eclipse/workshop/WorkShop05/src/
-!/Boot_Camp_6th/eclipse/workshop/WorkShop06/src/
-!/Boot_Camp_6th/eclipse/workshop/WorkShop07/src/
+
+# 2. src 폴더를 최우선적으로 살리기
+!/Boot_Camp_6th/eclipse/workspace/*/src/
+!/Boot_Camp_6th/eclipse/workshop/*/src/
 
 /Algorithm_Study/*
 !/Algorithm_Study/src/
