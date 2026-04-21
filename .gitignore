@@ -6,20 +6,20 @@
 ### Boot_Camp ###
 
 # 1. workshop 폴더는 전체 무시 (예외 없음)
-/Boot_Camp_6th/Java21_study/workshop/
+/Boot_Camp_6th/workshop/
 
 # 2. eclipse 폴더 자체는 무시하지 않고 '내용물'만 무시합니다.
-/Boot_Camp_6th/Java21_study/eclipse/*
+/Boot_Camp_6th/eclipse/*
 
 # 3. 이제 그 안에서 우리가 필요한 workspace 폴더만 예외로 둡니다.
-!/Boot_Camp_6th/Java21_study/eclipse/workspace/
+!/Boot_Camp_6th/eclipse/workspace/
 
 # 4. workspace 안의 모든 것도 일단 무시했다가 필요한 프로젝트만 엽니다.
-/Boot_Camp_6th/Java21_study/eclipse/workspace/*
-!/Boot_Camp_6th/Java21_study/eclipse/workspace/HelloTest/
-!/Boot_Camp_6th/Java21_study/eclipse/workspace/java_workshop/
-!/Boot_Camp_6th/Java21_study/eclipse/workspace/WorkShop05/
-!/Boot_Camp_6th/Java21_study/eclipse/workspace/WorkShop06/
+/Boot_Camp_6th/eclipse/workspace/*
+!/Boot_Camp_6th/eclipse/workspace/HelloTest/
+!/Boot_Camp_6th/eclipse/workspace/java_workshop/
+!/Boot_Camp_6th/eclipse/workspace/WorkShop05/
+!/Boot_Camp_6th/eclipse/workspace/WorkShop06/
 /Algorithm_Study/*
 !/Algorithm_Study/src/
 
@@ -47,7 +47,8 @@ local.properties
 bin/
 *.class
 eclipse/configuration/
-
+*.log
+.recommenders/
 # External tool builders
 .externalToolBuilders/
 
