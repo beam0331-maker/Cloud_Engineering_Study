@@ -3,23 +3,6 @@
 
 *.exe
 
-### Boot_Camp ###
-
-# 1. eclipse 하위의 모든 파일/폴더 일단 무시
-/Boot_Camp_6th/eclipse/*
-
-# 2. workshop, workspace 폴더 자체는 탐색하고 그 내부 내용만 무시
-/Boot_Camp_6th/eclipse/workshop/*
-/Boot_Camp_6th/eclipse/workspace/*
-
-# 3. 프로젝트 폴더(WorkShop07 등) 내부까지 들어가서 무시 (깊이 확보)
-/Boot_Camp_6th/eclipse/workshop/*/*
-/Boot_Camp_6th/eclipse/workspace/*/*
-
-# 4. 모든 경로에서 src 폴더와 그 하위 파일들만 최우선으로 살림
-!**/src/
-!**/src/**
-
 /Algorithm_Study/*
 !/Algorithm_Study/src/
 
@@ -290,3 +273,16 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,eclipse,intellij,visualstudiocode,java
 
+### 최하단으로 이동 ###
+# 1. 일단 모두 막음
+/Boot_Camp_6th/eclipse/**/*
+
+# 2. 입구(폴더)만 살림
+!/Boot_Camp_6th/eclipse/workshop/
+!/Boot_Camp_6th/eclipse/workspace/
+!/Boot_Camp_6th/eclipse/workshop/*/
+!/Boot_Camp_6th/eclipse/workspace/*/
+
+# 3. 최종 목적지(src)를 살림
+!**/src/
+!**/src/**
