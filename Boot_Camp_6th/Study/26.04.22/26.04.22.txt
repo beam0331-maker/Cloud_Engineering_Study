@@ -1,0 +1,276 @@
+-------------------------------------------------
+20206.04.22
+
+MyBatis_강좌정리
+
+////////////////////////////
+라이브러리 (library)
+- *.jar서(ex. *.js) 의미로서 외부에서 만들어진 클래스파일들의 묶음으로
+다운로드 받아서 build path에서 사용
+
+프레임워크(framework)
+- *.jar + 프로그램 개발하기 위한 틀을 제공
+////////////////////////////
+MyBatis 프레임워크(framework)
+
+1. 개요
+	- JDBC 사용을 편리하고 효율적으로 기능이 추가된 형태의 SQL Mapping Framework임.
+		( 개발자가 메서드 호출하면, 이 메서드에 해당하는 sql문을 자동으로 실행해줌 )
+	- ibatis (초창기 버전명)
+2. 환경설정
+	- mybatis jar 필요
+	http://mybatis.org 에서 다운받음 (mybatis-3.5.17)
+	https://mybatis.org/mybatis-3/ko/index.html
+
+	- mysql 드라이버 필요
+	
+	위 2개의 jar 파일을 (mybatis-3.5.17, mysql-connector-j-8.0.33.jar) eclipse에서 build path해야됨.
+	
+3. MyBatis 사용방법
+	
+	1) Jdbc 에서 사용했던 4가지 정보를 외부파일에 설정
+		String dirver = "com.mysql.cj.jdbc.Driver";
+		String url = "jdbc:mysql://localhost:3306/testdb";
+		String userid = "root";
+		String passwd = "1234";
+		
+		==> 파일명.properties	#	key = value
+		==> 저장방법
+			src/com/conmfig/jdbc.properties
+			
+			# 주석문
+			# key = value
+
+			jdbc.dirver=com.mysql.cj.jdbc.Driver
+			jdbc.url=jdbc:mysql://localhost:3306/testdb
+			jdbc.userid=root
+			jdbc.passwd=1234
+			
+		=> 현재 eclipse에서 사용중인 인코딩은 기본적으로 utf-8 임. ( 전세계의 모든 언어를 표현할 수 있음)
+			생성된 jdbc.properties 파일도 utf-8로 인코딩 병경
+	
+	2) DTO 클래스 작성
+	- MyBaties에서는 필수		
+	- 일반적으로 테이블당 하개씩 작성.
+		ex. dept테이블용 DeptDTO.java
+			 emp테이블용 EmpDTO.java
+			 
+	- DTO 클래스의 변수명은 테이블의 컬럼명과 일치하는걸 권장
+		
+		ex. dept 테이블 --------------------> com.dto.DeptDTO.java
+			 
+			 컬럼과 변수명이 같으면 명시적으로 매핑 x
+			 deptno -------------------------> int deptno; getDeptno()/ setDeptNo()
+			 dname --------------------------> String dname;
+			 loc ----------------------------> String loc;
+			
+			 명시적으로 컬럼과 get/set을 매핑해줘야 한다
+			 sal ----------------------------> int salary; getSalary()/setSalary()
+			 
+	- DTO 클래스에서 기본생성자와 getter/setter 메서드는 필수임
+	
+	==> DTO에 저장된 데이터는 자동으로 MyBaties에서 가져와서 SQL문에 사용됨.
+		 반대로 SQL문 실행된 결과를 자동으로 DTO에 저장시킨다.
+		 
+		//////////////////////////////////////
+		xml ( eXtensible Markup Language: 확장가능한 마크업 언어) ex. HTML
+			가. 태그로 구성
+				ex. <시작태그>
+						contents <== 태그 또는 문자열
+					 </종료태그>
+					 
+			나. 시작태그에는 속성(key=value)을 가질 수 있음.
+				ex. <태그 key=value key=value>
+				
+			다. 반드시 여러 태그들을 포함하는 단 하나의 root 태그를 가져야 한다.
+				
+				ex.<루트태그>
+						<태그></태그>
+						<태그></태그>
+						...
+					</루트태그>
+					
+			라. contents가 없는 태그를 빈태그(empty)가 가능
+				ex. <시작태그></종료태그>
+					 <시작태그 />
+					 
+		HTML(HyperText Markup Language)
+		- 태그명과 속성이 정해져 있다.
+		- 용도는 웹페이지의 구조를 만들때 사용.
+		
+		XML(eXtensible Markup Language)
+		- 태그명과 속성명 등을 마음대로 지정 가능
+		ex. 
+			<person>
+				<name>홍길동</name>
+				<age>20</age>
+				<address post="1234" city="seoul" />
+			</person>
+			
+		- 서로 다른 플랫폼간의 데이터 전달용 (공통포맷)
+		// 데이터 전달에 필요한 메타데이터가 많아져서 현재는 json으로대체됨
+			
+			ex. 
+				A(os/언어툴)	<-------->	B(os/언어툴)
+				win								Linux
+				java								python
+				word								hwp
+		
+			A에서 위의 xml을 작성
+			B에서는 프로그램적으로 xml을 읽는 작업이 필요하다
+				1) 루트태그명은 person
+				2) 첫번째 자식은 name
+				3) 두번째 자식은 age
+				...
+				
+		- A와 B간의 xml만들때 규칙(태그명, 순서명, 타입 등)을 정해서 문서화 했음.
+			# 문서화 방법
+				가. dtd 방법
+					- *.dtd
+					
+				나. schema 방법
+					- *.xsd
+		dtd 파일 다운로드 이슈 해결방법
+		eclipse > window > preperence > xml > download external resurce ... 체크
+		//////////////////////////////////////
+		
+	3) 2개의 xml 파일이 필요.
+		
+		가. 설정파일
+			- DB연도하기 위한 정보들을 포함한 파일.
+			- src/com/config/configuration.xml
+			
+		나. mapper 파일
+			- SQL문이 저장된 파일.
+			- 테이블당 하나씩 생성.
+			- src/com/config/테이블명Mapper.xml
+			
+				a. select 태그
+					
+					// 단일행
+					<select id = "findByDeptno" resultType="com/dto/DeptDTO" parameterType="int" >
+						select deptno, dename, loc
+						from dept 
+						where deptno = #{deptno} 	=> ; 제외,
+					</select>							#{변수} 대신에 진짜 데이터로 치환됨.
+															JDBC의 ? 역할.
+				
+					# 자바코드에서 호출 하는 방법:
+					SqlSession session = sqlSessionFactory.openSession();
+					T t =  session.selectOne(String);		// String = 태그 id
+					T t =  session.selectOne(String, Object);		// Object는 #{변수}에 입력할 값
+					# T는 resultType 과 같아야 한다.
+					
+					ex.
+						SqlSession session = sqlSessionFactory.openSession();
+						DeptDTO dto = session.selectOne("findByDeptno", 10);
+						
+					// 다중행	
+					<select id = "findByAll" resultType="com.dto.DeptDTO">
+						select deptno, dname, loc
+						from dept	
+					</select>
+					
+					# 자바코드에서 호출 하는 방법:		
+					
+					SqlSession session = sqlSessionFactory.openSession();
+					# E = resultType
+					List<E> list = session.selectList(String); # String = 태그 id
+					List<E> list = session.selectList(String, Object); # Object = #{변수} 값
+					List<E> list = session.selectList(String,Object, RowBounds); 
+					
+					ex.
+					SqlSession session = sqlSessionFactory.openSession();
+					List<DeptDTO> list = session.selectList("findAll");
+					
+					
+				속성
+				id	 : 태그 식별용
+				
+				resultType :
+				select문 실행된 후 결과 레코드 하나를 저장할 때 사용하는 클래스. 패키지명 필수.select된 결과가 자동으로 저장됨. (***********)
+				컬럼헤더이름으로 된 set메서드를 DTO에서 호출해서 저장한다.
+				 ==> 컬럼 헤더와 DTO의 변수명이 다르면 set메서드 호출이 안된다.
+						
+				parameterType :
+				sql 문에서 #{변수}에 해당하는 데이터 타입을 지정.
+				전달된 값이 자동으로 #{변수}에 치환된다.
+				
+				b. insert문
+					<insert id="insert" parameterType="com/dto/DeptDTO">
+						insert into detp (deptno, dname, loc)
+						valuese(#{deptno}, #{dname}, #{loc})
+					</insert>
+					
+				parameterType이 DTO 이므로 #{deptno}는 deptno의 get메서드를 호출해서 
+				DTO에서 파라미터를 가져온다.
+				
+				c. update문
+					<update id="update" parameterType="com/dto/DeptDTO">
+						update dept
+						set dname=#{dname}, loc=#{loc}
+						where deptno=#{deptno}
+					</upeate>
+				
+				d.delete문
+				<delete id="delete" parameterType="int">
+					delete from dept
+					where deptno = #{deptno}
+				</delete>
+				
+		/////////// configuration.xml	///////////
+			
+		<?xml version="1.0" encoding="UTF-8" ?>
+		<!DOCTYPE configuration
+		  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+		  "https://mybatis.org/dtd/mybatis-3-config.dtd">	// dtd파일, xml의 구조가 정의되어있다.
+		<configuration>
+		<properties resource="com/config/jdbc.properties"></properties>	// jdbc.property 를 소스로 불러온다.
+		
+		  <environments default="development">
+			 <environment id="development">
+				<transactionManager type="JDBC"/>	// 트랜잭션 처리 타입은 "JDBC"
+				<dataSource type="POOLED">
+				  <property name="driver" value="${jdbc.driver}"/> 	// .property의 값을 불러와서 쓴다 -> ${}}
+				  <property name="url" value="${url}"/>
+				  <property name="username" value="${username}"/>
+				  <property name="password" value="${password}"/>
+				</dataSource>
+			 </environment>
+		  </environments>
+		  <mappers>
+			 <mapper resource="com/config/DeptMapper.xml"/>	// DeptMapper.xml 설정
+		  </mappers>
+		</configuration>
+		/////////////////////////////////////////
+		
+		/////////// DeptMapper.xml //////////////
+		
+		<?xml version="1.0" encoding="UTF-8" ?>
+		<!DOCTYPE mapper
+		  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		<mapper namespace="org.mybatis.example.BlogMapper">
+		  <select id="selectBlog" resultType="Blog">		// id="" : 태그를 구분하기 위해 사용, 유일한 값 사용
+			 select * from Blog where id = #{id}			// #{id} : jdbc의 ? 와 같은 열할
+		  </select>
+		</mapper>
+		
+		/////////////////////////////////////////
+		
+	4) configuration.xml 파일 정보를 자바코드에서 사용할 수 있도록 설정
+	
+		String resource = "com/config/configuration.xml";
+		InputStream inputStream = Resources.getResourceAsStream(resource);
+		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+		
+		==> SqlSessionFactory 에서  SqlSession 타입을 얻어야 한다.
+			 SqlSession의 메서드를 이용해서 DB 연동한다. 
+			 (JDBC의 Connetcton + PreparedStatement 역할)
+			 
+		==> com/config/MySqlSessionFactory.java 작성
+		
+	# 장점 -> JDBC는 url이 자바 코드에 있으므로 수정시 다시 컴파일을 해야한다
+				 바이바티스는 url 이 외부 파일로 설정되어 있어 다시 컴파일 하지 않아도된다.
+				 
+// [회고] namespace에 대하여
