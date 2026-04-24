@@ -48,8 +48,7 @@ public class DeptMain {
 				String loc = sc.next();
 				System.out.println("=======================================");
 				DeptService service = new DeptServiceImpl();
-				service.setDao(new DeptDAO());		
-
+				service.setDao(new DeptDAO());	
 				DeptDTO dto = new DeptDTO(deptno, dname, loc);
 				
 				try {

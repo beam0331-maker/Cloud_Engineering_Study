@@ -1,0 +1,16 @@
+package com.service;
+
+import java.util.HashMap;
+import java.util.List;
+import com.dao.DeptDAO;
+import com.dto.DeptDTO;
+
+public interface DeptService {
+	
+	public abstract void setDao(DeptDAO dao);
+	public abstract List<DeptDTO> findALl();
+	public abstract int insert(DeptDTO dto);
+	public abstract int delete (int deptno);
+	public abstract int update(HashMap<String, Object> map);
+	public abstract int update2(DeptDTO dto);
+}
