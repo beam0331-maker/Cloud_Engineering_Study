@@ -1,0 +1,361 @@
+2026.04.23
+
+---------------------------------------------------------------------------------
+JDBC                                    MyBatis
+1) 4가지 정보  --------------------------------->   jdbc.properties
+2) 드라이버로딩        
+    Class.forName(driver);
+    
+3) Connection ---------------------------------->   configuration.xml   
+    Connection con;                                 POOLED
+                                                    // pool에 이미 만들어진 connection을 빌려와 사용 후 반환
+                                                    // sqlSessionFactory => pool
+4) SQL 작성   ------------------------------------>   Mapper.xml
+
+5) PreparedStatement 생성
+
+6) SQL문 전송
+    int n = pstmt.executeUpdate();
+    -------------------------------------------->   SqlSession의 selectOne(), selectList(), insert(),
+    ResultSet rs = pstmt.executeQuery();            update(), delete()
+
+7) 자원반납
+    close()   ------------------------------------>   사용한 Connection을 pool에 반납
+
+특징: try-catch 필수                             특징: try-catch 필요없음              
+      설정정보와 sql문이 자바코드 내에 있음              설정정보와 sql문이 자바코드 외부에서 설정
+      DML 사용 시 auto commit                           xml을 사용해서 서로 다른 플랫폼(개발환경)간의 데이터 교환이 가능
+                                                        코드가 간결함
+                                                        DML 사용 시 auto commit이 아님 => 명시적인 트랜잭션 필요
+                                                                            
+    insert문
+        <insert id="insert" parameterType="com.dto.DeptDTO">
+            insert into dept (deptno, dname, loc)
+            values (#{deptno}, #{dname}, #{loc})
+        </insert>
+                    
+        # 자바코드에서 호출하는 방법:
+        SqlSession session = sqlSessionFactory.openSession();
+        int n = session.insert(String id);
+        int n = session.insert(String id, Object);
+
+    update 문
+       <update id="update" parameterType="hashmap">
+           update dept
+           set dname=#{dname}, loc=#{loc}
+           where deptno=#{deptno}
+        </update>
+        
+        # 자바코드에서 호출하는 방법:
+        SqlSession session = sqlSessionFactory.openSession();
+        int n = session.update(String id);
+        int n = session.update(String id, Object);
+
+    delete 문
+      <delete id="delete" parameterType="int">
+           delete from dept
+           where deptno=#{deptno}
+        </delete>
+    
+        # 자바코드에서 호출하는 방법:
+        SqlSession session = sqlSessionFactory.openSession();
+        int n = session.delete(String id);
+        int n = session.delete(String id, Object);
+
+-------------------------------------------------
+
+1. com.dto.DeptDTO 별칭 설정하기
+     - configuration.xml에서 별칭 등록
+          <typeAliases>
+                <typeAlias type="com.dto.DeptDTO" alias="DeptDTO" />
+          </typeAliases>
+ 
+2. Mapper 비교연산자 사용 시 이슈 
+        
+        ex.
+        <select id="findByDeptnoLessThan" resultType="DeptDTO" parameterType="int">
+           select deptno, dname, loc
+           from dept
+           where deptno < #{deptno}    // 오류발생: '<' 태그로 인식
+        </select>
+        
+    < : &lt; (less than)
+    > : &gt; (greater than)
+    <= : &le; (less than equal)
+    >= : &ge; (greater than equal)
+    
+    ==> sql문 자체를 Character 자체로 처리할 수 있음.
+    <![CDATA[
+            select deptno, dname, loc
+            from dept
+            where deptno < 40
+    ]]>
+
+3. 동적 SQL 문
+
+    1) 멀티 INSERT 문
+    
+        - sql문:
+            
+            insert into emp (empno, ename, sal)
+            values (9001,'홍길동1',300), (9002,'홍길동2',300),(9003,'홍길동3',300),...;
+
+        - 자바
+            List<EmpDTO> list = Arrays.asList(new EmpDTO(9001,...),
+                                                         new EmpDTO(9002,...),
+                                                         new EmpDTO(9003,...)
+                                                         );             
+
+            SqlSession session = MysqlSessionFactory.getSession();
+            int n = session.insert("com.config.EmpDTO.insertMulti", list);
+            session.commit();
+
+        - mybatis문:
+            <mapper namespace="com.config.EmpDTO">
+                <insert id="insertMulti" parameterType="arraylist">
+                    insert into emp (empno, ename, sal)
+                    values
+                    <foreach item="dto" separator="," collection="list">
+                        (#{dto.empno}, #{dto.ename}, #{dto.sal})
+                    </foreach>
+                </insert>
+            </mapper>
+                                
+    2) 멀티 delete 문
+        - sql 문:
+            delete from emp
+            where empno IN (9001, 9002, ...);
+
+        - java 문:
+            List<Integer> list = Arrays.asList(9001, 9002, ....);
+            
+            SqlSession session = MysqlSessionFactory.getSession();
+            int n = session.delete("com.config.EmpDTO.deleteMulti", list);
+            session.commit();
+
+        - mybatis 문:
+            <mapper namespace="com.config.EmpDTO">
+            
+                <delete id="deleteMulti" parameterType="arraylist">
+                    delete from emp
+                    where empno IN (
+                        <foreach item="num" separator="," collection="list">
+                        #{num}
+                        </foreach>
+                        )
+                </delete>           
+            
+                <delete id="deleteMulti" parameterType="arraylist">
+                    delete from emp
+                    where empno IN
+                        <foreach item="num" open="(" separator="," close=")" collection="list">
+                        #{num}
+                        </foreach>
+                </delete>
+                
+                <delete id="deleteMulti" parameterType="arraylist">
+                    delete from emp
+                    where
+                        <foreach item="num" open=" empno IN (" separator="," close=")" collection="list">
+                        #{num}
+                        </foreach>
+                </delete>
+                
+                <delete id="deleteMulti" parameterType="arraylist">
+                    delete from emp
+                    <where>
+                        <foreach item="num" separator="," open="empno IN (" close=")" collection="list">
+                        #{num}
+                        </foreach>
+                    </where>
+                </delete>
+            </mapper>
+                
+    3) 멀티 SELECT 문
+        
+        - sql문:
+                select empno, ename, sal
+                from emp
+                where ename IN ('TURNER', 'SMITH', 'JONES');
+
+        - java 문:
+            
+            List<String> list3 = Arrays.asList("TURNER", "SMITH", "JONES");
+            
+            SqlSession session = MysqlSessionFactory.getSession();
+            List<EmpDTO> dtoList = session.selectList("com.config.EmpDTO.selectMulti", list3);
+
+        - mybatis
+                
+            <select id="selectMulti" resultType="EmpDTO" parameterType="arraylist">
+                select empno, ename, sal
+                from emp        
+                <where>
+                    <foreach item="ename" separator="," open=" ename IN (" close=")" collection="list">
+                        #{ename}
+                    </foreach>
+                </where>        
+            </select>
+            
+    4) 조건문 (단일 if문만 제공) - if-else 및 다중 if 지원 x
+    
+        가) 조건이 하나인 경우
+            - sql문:
+                select *
+                from emp
+                또는
+                
+                select *
+                from emp
+                where job = 값;
+
+            - java코드:
+                    EmpDTO dto = new EmpDTO();
+                    dto.setJob("SALESMAN");
+                    
+                    List<EmpDTO> list = session.selectList("com.config.EmpMapper.selectif", dto);
+                    
+            - mybatis문;
+                    <select id="selectif" parameterType="EmpDTO" resultType="EmpDTO">
+                        
+                        select empno, ename, sal, job
+                        from emp
+                        <where>
+                            <if test="job != null">
+                                job = #{job}
+                            </if>
+                        </where>
+                    
+                    </select>
+                    
+        나) 조건이 여러 개인 경우
+        
+            - sql문:
+                    select *
+                    from emp
+                    또는
+                    
+                    select *
+                    from emp
+                    where job = 값;
+
+                    select *
+                    from emp
+                    where sal = 값;
+                    
+                    select *
+                    from emp
+                    where job = 값 and(or) sal = 값;
+
+            - java코드:
+                        EmpDTO dto = new EmpDTO();
+                        // dto.setJob("SALESMAN");
+                        // dto.setSal(800);
+                        
+                        List<EmpDTO> list = session.selectList("com.config.EmpMapper.selectif2", dto);
+                        
+                - mybatis문;
+                        <select id="selectif2" parameterType="EmpDTO" resultType="EmpDTO">
+                            
+                            select empno, ename, sal, job
+                            from emp
+                            <where>
+                                <if test="job != null">
+                                    job = #{job}
+                                </if>
+                                <if test="sal != null">
+                                    or sal = #{sal}                // job을 만족하지 않는다면 or을 자동삭제 -> <where>의 기능
+                                </if>
+                            </where>
+                        
+                        </select>
+    
+    3) 조건이 여러 개인 경우 + update문
+    
+        - sql문:
+        
+            update emp
+            set mgr = val, sal = val, ename = val
+            where empno = val;
+
+            update emp
+            set mgr = val, sal = val
+            where empno = val;
+
+            update emp
+            set mgr = val, ename = val
+            where empno = val;
+            
+            update emp
+            set mgr = val
+            where empno = val;
+
+        - java코드:
+        
+            EmpDTO dto3 = new EmpDTO();
+            dto3.setMgr(7902);
+            // dto3.setJob("SALESMAN");
+            // dto3.setSal(800);
+            dto3.setEmpno(9000);
+                        
+            int n = session.update("com.config.EmpMapper.updateIf", dto3);
+
+        - mybatis문:
+        
+            <update id="updateIf" parameterType="EmpDTO">
+                update emp
+                
+                <set>        // <set> : 필요하지 않은 ','를 제거해준다
+                    <if test="mgr != null"> mgr = #{mgr}, </if>
+                    <if test="ename != null"> ename = #{ename}, </if>
+                    <if test="sal != 0"> sal = #{sal} </if>             
+                </set>
+                
+                where empno = #{empno}
+                
+            </update>
+    
+    4) case 문 기능
+
+        - sql 문            
+        
+                job이 "SALESMAN" 중에 sal > 1500
+                job이 "CLERK" 중에 sal > 2500
+                나머지 중에 sal > 3000
+                        
+        - java
+            EmpDTO dto4 = new EmpDTO();
+            dto4.setJob("SALESMAN");
+            List<EmpDTO> list = session.selectList("com.config.EmpMapper.selectChoose", dto4);
+        
+        - mybatis
+            <select id="selectChoose" parameterType="EmpDTO" resultType="EmpDTO">
+                select empno, ename, sal, job
+                from emp
+                <where>
+                    <choose>
+                        <when test="job == 'SALESMAN'">
+                            sal &gt; 1500
+                        </when>
+                        <when test="job == 'CLERK'">
+                            sal &gt; 2500
+                        </when>
+                        <otherwise>
+                            sal &gt; 3000
+                        </otherwise>
+                    </choose>                
+                </where>                
+            </select>
+            
+    5) 단일값 반환
+        
+        - select 했을 때 컬럼값 하나로 반환되는 경우
+        
+            ex. select count(*)
+                 from emp;
+
+                 count(*)
+                 -----------
+                 16
+                 
+                 T t = session.selectOne("id");    // T는 결과값에 따라 바뀐다.

@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,21 +15,21 @@ public class DeptMain {
 				MySqlSessionFactory.getSession();
 		
 		// 단일행
-		DeptDTO dto = session.selectOne("findByDeptno",20);
+		DeptDTO dto = session.selectOne("com.config.DeptMapper.findByDeptno",20);
 		System.out.println(dto);
 		
 		DeptDTO data = new DeptDTO();
 		data.setDeptno(10);
 		data.setDname("ACCOUNTING");
 		
-		DeptDTO dto2 = session.selectOne("findByDeptnoAndDname",data);
+		DeptDTO dto2 = session.selectOne("com.config.DeptMapper.findByDeptnoAndDname",data);
 		System.out.println(dto2);
 		
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("x", 10);
 		map.put("y", "ACCOUNTING");
 		
-		DeptDTO dto3 = session.selectOne("findByDeptnoAndDnameMap",map);
+		DeptDTO dto3 = session.selectOne("com.config.DeptMapper.findByDeptnoAndDnameMap",map);
 		System.out.println(dto3);
 		System.out.println("=============================================");
 		// 다중행		
@@ -41,11 +42,49 @@ public class DeptMain {
 		DeptDTO data2 = new DeptDTO();
 		data2.setDeptno(40);
 		data2.setDname("인사과");
-		List<DeptDTO> list2 = session.selectList("findByDnameOrDeptno",data2);	
+		List<DeptDTO> list2 = session.selectList("com.config.DeptMapper.findByDnameOrDeptno",data2);	
 		
 		for(DeptDTO d : list2) {
 			System.out.println(d);
 		}
+		
+		// insert
+//		DeptDTO data3 = new DeptDTO(61,"개발","서울");
+//		int n = session.insert("com.config.DeptMapper.insert", data3);
+//		if(n>=1) System.out.println("저장성공");
+//		
+//		session.commit();
+		
+		// update
+		HashMap<String, Object> map2 = new HashMap<String, Object>();
+		map2.put("deptno",61);
+		map2.put("dname","IT개발");
+		map2.put("loc","서울시");
+		int n2 = session.update("com.config.DeptMapper.update", map2);
+		session.commit();
+		if(n2>=1) System.out.println("수정성공");
+		
+		
+		//delete
+		int n3 = session.delete("com.config.DeptMapper.delete", 61);
+		if(n3>=1) {
+			System.out.println("삭제 성공");
+			session.commit();
+		} 
+		
+		// &lt;
+		List<DeptDTO> list3 =
+				session.selectList("com.config.DeptMapper.findByDeptnoLessThan", 40);
+		
+		for(DeptDTO d : list3)
+			System.out.println(d);
+		
+		System.out.println("==============================");
+		List<DeptDTO> list4 =
+				session.selectList("com.config.DeptMapper2.findByDeptno2", 40);
+		
+		for(DeptDTO d : list4)
+			System.out.println(d);
 		
 		session.close();
 	}
