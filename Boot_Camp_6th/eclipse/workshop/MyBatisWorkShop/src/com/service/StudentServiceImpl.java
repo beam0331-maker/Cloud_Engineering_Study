@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.session.SqlSession;
@@ -47,105 +48,82 @@ public class StudentServiceImpl implements StudentService {
 	}// nameSerch end
 
 	@Override
-	public List<StudentDTO> dateSearch(int start, int end) {
+	public List<StudentDTO> dataSearch(HashMap<String, Integer> map) {
 		List<StudentDTO> list = new ArrayList<StudentDTO>();
-		Connection con = null;
+		SqlSession session = MySqlSessionFactory.getSession();
 		try {
-			con = DriverManager.getConnection(url, userid, passwd);
-			list = dao.dateSearch(start, end, con);			
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally {
-			try {
-				if(con != null) con.close();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
+			list = dao.dataSearch(map, session);			
+		}finally {			
+			session.close();
 		}//try-catch-finally end	
+		
+		return list;
+	}// dateSearch end		
+
+	@Override
+	public List<StudentDTO> stuNoSearch(List<String> stuNoList) {
+		List<StudentDTO> list = new ArrayList<StudentDTO>();
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {			
+			list = dao.stuNoSearch(stuNoList, session);			
+		}finally {
+			session.close();
+		}//try-catch-finally end
+		
 		
 		return list;
 	}// dateSearch end	
 	
-	
+	@Override
+	public int absUpdate(List<String> stuNoList) {
+		int result = 0;
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			result = dao.absUpdate(stuNoList, session);
+//			session.commit();
+		}finally {
+			session.close();
+		}//try-catch-finally end
+		return result;
+	}// absUpdate end	
 
-//	@Override
-//	public List<StudentDTO> stuNoSearch(String[] stuNoArr) {
-//		List<StudentDTO> list = new ArrayList<StudentDTO>();
-//		Connection con = null;
-//		try {
-//			con = DriverManager.getConnection(url, userid, passwd);
-//			list = dao.stuNoSearch(stuNoArr, con);			
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}finally {
-//			try {
-//				if(con != null) con.close();
-//			} catch (Exception e2) {
-//				e2.printStackTrace();
-//			}
-//		}//try-catch-finally end
-//		
-//		
-//		return list;
-//	}// dateSearch end	
-//	
-//	@Override
-//	public int absUpdate(String[] stuNoArr) {
-//		int result = 0;
-//		Connection con = null;
-//		try {
-//			con = DriverManager.getConnection(url, userid, passwd);
-//			result = dao.absUpdate(stuNoArr,con);			
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}finally {
-//			try {
-//				if(con != null) con.close();
-//			} catch (Exception e2) {
-//				e2.printStackTrace();
-//			}
-//		}//try-catch-finally end
-//		return result;
-//	}// absUpdate end
-//	
-//	@Override
-//	public int capUpdate() {
-//		Connection con = null;
-//		int result = 0;
-//		try {
-//			con = DriverManager.getConnection(url, userid, passwd);
-//			result = dao.capUpdate(con);
-//		} catch (SQLException e) {
-//			// TODO: handle exception
-//		}finally {
-//			try {
-//				if(con != null) con.close();
-//			} catch (SQLException e2) {
-//				// TODO: handle exception
-//			}
-//		}// try -cathch-finally end
-//		
-//		return result;
-//	}// capUpdate end
-//	
-//	@Override
-//	public List<StudentDTO> stuNoSearch(int in) {
-//		Connection con = null;
-//		List<StudentDTO> gradeList = new ArrayList<StudentDTO>();
-//		try {
-//			con = DriverManager.getConnection(url, userid, passwd);
-//			gradeList = dao.stuNoSearch(in, con);
-//						
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}finally {
-//			try {
-//				if(con != null) con.close();
-//			} catch (SQLException e2) {
-//				e2.printStackTrace();
-//			}
-//		}
-//		return gradeList;
-//	}
+	@Override
+	public int capUpdate() {
+		SqlSession session = MySqlSessionFactory.getSession();
+		int result = 0;
+		try {			
+			result = dao.capUpdate(session);
+//			session.commit();
+		} finally {
+			session.close();
+		}// try -cathch-finally end
+		
+		return result;
+	}// capUpdate end
+	
+	@Override
+	public List<HashMap<String, Object>> stuGradeSearch(String stuNo) {		
+		SqlSession session = MySqlSessionFactory.getSession();
+		List<HashMap<String, Object>> gradeList = new ArrayList<HashMap<String,Object>>();
+		try {			
+			gradeList = dao.stuGradeSearch(stuNo, session);
+			
+		}finally {
+			session.close();
+		}
+		return gradeList;
+	}
+	
+	@Override
+	public List<StudentDTO> paging(int offset, int posts) {
+		SqlSession session = MySqlSessionFactory.getSession();
+		List<StudentDTO> list = new ArrayList<StudentDTO>();
+		try {
+			list = dao.paging(offset, posts, session);
+		}finally {
+			session.close();
+		}		
+		return list;
+	}
 
 }// class end

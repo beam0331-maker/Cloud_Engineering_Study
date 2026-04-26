@@ -1,6 +1,7 @@
 
-
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.StringJoiner;
@@ -28,6 +29,7 @@ public class StudentMain {
 					5. 학생 휴학 일괄 수정
 					6. 학과 정원 일괄수정
 					7. 학생 학점 검색
+					8. 전체 학생 목록 - 페이징
 					***********************************************
 					""");
 			System.out.print("메뉴입력 => ");
@@ -40,57 +42,110 @@ public class StudentMain {
 				System.exit(1);
 			} else if (cmd == 1) {
 				stuList();
-			
+
 			} else if (cmd == 2) {
 				System.out.println("***********************************************");
 				System.out.print("검색할 학생명을 입력하시오 => ");
 				String findName = sc.next();
-				nameSearch("%"+findName+"%");
+				nameSearch("%" + findName + "%");
 			} else if (cmd == 3) {
 				System.out.println("***********************************************");
 				System.out.print("시작 입학년도 입력하시오 => ");
 				int start = sc.nextInt();
 				System.out.print("끝 입학년도 입력하시오 => ");
 				int end = sc.nextInt();
-				dateSerch(start, end);
-//			} else if (cmd == 4) {
-//				System.out.println("***********************************************");
-//				System.out.print("검색할 학생의 학번을 입력하시오 => ");
-//				String[] stuNoArr = sc.next().split(",");
-//				stuNoSearch(stuNoArr);
-//			} else if (cmd == 5) {
-//				System.out.println("***********************************************");
-//				System.out.print("수정할 학생의 학번을 입력하시오 => ");
-//				String[] stuNoArr = sc.next().split(",");
-//				int result = absUpdate(stuNoArr);
-//				System.out.println("총 변경된 학생수: " + result);
-//			} else if (cmd == 6) {
-//				int result = capUpdate();
-//				System.out.println("총 변경된 학과수: " + result);
-//			}else if(cmd == 7) {
-//				System.out.println("***********************************************");
-//				System.out.print("검색할 학생의 학번을 입력하시오 => ");
-//				int in = sc.nextInt();
-//				stuNoSearch(in);
-			
-			}
-
-			// if-elseif end
-
+				HashMap<String, Integer> map = new HashMap<String, Integer>();
+				map.put("start", start);
+				map.put("end", end);
+				dataSearch(map);
+			} else if (cmd == 4) {
+				System.out.println("***********************************************");
+				System.out.print("검색할 학생의 학번을 입력하시오 => ");
+				List<String> stuNoList = Arrays.asList(sc.next().split(","));
+				stuNoSearch(stuNoList);
+			} else if (cmd == 5) {
+				System.out.println("***********************************************");
+				System.out.print("수정할 학생의 학번을 입력하시오 => ");
+				List<String> stuNoList = Arrays.asList(sc.next().split(","));
+				int result = absUpdate(stuNoList);
+				System.out.println("총 변경된 학생수: " + result);
+			} else if (cmd == 6) {
+				int result = capUpdate();
+				System.out.println("총 변경된 학과수: " + result);
+			} else if (cmd == 7) {
+				System.out.println("***********************************************");
+				System.out.print("검색할 학생의 학번을 입력하시오 => ");
+				String stuNo = sc.next();
+				stuGradeSearch(stuNo);
+			} else if (cmd == 8) {
+				System.out.println("***********************************************");
+				System.out.print("페이지당 보여줄 레코드 갯수를 입력하시오 => ");
+				int posts = sc.nextInt();
+				paging(posts);
+			} // if-elseif end
 		} // while end
-	}// main end	
+	}// main end
 
-	
+	static void paging(int posts) {
+		Scanner sc = new Scanner(System.in);
+		StudentService service = new StudentServiceImpl();
+		service.setDao(new StudentDAO());
+		int totalRecord = service.list().size();
+		int totalPage = (int) Math.ceil(totalRecord / (double) posts);
+		int curPage = 1;
+		while (true) {
+			int offset = (curPage - 1) * posts;
+			List<StudentDTO> stuList = service.paging(offset, posts);
+			
+			System.out.print("""
+					================================================================================
+					학번\t이름\t주민번호\t\t주소\t\t\t입학년도\t휴학여부
+					--------------------------------------------------------------------------------
+					""");
+			for (StudentDTO stu : stuList)
+				System.out.printf("%s\t%s\t%s\t%s\t%s\t%c\n", stu.getStudentNo(), stu.getStudentName(),
+						stu.getStudentSsn(), stu.getStudentAddress(), stu.getEntrnaceDate(), stu.getAbsenceYn());
+			System.out.println(curPage + "/" + totalPage);
+			System.out.println("N: 다음페이지 B: 이전페이지 Q: 메인화면");
+			System.out.print("명령 입력 => ");
+			String cmd = sc.next();			
+			
+			if(cmd.equals("n")){
+				curPage++;
+			}else if (cmd.equals("b")) {
+				curPage--;
+			}else if (cmd.equals("q")) {
+				return;
+			}
+			
+		}
 
-	
-	
-	
-	static void dateSerch(int start, int end) {
+	}// end paging
+
+	static void stuNoSearch(List<String> stuNoList) {
 
 		StudentService service = new StudentServiceImpl();
 		service.setDao(new StudentDAO());
-		List<StudentDTO> stuList = service.dateSearch(start, end);
-		
+		List<StudentDTO> stuList = service.stuNoSearch(stuNoList);
+		System.out.print("""
+				================================================================================
+				학번\t이름\t주민번호\t\t주소\t\t\t입학년도\t휴학여부
+				--------------------------------------------------------------------------------
+				""");
+		for (int i = 0; i < stuList.size(); i++) {
+			StudentDTO stu = stuList.get(i);
+			System.out.printf("%s\t%s\t%s\t%s\t%s\t%c\n", stu.getStudentNo(), stu.getStudentName(), stu.getStudentSsn(),
+					stu.getStudentAddress(), stu.getEntrnaceDate(), stu.getAbsenceYn());
+		}
+		System.out.println("총 학생수 : " + stuList.size() + " 명");
+	}// dateSerch end
+
+	static void dataSearch(HashMap<String, Integer> map) {
+
+		StudentService service = new StudentServiceImpl();
+		service.setDao(new StudentDAO());
+		List<StudentDTO> stuList = service.dataSearch(map);
+
 		System.out.print("""
 				================================================================================
 				학번\t이름\t주민번호\t\t주소\t\t\t입학년도\t휴학여부
@@ -104,8 +159,8 @@ public class StudentMain {
 		}
 		System.out.println("총 학생수 : " + stuList.size() + " 명");
 
-	}// dateSerch end	
-	
+	}// dateSerch end
+
 	static void nameSearch(String findName) {
 
 		StudentService service = new StudentServiceImpl();
@@ -124,8 +179,7 @@ public class StudentMain {
 		}
 		System.out.println("총 학생수 : " + stuList.size() + " 명");
 	}// nameSearch end
-	
-	
+
 	static void stuList() {
 		StudentService service = new StudentServiceImpl();
 		service.setDao(new StudentDAO());
@@ -145,71 +199,38 @@ public class StudentMain {
 		}
 		System.out.println("총 학생수 : " + stuList.size() + " 명");
 	}// stuList ()
-	
 
-//
-//	static void stuNoSearch(String[] stuNoArr) {
-//
-//		StudentService service = new StudentServiceImpl();
-//		service.setDao(new StudentDAO());
-//		List<StudentDTO> stuList = service.stuNoSearch(stuNoArr);
-//		System.out.print("""
-//				================================================================================
-//				학번	이름	주민번호		주소		입학년도	휴학여부
-//				--------------------------------------------------------------------------------
-//				""");
-//
-//		for (int i = 0; i < stuList.size(); i++) {
-//			StringJoiner sj = new StringJoiner("\t");
-//			StudentDTO stu = stuList.get(i);
-//
-//			sj.add(stu.getStuNo()).add(stu.getStuName()).add(stu.getStuSsn()).add(stu.getStuAddress())
-//					.add(stu.getDate()).add(String.valueOf(stu.getAbsYn()));
-//
-//			System.out.println(sj);
-//		}
-//		System.out.println("총 학생수 : " + stuList.size() + " 명");
-//
-//	}// dateSerch end
-//
-//	static int absUpdate(String[] stuNoArr) {
-//		StudentService service = new StudentServiceImpl();
-//		service.setDao(new StudentDAO());
-//		int result = service.absUpdate(stuNoArr);
-//		return result;
-//
-//	}// absUpdate end
-//
-//	static int capUpdate() {
-//		StudentService service = new StudentServiceImpl();
-//		service.setDao(new StudentDAO());
-//		int result = service.capUpdate();
-//		return result;
-//
-//	}// absUpdate end
-//	
-//	static void stuNoSearch(int in) {
-//
-//		StudentService service = new StudentServiceImpl();
-//		service.setDao(new StudentDAO());
-//		List<StuGradeDTO> gradList = service.stuNoSearch(in);
-//		System.out.print("""
-//				================================================================================
-//				학기	학번	이름	과목명		점수	학점
-//				--------------------------------------------------------------------------------
-//				""");
-//
-//		for (int i = 0; i < gradList.size(); i++) {
-//			StringJoiner sj = new StringJoiner("\t");
-//			StuGradeDTO grade = gradList.get(i); 			
-//			
-//		sj.add(grade.getTermNo()).add(grade.getStuNo()).add(grade.getStuName())
-//		.add(grade.getClassName()).add(Float.toString(grade.getPoint())).add(grade.getGrade());
-//
-//			System.out.println(sj);
-//		}
-//		System.out.println("총 학생수 : " + gradList.size() + " 명");
-//
-//	}// stuNoSearch end
+	static int absUpdate(List<String> stuNoList) {
+		StudentService service = new StudentServiceImpl();
+		service.setDao(new StudentDAO());
+		int result = service.absUpdate(stuNoList);
+		return result;
+
+	}// absUpdate end
+
+	static int capUpdate() {
+		StudentService service = new StudentServiceImpl();
+		service.setDao(new StudentDAO());
+		int result = service.capUpdate();
+		return result;
+	}// capUpdate end
+
+	static void stuGradeSearch(String stuNO) {
+
+		StudentService service = new StudentServiceImpl();
+		service.setDao(new StudentDAO());
+		List<HashMap<String, Object>> gradeList = service.stuGradeSearch(stuNO);
+		System.out.print("""
+				================================================================================
+				학기\t학번\t이름\t과목명\t\t점수\t학점
+				--------------------------------------------------------------------------------
+				""");
+		for (HashMap<String, Object> stu : gradeList) {
+			System.out.printf("%s\t%s\t%s\t%s\t%s\t%s\n", stu.get("TERM_NO"), stu.get("STUDENT_NO"),
+					stu.get("STUDENT_NAME"), stu.get("CLASS_NAME"), stu.get("POINT"), stu.get("GRADE"));
+		}
+		System.out.println("총 학생수 : " + gradeList.size() + " 명");
+
+	}// stuNoSearch end
 
 }// class end

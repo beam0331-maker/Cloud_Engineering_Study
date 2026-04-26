@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
 
 import com.dto.StudentDTO;
@@ -15,225 +16,43 @@ import com.dto.StudentDTO;
 public class StudentDAO {
 
 	public List<StudentDTO> list(SqlSession session) {
-		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.list");		
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.list");
 		return list;
 	}// list end
 
 	public List<StudentDTO> nameSearch(String findName, SqlSession session) {
-		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.nameSearch",findName);			
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.nameSearch", findName);
 		return list;
 	}// nameSerch end
-	
-	public List<StudentDTO> dateSearch(HashMap<String, Integer> map, SqlSession session) {
-		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.dateSearch", map);
+
+	public List<StudentDTO> dataSearch(HashMap<String, Integer> map, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.dataSearch", map);
 		return list;
 	}// dateSearch end
-	
-	
-	
-	
-	
-	
-	
-	
 
-//	public List<StudentDTO> stuNoSearch(int in, SqlSession session) {
-//				
-//		List<StudentDTO> gradeList = new ArrayList<StudentDTO>();
-//		
-//		PreparedStatement pstmt = null;
-//		ResultSet rs = null;
-//
-//		try {
-//			String sql = 
-//			"""
-//			select	
-//				TERM_NO,
-//			    STUDENT_NO,
-//			    STUDENT_name,    
-//			    CLASS_NAME,
-//			    point,
-//			    case when point between 0 and 1.9 then "F 학점"
-//					 when point between 2.0 and 2.9 then "D 학점"
-//			         when point between 3.0 and 3.4 then "C 학점"
-//			         when point between 3.5 and 3.9 then "B 학점"
-//			         else "A 학점"
-//				end as GRAD 
-//			from tb_student s join tb_grade g using (STUDENT_NO)
-//							  join tb_class c using (CLASS_NO)
-//			where STUDENT_NO = ?					
-//			order by TERM_NO
-//			   """;
-//			
-//			pstmt = con.prepareStatement(sql);
-//			pstmt.setInt(1, in);
-//			rs = pstmt.executeQuery();
-//			while (rs.next()) {
-//				
-//				String termNo = rs.getString("TERM_NO");
-//				String stuNo = rs.getString("STUDENT_NO");				
-//				String stuName = rs.getString("STUDENT_NAME");
-//				String className = rs.getString("CLASS_NAME");	
-//				float point = rs.getFloat("point");
-//				String grade = rs.getNString("GRAD");
-//				gradeList.add(new StudentDTO(termNo,stuName, stuNo, className, point, grade));
-//			
-//			}
-//
-//		} catch (SQLException e) {
-//
-//			System.err.println(e.getMessage());
-//
-//		} finally {
-//			try {
-//				if (rs != null)
-//					rs.close();
-//				if (pstmt != null)
-//					pstmt.close();
-//			} catch (Exception e2) {
-//				System.err.println(e2.getMessage());
-//			}
-//
-//		} // try-catch-finally end
-//		
-//		return gradeList;
-//	}// stuNoSearch end
-//	
-//	
-//	
-//	
-//		
-//	
-//	
+	public List<StudentDTO> stuNoSearch(List<String> stuNoList, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.stuNoSearch", stuNoList);
+		return list;
+	}// stuNoSearch end
 
-//
-//	
-//
-//	public List<StudentDTO> stuNoSearch(String[] stuNoArr, Connection con) {
-//		List<StudentDTO> list = new ArrayList<StudentDTO>();
-//		PreparedStatement pstmt = null;
-//		ResultSet rs = null;
-//
-//		try {
-//
-//			for (String s : stuNoArr) {
-//				String sql = """
-//						select
-//							STUDENT_NO,
-//							DEPARTMENT_NO,
-//							STUDENT_NAME,
-//							rpad(substr(STUDENT_SSN,1,8),14,'*') as STUDENT_SSN,
-//						    if(STUDENT_ADDRESS is null, concat('***주소 미상***'),concat(substr(STUDENT_ADDRESS,1,10),'...'))as STUDENT_ADDRESS,
-//							date_format(ENTRANCE_DATE, '%Y/%m/%d') as ENTRANCE_DATE,
-//							ABSENCE_YN,
-//							COACH_PROFESSOR_NO
-//							from tb_student
-//						    where STUDENT_NO = ?
-//						    """;
-//
-//				pstmt = con.prepareStatement(sql);
-//				pstmt.setString(1, s);
-//
-//				rs = pstmt.executeQuery();
-//				if (rs.next()) {
-//					String stuNo = rs.getString("STUDENT_NO");
-//					String departNo = rs.getString("DEPARTMENT_NO");
-//					String stuName = rs.getString("STUDENT_NAME");
-//					String stuSsn = rs.getString("STUDENT_SSN");
-//					String stuAddress = rs.getString("STUDENT_ADDRESS");
-//					String Date = rs.getString("ENTRANCE_DATE");
-//					char absYn = rs.getString("ABSENCE_YN").charAt(0);
-//					String coachProfessorNo = rs.getString("COACH_PROFESSOR_NO");
-//					list.add(new StudentDTO(stuNo, departNo, stuName, stuSsn, stuAddress, Date, absYn,
-//							coachProfessorNo));
-//				}
-//
-//			} // for end
-//
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		} finally {
-//			try {
-//				if (pstmt != null)
-//					pstmt.close();
-//				if (rs != null)
-//					rs.close();
-//			} catch (SQLException e2) {
-//				e2.printStackTrace();
-//			}
-//		} // try-catch-finally end
-//
-//		return list;
-//	}// stuNoSearch end
-//
-//	public int absUpdate(String[] stuNoArr, Connection con) {
-//		int result = 0;
-//		PreparedStatement pstmt = null;
-//		String sql = """
-//				update tb_student
-//				set ABSENCE_YN = 'y'
-//				where STUDENT_NO = ?
-//				""";
-//
-//		try {
-//
-//			for (String stuNo : stuNoArr) {
-//				pstmt = con.prepareStatement(sql);
-//				pstmt.setString(1, stuNo);
-//				int n = pstmt.executeUpdate();
-//				if (n >= 1)
-//					result++;
-//
-//			} // for end
-//
-//		} // for end
-//
-//		catch (SQLException e) {
-//			e.printStackTrace();
-//		} finally {
-//			try {
-//				if (pstmt != null)
-//					pstmt.close();
-//			} catch (SQLException e2) {
-//				e2.printStackTrace();
-//			}
-//		} // try-catch-finally end
-//
-//		return result;
-//	}// absUpdate end
-//
-//	public int capUpdate(Connection con) {
-//		int result = 0;
-//		PreparedStatement pstmt = null;
-//		String sql = """
-//				update tb_department
-//					set CAPACITY = case WHEN CAPACITY between 0 and 20 then CAPACITY+5
-//					WHEN CAPACITY between 21 and 25 then CAPACITY+4
-//                    WHEN CAPACITY between 26 and 30 then CAPACITY+3
-//                    else CAPACITY
-//				end
-//				""";
-//
-//		try {
-//			pstmt = con.prepareStatement(sql);
-//			result = pstmt.executeUpdate();
-//			// for end
-//
-//		} // for end
-//
-//		catch (
-//
-//		SQLException e) {
-//			e.printStackTrace();
-//		} finally {
-//			try {
-//				if (pstmt != null)
-//					pstmt.close();
-//			} catch (SQLException e2) {
-//				e2.printStackTrace();
-//			}
-//		} // try-catch-finally end
-//
-//		return result;
-//	}// capUpdate end
+	public int absUpdate(List<String> stuNoList, SqlSession session) {
+		int result = session.update("com.dao.StudentMapper.absUpdate", stuNoList);
+		return result;
+	}// absUpdate end
+
+	public int capUpdate(SqlSession session) {
+		int result = session.update("com.dao.StudentMapper.capUpdate");
+		return result;
+	}// capUpdate end
+
+	public List<HashMap<String, Object>> stuGradeSearch(String stuNo, SqlSession session) {
+		List<HashMap<String, Object>> gradelist = session.selectList("com.dao.StudentMapper.stuGradeSearch", stuNo);
+		return gradelist;
+	}// stuGradeSearch end
+
+	public List<StudentDTO> paging(int offset, int posts, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.list", null, new RowBounds(offset, posts));
+		return list;
+	}// end paging
+
 }// class end

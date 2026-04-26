@@ -31,7 +31,7 @@
 		    where STUDENT_NAME like #{findname}
 	</select>
 	
-	<select id="dateSearch" resultType="StudentDTO" parameterType="map" >
+	<select id="dataSearch" resultType="StudentDTO" parameterType="map" >
 		select
 			STUDENT_NO,
 			DEPARTMENT_NO,
@@ -45,4 +45,63 @@
 		    where year(ENTRANCE_DATE) between #{start} and #{end}
 		    ORDER BY ENTRANCE_DATE	
 	</select>
+	
+	<select id="stuNoSearch" parameterType="arraylist" resultType="StudentDTO">
+		select
+			STUDENT_NO,
+			DEPARTMENT_NO,
+			STUDENT_NAME,
+			rpad(substr(STUDENT_SSN,1,8),14,'*') as STUDENT_SSN,
+		    if(STUDENT_ADDRESS is null, concat('***주소 미상***'),concat(substr(STUDENT_ADDRESS,1,10),'...'))as STUDENT_ADDRESS,
+			date_format(ENTRANCE_DATE, '%Y/%m/%d') as ENTRANCE_DATE,
+			ABSENCE_YN,
+			COACH_PROFESSOR_NO
+			from tb_student			
+			<where>
+				<foreach collection="list" item="studnetNo" separator="," open="STUDENT_NO in (" close=")">
+					#{studnetNo}
+				</foreach>
+			</where>		    
+	</select>
+	
+	<update id="absUpdate" parameterType="arraylist" >
+		update tb_student
+		set ABSENCE_YN = 'y'
+		<where>
+				<foreach collection="list" item="studnetNo" separator="," open="STUDENT_NO in (" close=")">
+					#{studnetNo}
+				</foreach>
+			</where>		    
+	</update>
+	
+	<update id="capUpdate">
+		update tb_department
+		set CAPACITY = case WHEN CAPACITY between 0 and 20 then CAPACITY+5
+		WHEN CAPACITY between 21 and 25 then CAPACITY+4
+	  	WHEN CAPACITY between 26 and 30 then CAPACITY+3
+	    else CAPACITY
+		end
+	
+	</update>
+	
+	<select id="stuGradeSearch" resultType="hashMap" parameterType="String">
+		select
+			TERM_NO,
+		    STUDENT_NO,
+		    STUDENT_NAME,
+		    CLASS_NAME,
+		    POINT,
+		    case when point between 0 and 1.9 then "F 학점"
+				 when point between 2.0 and 2.9 then "D 학점"
+		         when point between 3.0 and 3.4 then "C 학점"
+		         when point between 3.5 and 3.9 then "B 학점"
+		         else "A 학점"
+			end as GRADE
+		from tb_student s join tb_grade g using (STUDENT_NO)
+						  join tb_class c using (CLASS_NO)
+
+		where STUDENT_NO = #{stuNo}
+		order by TERM_NO	
+	</select>
+	
 </mapper>
