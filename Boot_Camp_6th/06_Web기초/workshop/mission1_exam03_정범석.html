@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>mission1_exam02_정범석</title>
+  </head>
+  <body>
+    <h1>Paymetn Form</h1>
+    <hr />
+    Required fields are followed by* <br />
+    <h2>Contact Informaiton</h2>
+    <form action="">
+      <div>
+        <label for="name">Name:*</label>
+        <input type="text" placeholder="smith" id="name" />
+      </div>
+      <fieldset>
+        <legend>Gender*</legend>
+
+        <label for="male">Male</label>
+        <input type="radio" id="male" />
+
+        <label for="female">Female</label>
+        <input type="radio" id="female" />
+
+        <label for="other">Other</label>
+        <input type="radio" id="other" />
+      </fieldset>
+
+      <label for="address">Address:</label><br />
+      <textarea name="address" id="address" placeholder="Enter the address" rows="5" cols="66"></textarea>
+
+      <div>
+        <label for="email">Email:*</label>
+        <input type="email" id="email" placeholder="amith@gmail.com" />
+      </div>
+      <div>
+        <label for="pincode">Pincode:*</label>
+        <input type="number" id="pincode" placeholder="123456" /> <br />
+      </div>
+      <br />
+      <hr />
+      <h1>Payment Information</h1>
+      <div>
+        <label for="cardType"> Card Type:*</label>
+        <select name="cards" id="cardType" val>
+          <option value="">--Select a Card Typed--</option>
+          <option value="">Rupay</option>
+          <option value="">Mastercard</option>
+          <option value="">Visa</option>
+        </select>
+      </div>
+      <div>
+        <label for="cardNumber">Card Number:*</label>
+        <input type="text" id="cardNumber" placeholder="1111-2222-3333-4444" />
+      </div>
+      <div>
+        <label for="date">Expriateion Date:*</label>
+        <input type="date" id="date" />
+      </div>
+      <div>
+        <label for="cvv">CVV:* </label>
+        <input type="number" id="cvv" max="3" />
+      </div>
+      <input type="submit" value="Pay Now" />
+    </form>
+  </body>
+</html>
