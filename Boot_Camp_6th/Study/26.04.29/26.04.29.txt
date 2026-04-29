@@ -1,0 +1,304 @@
+-------------------------------------------------
+2026.04.29
+
+프레임 워크 공부할것 아래 두가지
+bootstrap
+tailwind
+
+es5 까지는 표준안이 되지 않은 일반 JS
+es6 부터 표준안이다.
+/////////////////////////////////////////////////
+2. 식별자
+	- 기본적인 명명규칙, 작성법 등 자바와 유사하다
+	
+	1) 기본 데이터형
+		- "number"(수치데이터): 정수와 실수
+		- "string"(문자데이터): 문자와 문자열 및 이스케이프 문자(\t)
+		- "boolean"(논리데이터): true / false. 
+			JS는 true, false가 아니여도 논리 값으로 처리 가능하다. (*)
+			0, "", '' , null, nudefined, NaN => false // [외우기]
+			false 가 아닌 값 => true
+			
+		- undefined: 변수가 초기화되지 않은 상태
+			ex. var 변수명;
+		- null: 객체없음(초기화는 된 상태)
+			ex. var 변수명 = null;
+		- NaN	: Not a Number
+			ex. Number.parseInt("홍길동") // 잘못된 문자열을 숫자로 바꿀려할때
+	
+	2) 참조 데이터형
+		: 객체형(배열)과 함수형 및 클래스
+		- 객체: 두가지 형식이 존재
+			map 형식 : {key:value} 
+			배열 형식: [값, 값2,...] 
+			
+		- 함수: function{} ==> method와 유사하다.
+		- 클래스: class ==> java의 class
+		
+		# 자바스크립트는 자바와 다르게 함수를 데이터로 취급한다
+			==> 함수 또한 변수에 저장이 가능하다 (*)
+	
+	3) 변수
+		가. 변수 선언(초기값은 undefied할당)
+			
+			var 변수명; => OLD
+				- 변수명 중복이 가능
+				- 블록 scope가 아닌 함수 scope를 따른다.
+				  (함수로 만든 블록에서만 사용 가능, 함수가 아닌 블록에서 선언한 변수는 블록 밖에서도 사용가능)
+				  ex. 
+						// {} 스코프에서 선언 -> 함수 아니므로 외부에서 사용가능
+						if(true){
+						  var n2 = 100;
+						}
+						console.log(n2);  //  100
+				-
+			let 변수명; => ES6(권장), 자바문법과 유사
+				- 변수명 중복이 줄가
+				- 블록 scope를 따른다.({} 안에서 선언된 변수는 밖에서 사용불가)
+				
+		나. 변수 초기화
+			변수명 = 값; // 런타임시에 지정된 값으로 할당된다.
+			
+		특징: 데이터형을 지정하지 않는다(실행단계에서 데이터형이 지정된다)
+		 typeof 연산자를통해 데이터 타입을 확인 할 수 있다.
+		 ==> var로 변수를 선언하면 나중에 데이터형이 지정된다.
+		 
+	4) 데이터 자동형변환
+		가. *,/,-사용하는 경우 (+는 자바와 같이 문자열로 연결)
+			ex. var test = “100” * 2; -> 200
+			
+		나. boolean값으로 자동 변환
+			 : 0, "",’’, NaN, null, undefined 은 false로 변환된다
+			 
+	5) call by value vs call by reference
+		: 자바와 같이 참조형은 변수를 전달받은 후 수정하면 같이 영향을 받는다.
+			ex. 
+				 let x = [10,20,30];
+				 let x2 = x;				  
+				 x2[0]= 100;
+				 
+	6) const: 상수 작성시 사용
+		- let 변수와 동일하게 작동한다(block scope, 중복X)
+		- 요소값 변경은 가능하다.(변수명에 할당된 주소를 바꾸는게 아니라 주소가 가르키는 값의 변경이기 때문 JS는 인식을 못한다)
+		ex. 
+			const NUMS = [10, 20, 30];
+			NUMS[0] = 100;
+			// const된 변수값(저장된 주소값)을 바꾸는는거 불가능		
+			// NUMS = [20, 30, 40];	
+		
+/////////////////////////////////////////////////
+3. 연산자 - 대부분 자바와 동일하므로 차이점 위주로 정리한다.
+
+	- 문자열 + 다른 데이터형이: 문자열로 연결된다.
+	- / 연산자는 실수로 출력된다
+		ex. 10/3 = 3.33333
+		
+	1) 동등 연산자
+		가. equal 연산자( ==, != ): 값을 비교한다 			
+			ex. 
+				var w = 10;
+				var w2= “10”;
+				console.log( w == w2); // true
+				
+		나. identical 연산자( ===, !== ): 값과 데이터 타입까지 비교 (권장)
+			ex.
+				var w = 10;
+				var w2= “10”;
+				console.log( w === w2); // false
+				
+		- undefined를 비교할때는 === 연산자를 사용한다.
+			ex.
+				var x ;
+				var x2 = null;				
+				if( x === undefined ){ }// true
+				if( x2 === undefined ){} // false
+				
+	2) 논리연산자
+		- 기본적으로 자바와 같지만, 논리 값이 아닌 객체 비교가 가능하다.
+		
+		가. 값1 && 값2
+			: 값1이 true면 값2가 선택되고
+			  값1이 false면 값1이 선택된다.
+			  (and 연산은 값1의 true일때 값2을 봐야 결과를 안다, 
+				false일때는 값2를 보지 않아도 결과가 정해진다.
+			ex. 10 && "홍길동" => "홍길동"
+				 NaN &&  100 	 => NaN
+		
+		나. 값1 || 값2
+			: 값1이 true면 값1이 선택되고
+			  값1이 flase면 값2가 선택된다.
+			(or 연산은 값1이 true면 true 이고
+			flase일때는 값2를 알아야 결과를 안다)
+
+			ex. 10 || '홍길동'=>  10
+				 NaN || 100		=> 100
+
+/////////////////////////////////////////////////
+4. 문장(statement) - 자바와 차이점 위주로 정리한다.
+	
+	- var 변수는 함수 scope
+		=> 블록 안에서 선언한 변수를 블록 밖에서 사용이 가능하다
+			(가능하면 let 변수로 선언)
+	
+	- Number.parseInt(String): String 변수를 Number로 파싱한다
+	
+/////////////////////////////////////////////////
+5. 객체 및 JSON / 배열 (*)
+
+	시스템 정의 객체(내장객체)  // 클래스와 유사
+		- 자바의 클래스와 동일하게 속성(변수)과 매서드(함수)를 제공함.
+
+		- 데이터 관련 객체
+		: String , Number , Date , Array, Boolean , Object , Math, RegExp
+		
+		- 브라우저 관련 객체( BOM: Browser Object Model )
+		: Window, Screen , Location , History, Navigator
+		
+		- HTML 관련 객체( HTML이 랜더링 되면 자동으로 생성되는 객체 )			
+		: DOM(Document Object Model) 객체
+		
+	사용자 정의 객체
+		- 데이터 관리 목적으로 생성
+		- JSON형식
+		: {KEY:VALUE}, class 이름 (){}
+	
+
+	1) 데이터 관련 객체
+		
+		가. 문자관련: Strig	https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/String
+			- backtick(`)
+			ex. 
+				let name = "홍길동";
+				let age = 20;
+				
+				let result2 = `이름:${name} 나이:${age}`;	// 이름:홍길동 나이:20
+				
+			----------------------------------------------------------------------
+				// 해결1: ""('') 이용 ==> 해결안됨.
+				let table = "<table>";
+				table += " <tr>";
+				table += "  <td>hello</td>";    
+
+				// 해결2: 백틱사용
+				// 더 직관적으로 해결이 가능하다
+				let table2 = `
+								  <table>
+									  <tr> 
+										 <td>hello</td>
+										 <td>${name}</td>    
+									`;
+				
+		나. 수치관련: Number
+		https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Number
+		
+		다. 날짜관련: Date
+		https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Date
+		
+		라. 배열: Array( 자바에서 list가 주로 사용된것과 다르게 JS에서는 배열이 권장된다)(*)
+		https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Date
+			
+			- for(자바 향상된 for)	   
+				for(var x of arr){} ==> 값 반환
+				for(var x in arr){} ==> index값 반환
+			
+			- array.push(값) / array.pop()
+			  : 배열 내부가 스택으로 관리된다.
+			  
+			- array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+		  
+			  array.splice(0,3) ==> 0부터시작해서 3개 삭제
+			  array.splice(0,3,10,20) ==> 0부터시작해서 3개 삭제하고 10과 20 삽입
+			  array.splice(0,0,10,20) =>  0부터 10과 20 삽입
+			  
+			- fill(value),fill(value, start),fill(value, start, end)
+			  : value = 채울값, start = 시작점, end = 끝지점
+			
+			- array.join("구분자"): array의 문자열을 구분자로 이어 하나의 문자열로 출력
+		
+		마. Json(JavaScript Object Notation) 표현식: {key:value} (*)
+			가. 특징
+				- value가 모든 데이터가 가능
+			
+
+	2) 브라우저 관련 객체( BOM: Browser Object Model )
+		- 브라우저가 열리면 자동으로 생성되는 객체이다.
+		
+		- window객체( <== window 이용해서 참조 )
+			: 웹브라우저 창 관련 객체, 
+			  전역객체(*) // Object(최상위 객체)아래 웹브라우저 계열 중 최상위객체
+			
+			ex. Window window = new window();
+			
+			==> screen, history, location, naviagtor, document는 Window객체의 속성으로 제공함.
+			window.screen , window.history 형식으로 사용되어한다.
+			하지만 전역객체이므로 생략이 가능하다.
+			
+			가. setTimeout(function(){}, delay);
+				:단 한번만 실행됨
+				ex.
+					function run(){       
+						setTimeout(function(){
+						  console.log("2초뒤에 출력됨");
+						}, 2000);
+					}
+			
+			나. etInterval(function(){}, delay);
+				:반복실행 -> clearInterval로 정지
+		 
+			다. window.open(url?: string | URL, target?: string, features?: string)
+				: 새창에 URL을 연다(window.close()는 자기 자신창 닫기)
+				ex.		
+					var childWin;
+					// 새창(자식창)을 childWin 변수에 저장
+					function new_win() {			
+					  childWin = window.open("target.html", "", "width=200, height=300, left=200, top=200");        
+					}
+					
+					// 자기 자신을 닫기
+					function self_close() {
+					  window.close();
+					}
+					
+					// 자식창 닫기
+					function child_close() {
+					  childWin.close();
+					}
+					
+		- Screen객체 	: 웹브라우저 화면 관련  객체( <== screen객체 이용해서 참조 )		
+		
+		- Histroy객체 	: 웹브라우저 뒤로/앞으로 관련 객체( <== histroy객체 이용해서 참조 )
+			hisotry.go(n) : n번째 history로 이동한다.
+			ex. 
+				hisotry.go(-1) : 뒤로 한번
+				hisotry.go(2) :  앞으로 두번
+				
+		- Location객체	: 웹브라우저 URL 관련 객체( <== location객체 이용해서 참조 )
+			location.href = "URL" : URL로 이동한다
+			
+		- Navigator객체: 웹브라우저 자체 정보 관련객체( <== navigator객체 이용해서 참조 )
+		
+	3) HTML 문서 관련 객체 (DOM: Document Object Model)
+		- Document 객체( <== document 이용해서 참조 )
+			ex. Document document = new Document();
+		- 웹브라우저에서 임의의 html파일이 보여질 때 자동으로 생성됨
+		- documet 객체를 통해 DOM의 node를 동적 핸들링이 가능하다.
+		- 원래는 window.document 로 사용해야 하지만 전역객체(window)를 생략한다			
+	
+6. 객체 (*)
+
+	1) 개념 
+		{key:value} : Json(JavaScript Object Notation) 표현식
+	  
+	2) 특징
+		- value가 모든 데이터가 가능 ex. 수치, 문자, 날짜, null, undefined, 배열, json, 함수, 클래스, ..
+		ex.
+			{	name:"홍길동",
+				age:20,
+				pahone:["010","011"],
+				hobby:{
+							key:value,
+							key:value
+						},
+				getName:founction(){return this.name}
+			}
+	
