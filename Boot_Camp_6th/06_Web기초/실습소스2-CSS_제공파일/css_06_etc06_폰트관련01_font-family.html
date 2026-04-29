@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>font-family 실습</title>
-<style type="text/css">
- 
-    /*
+  <head>
+    <meta charset="UTF-8" />
+    <title>font-family 실습</title>
+    <style type="text/css">
+      /*
 
      font-family 속성
       - 글꼴인 폰트를 지정하는 속성으로 여러 개 지정 가능.
@@ -91,36 +90,34 @@
 
     */
 
-     .font-arial{
-       font-family: sans-serif;
-     }
-     .font-roman{
-       font-family:  serif;
-     }
-     .font-ansang{
-       font-family: '굵은안상수체' , sans-serif;
-     }
-     .font-md{
-       font-family: 'MD솔체' , sans-serif;
-     }
-</style>
-</head>
-<body>
-   <!-- 가. CSS에서 명시적으로 font-family 속성을 지정하지 않으면
+      .font-arial {
+        font-family: sans-serif;
+      }
+      .font-roman {
+        font-family: serif;
+      }
+      .font-ansang {
+        font-family: "굵은안상수체", sans-serif;
+      }
+      .font-md {
+        font-family: "Ink Free", serif;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 가. CSS에서 명시적으로 font-family 속성을 지정하지 않으면
           웹 브라우저의 표준글꼴에 설정된 font family를 사용하여 랜더링된다. -->
-   <h1>Lorem ipsum</h1> 
+    <h1>Lorem ipsum</h1>
 
-   <!-- 나. 웹 브라우저 설정에서 지정한 sans-serif의 font family를 사용하여 랜더링된다.-->
-   <h1 class="font-arial">Lorem ipsum</h1>
+    <!-- 나. 웹 브라우저 설정에서 지정한 sans-serif의 font family를 사용하여 랜더링된다.-->
+    <h1 class="font-arial">Lorem ipsum</h1>
 
-   <!-- 나. 웹 브라우저 설정에서 지정한 serif의 font family를 사용하여 랜더링된다.-->
-   <h1 class="font-roman">Lorem ipsum</h1>
+    <!-- 나. 웹 브라우저 설정에서 지정한 serif의 font family를 사용하여 랜더링된다.-->
+    <h1 class="font-roman">Lorem ipsum</h1>
 
-   <!-- 다. CSS에서 직접 font family를 설정해서 랜더링.
+    <!-- 다. CSS에서 직접 font family를 설정해서 랜더링.
           이 방법은 웹 브라우저 설정에 직접적인 영향을 받지 않음.-->
-   <h1 class="font-ansang">Lorem ipsum</h1>
-   <h1 class="font-md">Lorem ipsum</h1>
-   
-</body>
+    <h1 class="font-ansang">Lorem ipsum</h1>
+    <h1 class="font-md">Lorem ipsum</h1>
+  </body>
 </html>
-

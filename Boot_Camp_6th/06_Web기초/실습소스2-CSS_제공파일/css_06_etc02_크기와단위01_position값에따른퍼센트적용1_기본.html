@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>CSS 크기 단위 실습</title>
-<style type="text/css">
-     
-     /*
+  <head>
+    <meta charset="UTF-8" />
+    <title>CSS 크기 단위 실습</title>
+    <style type="text/css">
+      /*
          # % ( 백분율 )
 	   예> 기본개념
          <div>
@@ -74,48 +73,47 @@
 
 
      */
-      #a{
-         background-color: red;     
-         width: 500px;
-         height: 500px;
+      #a {
+        background-color: red;
+        width: 500px;
+        height: 500px;
       }
 
-      .main-header1{
-         width:50%;
-	      position:fixed;
-         background-color: blue;          
-	   }
-      
-      .main-header2{
-         width:50%;    /*  가장 가까운 #a 기준이기 때문에 250px. 반드시 부모는 블럭레벨이어야 됨. 인라인이면 무시됨.*/
-	      position:relative;
-         background-color: yellow;          
-	   }
-
-      #b{
-         background-color: mediumspringgreen;     
-         width: 400px;
-         height: 400px;
-         padding: 10px;
-         position: relative;
+      .main-header1 {
+        width: 50%;
+        position: fixed;
+        background-color: blue;
       }
 
-      .main-header3{
-         width:50%;   /*  부모의 안쪽 여백이 포함되어 210px이 됨.*/
-	      position:absolute;
-         background-color: magenta;          
-	   }
-</style>
-</head>
-<body>
-  <div id="a">
-    <h1 class="main-header1">Hello1(fixed).뷰포트 기준</h1>
-    <h1 class="main-header2">Hello2(relative). 가장 가까운 블럭레벨의 조상기준.</h1>
-  </div>
-  <hr>
-  <div id="b">
-   <h1 class="main-header3">Hello3(absolute). relative로 지정된 부모기준. padding 포함됨.</h1>
- </div>
-</body>
+      .main-header2 {
+        width: 50%; /*  가장 가까운 #a 기준이기 때문에 250px. 반드시 부모는 블럭레벨이어야 됨. 인라인이면 무시됨.*/
+        position: relative;
+        background-color: yellow;
+      }
+
+      #b {
+        background-color: mediumspringgreen;
+        width: 400px;
+        height: 400px;
+        padding: 10px;
+        position: relative;
+      }
+
+      .main-header3 {
+        width: 50%; /*  부모의 안쪽 여백이 포함되어 210px이 됨.*/
+        position: absolute;
+        background-color: magenta;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="a">
+      <h1 class="main-header1">Hello1(fixed).뷰포트 기준</h1>
+      <h1 class="main-header2">Hello2(relative). 가장 가까운 블럭레벨의 조상기준.</h1>
+    </div>
+    <hr />
+    <div id="b">
+      <h1 class="main-header3">Hello3(absolute). relative로 지정된 부모기준. padding 포함됨.</h1>
+    </div>
+  </body>
 </html>
-

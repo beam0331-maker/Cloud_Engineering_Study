@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      let curNum;
+      let result = 0;
+      for (let i = 1; i <= 100; i++) {
+        result += i;
+        curNum = i;
+        if (result > 40) {
+          break;
+        }
+      }
+      console.log(`현재값: ${curNum}`);
+      console.log(`1~100까지의 총합: ${result}`);
+    </script>
+  </head>
+  <body></body>
+</html>

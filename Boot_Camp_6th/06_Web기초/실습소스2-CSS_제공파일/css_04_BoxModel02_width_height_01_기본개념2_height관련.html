@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>Box 모델 실습</title>
-<style type="text/css">
-
-  /*
+  <head>
+    <meta charset="UTF-8" />
+    <title>Box 모델 실습</title>
+    <style type="text/css">
+      /*
    width 와 height
 
   4) height
@@ -21,40 +20,35 @@
         전체적으로 반영되도록 사슬구조를 생성해야 된다. (********)
 
 
-  */ 
+  */
 
-  
-   #y{
-       /*  부모요소인 id=x 크기를 지정하지 않았기 때문에 height 값 21 크기 사용됨.  */
-      width:100px;
-      height: 100%;
-      background-color: powderblue;
-   }
+      #y {
+        /*  부모요소인 id=x 크기를 지정하지 않았기 때문에 height 값 21 크기 사용됨.  */
+        width: 100px;
+        height: 100%;
+        background-color: powderblue;
+      }
 
-   #x2{
-     height: 500px;
-   }
-   #y2{
-       /*  부모요소인 id=x2 크기를 500px 로 지정 했기 때문에 height 값 500 크기 사용됨.  */
-      width:100px;
-      height: 100%;
-      background-color: powderblue;
-   }
-</style>
-</head>
-<body>
-   <h1>1. 부모 컨테이터 크기 미설정한 경우</h1>
+      #x2 {
+        height: 500px;
+        background-color: yellow;
+      }
+      #y2 {
+        /*  부모요소인 id=x2 크기를 500px 로 지정 했기 때문에 height 값 500 크기 사용됨.  */
+        width: 100px;
+        height: 50%;
+        background-color: powderblue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>1. 부모 컨테이터 크기 미설정한 경우</h1>
     <div id="x">
-      <div id="y">
-        AAA
-      </div>
+      <div id="y">AAA</div>
     </div>
-   <h1>2. 부모 컨테이터 크기 설정한 경우</h1>
-   <div  id="x2">
-    <div id="y2">
-      AAA
+    <h1>2. 부모 컨테이터 크기 설정한 경우</h1>
+    <div id="x2">
+      <div id="y2">AAA</div>
     </div>
-  </div>
-</body>
+  </body>
 </html>
-

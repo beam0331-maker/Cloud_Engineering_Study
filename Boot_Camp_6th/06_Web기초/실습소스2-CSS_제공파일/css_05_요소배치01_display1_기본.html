@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>display 실습</title>
-<style type="text/css">
-
-  /*
+  <head>
+    <meta charset="UTF-8" />
+    <title>display 실습</title>
+    <style type="text/css">
+      /*
     display 속성
 
   1)개념 및 용도
@@ -23,43 +22,42 @@
 
 
 
-  */ 
+  */
 
-/* block태그인 p를 inline 태그로 표시 */
- p{
-   display: inline;
- }
- 
- div.two{
-  /* DOM 유지되고 랜더링시 영역유지 안됨 */
-   display:none;
- }
- div.three{
-  /* DOM 유지되고 랜더링시 영역유지 됨 */
-   visibility: hidden;
- }
+      /* block태그인 p를 inline 태그로 표시 */
+      p {
+        display: inline;
+      }
 
- /* inline 태그인 span 를 block 태그로 표시 */
- span{
-  display: block;
- }
-</style>
-</head>
-<body>
-<div  class="one">
- <p>Hello</p>
- <p>world</p>
-</div>
-<div class="two">
- <p>Hello2</p>
- <p>world2</p>
-</div>
-<div class="three">
-  <p>Hello3</p>
-  <p>world3</p>
- </div>
-<p>Hello4<span>world4</span></p>
+      div.two {
+        /* DOM 유지되고 랜더링시 영역유지 안됨 */
+        display: none;
+      }
 
-</body>
+      div.three {
+        /* DOM 유지되고 랜더링시 영역유지 됨 */
+        visibility: hidden;
+      }
+
+      /* inline 태그인 span 를 block 태그로 표시 */
+      span {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="one">
+      <p>Hello</p>
+      <p>world</p>
+    </div>
+    <div class="two">
+      <p>Hello2</p>
+      <p>world2</p>
+    </div>
+    <div class="three">
+      <p>Hello3</p>
+      <p>world3</p>
+    </div>
+    <p>Hello4<span>world4</span></p>
+  </body>
 </html>
-

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta charset="UTF-8">
-<title>캐스캐이딩과 명시도(Specificity)</title>
-<style>
-  /*  명시도(Specificity) 실습
+  <head>
+    <meta charset="UTF-8" />
+    <title>캐스캐이딩과 명시도(Specificity)</title>
+    <style>
+      /*  명시도(Specificity) 실습
     
     여러 스타일이 하나의 요소에 적용될 수 있음을 뜻한다. 2024-03-22
     그런데 이러낳 규칙은 충돌을 야기시키게 되고 충돌을 해결하기 위해서 CSS 명시도가 필요하다.
@@ -31,31 +31,26 @@
 
    */
 
-  #xxx{
-    color:blue;
-  }
-  .yyy{
-    color:red
-  }
-  div{
-    color:blueviolet !important; 
-  }
-</style>
-</head>
-<body>
-  <div  >
-    1111
-    <!-- 우선순위는  style > id > class > div  순이다. -->
-    <div class="yyy" id="xxx" style="color:mediumaquamarine">
-      2222
-      <div  >
-        3333
-      </div>
-    </div>
+      #xxx {
+        color: blue;
+      }
+      .yyy {
+        color: red;
+      }
+      div {
+        color: blueviolet;
+      }
+    </style>
+  </head>
+  <body>
     <div>
-      444
+      1111
+      <!-- 우선순위는  style > id > class > div  순이다. -->
+      <div class="yyy" id="xxx" style="color: mediumaquamarine">
+        2222
+        <div>3333</div>
+      </div>
+      <div>444</div>
     </div>
-  </div>
-</body> 
+  </body>
 </html>
-

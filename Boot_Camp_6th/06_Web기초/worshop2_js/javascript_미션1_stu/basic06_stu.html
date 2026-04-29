@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      let n = Number.parseInt(window.prompt("수값을 입력하시오."));
+      let s = [];
+      if (n % 3 == 0) {
+        s.push("foo");
+      }
+      if (n % 5 == 0) {
+        s.push("bar");
+      }
+      if (n % 7 == 0) {
+        s.push("baz");
+      }
+      let result = s.join(" ");
+      console.log(`입력값은: ${n} ${result}`);
+    </script>
+  </head>
+  <body></body>
+</html>
