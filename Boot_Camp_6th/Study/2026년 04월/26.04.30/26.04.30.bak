@@ -1,0 +1,409 @@
+-------------------------------------------------
+26.04.29
+
+6. 객체 (*)
+
+	1) 개념 
+		{key:value} : Json(JavaScript Object Notation) 표현식
+	  
+	2) 특징
+		- value는 모든 데이터가 가능 ex. 수치, 문자, 날짜, null, undefined, 배열, json, 함수, 클래스, ..
+		ex.
+		var person =	{	name:"홍길동",
+								age:20,
+								phone:["010","011"],
+								hobby:{
+											key:value,
+											key:value
+										},
+								getName:function(){return this.name;},
+								setName:function(n){this.name = n};
+							}
+		
+		# 접근방법 => .(dot) 또는 연관배열 ( ["key"] )
+		person.name;
+		person["name"]; <== 변수로 치환이 가능
+		
+		ex. 
+			var xxx= "name";
+			person[xxx];
+		
+		person.getName();
+		person.setName("이순신");
+		
+		# value값은 변수로 사용가능.
+		ex.
+			var name = '홍길동';
+			var age = 20;
+			phone = ["010","011"];
+			ver person = {	name,	// name:name, key와 value가 동일 하면 key만 지정가능
+								age,	// age:age
+								phone}	// phone:phone
+								
+		# value가 함수인 경우에는 자바의 메서드 처럼 축약가능
+		ex.
+		var person =	{	name:"홍길동",								
+								// getName:function(){return this.name;},
+								getName(){return this.name;},
+								// setName:function(n){this.name = n};
+								setName(n){this.name = n};
+							};
+							
+		
+		==> 아래와 같이 JSON의 특징 없이 선언 될 수도 있다.
+		var person = {	name,
+							age,
+							phone,
+							getName(){return this.name;},
+							setName(n){this.name = n;}	
+							};
+							
+		# key값은 변수로 사용가능
+		var xxx = "name";
+		ver person = {	[xxx]:"홍길동",		// name:"홍길동"
+							[xxx+"01"]:"이순신"	// name01:"이순신"
+							age:20,
+						 };
+						 
+		# JSON 작성시 함수앞에 set / get 키워드 지정가능
+			- 반드시 속석처럼 사용해야 된다. (*******)
+			var person = {	name,
+								age,
+								phone,
+								get  userName(){return this.name;},
+								set  userName(n){this.name = n;}	
+								};
+								
+		==> 코드를 통해 구분해야 한다.
+		person.userName = "홍길동";	// set
+		var xxx = person.userName;	// get
+		
+		# 중요 ****************
+		
+		"{key:value}" --------------> {key:value}
+		"[10,20]" ------------------> [10,20]
+		
+		=> 문자열 형태의 json/배열을 josn/배열 형태로 바꿈
+		JSON.parse(json(배열) 문자열)
+		
+		"{key:value}" <-------------- {key:value}
+		"[10,20]" <------------------ [10,20]
+		
+		=> json/배열을 문자열 형태로 바꾼다
+		JSON.stringify(json(배열))
+
+7. spread 연산자 (*) 	// [회고포인트] 불변객체와 spread
+	
+	문법: [...배열]
+			복사되는 형식으로 동작. 새로운 배열을 수정했을 때 원본 배열에 영향이 없음.
+	용도: 배열복사, 배열연결, 배열추가
+	
+	ex. 
+		var arr = [1,2,3];
+		var new_arr = [...arr]; // [1,2,3]; , 새로운 주소로 배열을 복사 == 깊은 복사
+		var new_arr = [10,20,30, ...arr];	// [10,20,30,1,2,3]
+						  [...arr, 10,20,30];	// [1,2,3,10,20,30]
+		var x = [1,2,3,4];
+		var x2 = [5,6,7];
+		
+		var x3 = [...x, ...x2]; //	[1,2,3,4,5,6,7]
+
+8. 함수 (function)
+	
+	1) 용도: 기능처리
+	2) 문법 2가지(*)
+		
+		가. 함수 선언식( 함수명이 있는, 이름이 있는 함수)
+			
+			<script>
+			함수명([값,...])	// 호출가능, <script> 태그에서 이미 생성되어 있다
+			function 함수명([파라미터, ...]){
+						문장;
+						[return 값;]
+					}
+			
+			호출: 함수명([값,...]);
+			생성시점: JS 실행시 생성됨 <script>가 실행될때
+			
+		나. 함수 표현식( 함수명이 없는, 이름 없는 함수 = 익명 함수)
+			
+			// 함수명([값,...])	// 호출불가
+			선언: 
+			var 함수명 = function([파라미터, ...]){
+								문장;
+								[return 값;]
+							 };
+			
+			호출: 변수명([값,...]);
+			생성시점: 코드가 실행될때 생성된다(var 함수명 = function 이 실행 될때)
+			
+	3) 특징
+		- 호출해야 실행됨.
+		- 호출후 호출한 곳으로 돌아옴.
+		- 호출 시 인자값 전달가능. 돌아올때 리턴값 반환 가능
+		- 함수의 파라미터 갯수가 일치하지 않아도 가능(**************))
+		 
+		  파라미터가 필요치보다 적으면 undefined  
+		  ==> default 파라미터를 통해 누락방지
+		  파라미터가 피료치보다 많으면 남는 파라미터는 누락
+		  ==> rest 파라미터를 통해 남는 데이터를 배열로 저장가능
+			
+		  ex
+		  function fun(){}
+		  function fun3(n,n2,n3){}
+		  
+		  fun(10); 	// 10누락
+		  fun3(10); //	n2,n3 -> undefined
+		  
+		  // default 파라미터
+		  function fun(n, n2 = "홍길동", n3 = 10) {}
+		  fun();	// undefined, "홍길동", 10
+		  
+		  // default + rest 혼합사용 가능
+		  function fun(n=10,n2=30, ...n3){}		  
+		  fun(20,30,40,8,5,6,7,8);	//20,30 array[40,8,5,6,7,8]
+		  
+		- spread를 통해 인자 전달 가능		
+		ex. 
+			function fun(n,n2){} 
+
+			var arr=[10,20];			
+			fun(...arr);  // spread 연산자
+
+	4) 일급객채 (first class) (*)
+		
+		function my(){}
+		
+		함수(my) 데이터있음
+		
+		var n = my; // 변수 에 저장
+		
+		fun(my);
+		ex. setTime(함수, 2000);
+			 setTime(function(){}, 2000);
+			 
+		funciton fun(){
+			return my;
+		}	
+	
+		- 개념: 함수를 데이터로 처리해서 함수를 변수에 저장/ 함수 호출시 인자값/ 함수의 리턴값 기능이 가능한 기능을 포함하는 객체 의미.
+		ex. 
+			function yyy() {
+			  console.log("yyy");
+			}		
+			function xxx(f) {
+			  f();
+			}
+			xxx(yyy); // 호출은 xxx()함수, 실제 실행되는 함수는 yyy()
+							 => 콜백함수(callback function)
+							 : 실행하려는 함수를 직접호출하지 않고 단지 호출하고자 하는 함수의 이름만
+								알려주면 시스템이 적절한 시점에 전달된 함수를 호출하는 동작의 함수.
+								
+			var yyy2 = function(){};
+			 function xxx2(){
+				// return function(){};
+				return yyy2;
+			 }
+		   var f = xxx2(); // f에는 yyy2가 리턴된다.
+			f() == yyy2()
+			
+	5) arrow 함수 ( 자바의 람다와 유사 )
+		- 함수 표현식의 축약표현
+		
+		가. 파라미터 없고 리턴없는 함수
+				var f = function(){console.log("fun");};
+				
+				# arrow 함수
+				var f = () =>{console.log("fun");};
+				var f = () = >console.log("fun");
+				
+		나. 파라미터 있고 리턴없는 함수
+				var f = function(n){console.log("fun");};
+				var f = function(n,n2){console.log("fun");};
+				
+				# arrow 함수
+				var f = n => console.log("fun");
+				var f = (n,n2) => console.log("fun");				
+				
+		다. 파라미터 없고 리턴있는 함수
+				var f = function(){return 100;};
+				
+				# arrow
+				var f = () => return 100;
+				var f = () => 100;
+				
+		라. 파라미터 있고 리턴있는 함수
+				var f = function(n, n2){return n+n2;};
+				
+				# arrow
+				var f = (n,n2) => return n+n2;
+				var f = (n,n2) => n+n2;
+				
+	6) generator 함수
+		
+		가. 문법
+			function* xxx(){
+				문장1;
+				yield
+				문장2;
+				문장3;
+			}
+			var gen = xxx();
+			gen.next())
+			
+		나. 특징
+		- 함수호출시 실행되지 않고 generator 객체를 반환하고 실행하기 위해서 next() 호출해야 됨.
+		
+		- yield 키워드 이용해서 시행하고자 하는 작업을 분리해서 실행가능
+		
+		다. 목적
+		- 작업이 많아서 분리해 작업할때.
+	
+	7) 즉시 호출 함수: 함수명() 을 사용하지 않아도 함수 호출 가능.
+		(function () {
+        문장
+      })();
+		
+9. 이벤트 처리
+	
+	1) 개념
+		- 버튼, 위젯에 마우스로 클릭 등과 같이 작업시 특정 동작할 수 있도록 처리하는방법.
+		ex. 버튼클릭시 화면 닫기
+		
+	2) 용어
+		이벤트: 사용자 및 시스템(load)의 동작 의미
+		이벤트 소스: 이벤트가 발생된 위젯 의미 
+			ex. 버튼
+			
+		이벤트 핸들러: 이벤트가 발생될때 처리하느 함수 의미.
+		이벤트 타입: 이벤트 종류 의미 
+			ex. click, dbclick,  keyup, keydown, mouseover, ....
+			ex.
+				<button>ok</button>
+						|
+						|	연결하는 방법: 이벤트처리라고 부름
+						|
+				function fun(){}
+				
+		이벤트 처리 방법 2가지
+		# event 객체를 통해 이벤트가 발생하는 태그에 대한 정보를 가져올 수 있다.
+		  event => 발생한 이벤트와 관련된 모든 정보
+		  event.taget => 이벤트가 발생한 태그
+			가. DOM Level 0
+				- 인라인 방식: 태그 안에서 처리
+					ex.
+						<button 속성명="함수명" ...></button>
+						# 속성명 
+						onclick -> <button onclick="fun()">ok</button> // ok를 눌렀을때 onclick이 활성화
+						
+				- 고전 방식 : 태그 밖에서 처리( 태그와 이벤트 분리 )
+				ex.
+					<script>
+						function fun(){}
+						// 이벤트 연결 ( DOM 방식 )
+						
+						// document.querySelectorAll("선택자") => 여러개, 배열로 리턴된다.
+						// document.querySelector("css선택자");						
+						var btn = document.querySelector("#btn1");  => 첫번째 이슈: btn = null
+						
+						// btn.onclick = fun();	=> 두번째 이슈: 직접 호출하는 함수 
+															== 결과를 리턴한다(함수의 리턴이 없으로 이때는 undefined).
+						btn.onclick = fun;		=> 함수명만 지정(callback 함수)
+					</script>
+					
+					<button id="btn1" >ok</button>
+					<button id="btn">ok2</button>
+					
+					// <script>에서 아직 만들어지지 않은 <body> 안의 button에 접근하기 때문에 btn은 null 이다. ==> <script></script>는 body의 <button> 아래에 위치 해야한다.
+					// 또는 onload를 통해 <body>가 생성된 다음에 함수로 불러온다
+					// onload => <body>내의 태그가 생성되고 호출된다. 
+					ex. 
+						<script>
+							function ok() {}
+							function init() {
+							  // 이벤트연결
+							  var btn = document.querySelector("#x");
+							  console.log(btn);
+							  btn.onclick = fun;
+							}
+						</script>
+						</head>
+						<body onload="init()">
+							<button id="x">ok</button>
+						</body>
+						
+					===================================================
+					ex. 
+						<script>
+							function ok() {}
+							
+							window.onload = init;
+							
+							function init() {
+							  // 이벤트연결
+							  var btn = document.querySelector("#x");
+							  console.log(btn);
+							  btn.onclick = fun;
+							}
+						</script>
+						</head>
+						<body>
+							<button id="x">ok</button>
+						</body>
+						
+			나. DOL Level 2
+			
+				function fun(){}
+				var btn = document.querySelector("#x");
+				// btn.onclick=fun
+				// btn.addEventListener("이벤트타임", 콜백함수);
+				btn.addEventListener("click", fun);
+
+				<button id="x">ok임/button>
+				
+10. DOM 처리 (*)
+
+	1) 개념
+		JS에서 html tag에 접근해서 수정, 삭제, 조회, 추가 등 작업 처리 의미
+	
+	2) 접근방법
+		
+		var 변수 = document.getElemetnById("아이디값");
+		
+		var 변수 = document.querySelector("css선택자");		// 값으로 반환
+		var 변수 = document.querySelectorAll("css선택자"); // 배열로 반환
+		
+		ex.  <button id = "x" <============= document.querySelector("#x")
+														 Button 객체 반환되고 이 객체안의 속성/메서드를 찾아서 활용하자
+														  
+				<p>
+				<p> <========================= document.querySelectorAll("p"), 배열로 반환
+				<p>									 p 태그 객체반환되고 이 객체안의 속성/메서드를 찾아서 활용하자
+				
+11. 객체분해할당( destructuring )
+
+	1) 개념:
+		- 배열 또는 객체(JSON)를 매우 쉽게 요소를 접근하는 방법.
+	
+		ex1. 배열
+			
+			var arrr = [10,20];
+			
+			var x1 = arr[0];
+			var x2 = arr[1];
+			
+			#객체분해할당
+			var [x1, x2] = [10,20];
+		
+		ex2. json
+			
+			var json = {name:"홍길동", age:20};
+			var name = json.name;	// json["name"]
+			var age = json.age;		// json["age"]
+			
+			# 객체분해할당
+			var {key1, key2} = {key1:value1 key2:value2};
+			
+			var {name, age} = {name:"홍길동", age:20};
+			var {name:username, age:userage} = {name:"홍길동", age:20};
+			//  key:별칭 -> 별칭으로 값을 가져온다

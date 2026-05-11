@@ -1,0 +1,245 @@
+-------------------------------------------------
+2026.05.
+
+Serblet/JSP 강의
+
+1. 자바 개발 플랫폼 3가지
+
+	1) Java SE (Java Standard Edition)
+		- 자바 spec
+		- JDK (JVM, 개발툴(javac, java), API(.jar))
+		- 시작점(starting point)인 main 메서드를 가짐.
+	
+	2) Java EE ( Java Enterprise Edition )
+		- 웹 어플리케이션 개발을 플랫폼.
+		- Servlet/JSP spec( 인터페이스 )
+		- 실제 구현체를 제공하는 벤더는 Apache임
+		  ( Tomcat 서버와 Servlet/JSP의 jar 제공 )
+	
+	3) Java ME ( Java Micro Edition )
+	
+2. 개발환경
+
+	1) java SE 환경 구축
+	
+		- JDK 설치( JDK21 )
+		- 환경변수 설정
+			
+			JAVA_HOME=
+			PATH= 
+			
+	2) Eclipse 설치
+		https://www.eclipse.org
+		
+		Eclipse IDE 2025-3 R Paakge 의 Eclipse IDE for Enterprise Java and Web Developers 다운
+		
+		
+	3) Tomcat 서버 (Tomcat 컨테이너)
+	 https://jakarta.apache.org
+	 https://tomcat.apache.org/download-10.cgi 에서 Tomcat 10 다운로드
+	 
+	 // servlet / jsp 벤더가 Oracle에서 Apache로 넘어가면서 패키지 이름이 바뀜
+	 // Tomcat 10 부터 버전 차이가 발생하니 유의해 둘것
+	 # tomcat 9과 tomcat 10 차이점
+	 
+		tomcat 9 : JDK11 까지만 지원됨
+					  Oracle 벤더에서 관리
+					  패키지명은 javax.servlet 시작됨
+		
+		tomcat10 : JDK 17 이상 지원됨
+					  Apache 벤더에서 관리
+					  패키지명은 jakarta.servlet 시작됨
+		https://tomcat.apache.org/tomcat-10.1-doc/servletapi/index.html
+		
+	 # 필요시 환경변수 설정필요
+		CATALINA_HOM=C:\cloud_engineering\Boot_Camp_6th\07_Servlet_JSP\apache-tomcat-10.1.54
+		
+	4) 압축풀기 - 같은폴더에 풀기
+		C:\cloud_engineering\Boot_Camp_6th\07_Servlet_JSP\apache-tomcat-10.1.54\bin
+		C:\cloud_engineering\Boot_Camp_6th\07_Servlet_JSP\eclipse\configuration
+		
+	5) eclipse와 tomcat 연동
+		
+		# 서블릿/JSP 웹 어플리케이션 배포 방법
+			
+			가. eclipse에서 웹어플리케이션 생성
+			나. 웹어플리케이션 압출 ( test.war )
+			다. tomcat 서버에 배포
+				 tomcat\webapps 에서 배포가능
+				 
+			라. tomcat이 자동으로 test.war 압축 해제
+				tomcat\webapps\test : html, jsp, css, image 파일들이 위치한다. 
+				.\WEB-INF // 필수. 반드시 대문자
+				.\WEB-INF\lib 		: Java SE의 build Path와 동일한 기능.(  *.jar )
+				.\WEB-INF\classes : 작성한 *.class 파일들이 위치하는 폴더
+				.\classe\web.xml
+			
+			마. 웹브라우저에서 웹어플리케이션 요청
+				http://localhost:포트번호/자원
+				http://localhost:8080
+				
+	# 물리적인 이름(pc에 저장된 이름, web application)과 논리적인 이름(context)은 매핑되어 있다
+	  => 브라우저에서 context를 호출하면 매핑된 web application을 찾아 불러온다.
+	
+3. 웹프로젝트 생성
+
+	File > new > Dynamic Web Project 선택>
+		
+		Web Moudule 화면
+			
+			Context root: 논리적 이름(컨텍스트명), 수정가능
+							  기본적으로 프로젝트명으로 설정됨.
+							  http://localhost:8080/컨텍스트명 (*)
+			Content Directory: src/main/webapp <== 이클립스가 관리하는 디렉토리
+				
+					Generate Deployment Dscriptor: web.xml ( 배치 지시자 ), 하나의 웹 어플리케이션 설정정보 관리.															 
+															 
+///////////////////////////////////////////////////////////////////////////////////
+
+4. 웹 컴포넌트 작성 ( 클라이언트에서 )
+
+	1) 서블릿
+	2) jsp  ( html과 동일)
+	
+		3-step 작업
+		가. 변환단계
+			hello.jsp --------> hello_jsp.java
+		나. 컴파일단계
+			hello_jsp.java ---> hello_jsp.class
+		다. 실행단계
+			hello_jsp.class --> html 코드로 결과가 나옴
+	
+	3) html (사용안함, 대신 jsp 사용)
+
+	프로젝트명
+		src
+			main
+			|- java
+			|- webapp
+				|- META-INF
+				|- WEB-INF		<== WEB-INF는 외부(웹 브라우저)에서 접근이 불가(보안)
+				|- *.html
+				|- *.jsp
+				|- *.cs
+				|- *.js
+				|- 디렉토리
+					|- *.html
+					|- *.cs
+					|- *.js
+
+5. 서블릿(Servlet)
+
+	1) 특징
+		- *.java
+		- 저장위치는 src/main/java에 저장
+		- 반드시 패키지 필수 (*)
+		- main 메서드가 없음. 시작점이 없다.
+		  ( 사용자가 맨 처음 요청하는 서블릿이 시작점이 된다. 유저는 다양한 루트를 통해 접근할 수 있다. )
+		  
+		- 직접 new하지 않음.
+			Tomcat 서버가 필요한 시점에 생성부터 소멸까지 관리해줌
+			Tomcat 서버가 필요한 이유: Servlet/JSP 같은 동적컴포넌트를 관리함
+			
+		- 실행결과는 html로 나옴
+	
+	2) 구현 방법 (*)
+		
+		가. 패키지로 구성
+			ex. com.servlet
+			
+		나. extends HttpServlet ( jakarta.servlet.http 패키지 )
+			
+			////////////////////////////////////////////////////
+			 서블릿의 계층구조 (외우기 *)
+				
+				Servlet, ServletConfig ( 인터페이스 )				
+					|
+				GenericServlet ( 추상 클래스 )
+					|
+				HttpServlet ( 추상 클래스 )
+					|
+				사용자 서블릿
+				
+				Servlet 인터페이스: init(), service(), destroy(), getServletConfig()
+				ServletConfig 인터페이스 : getInitParametor(), getServletName(), getServletContext()
+				GenericServlet 추상클래스 : init(), service(), destroy(), getInitParametor()
+				HttpServlet 추상클래스 : doGet(), doPost(), doPut(), doDelete()
+				
+				https://tomcat.apache.org/tomcat-10.1-doc/servletapi/index.html
+												
+				==> 사용자 서블릿에서 위의 메서드를 사용 또는 재정의가 가능 (*)
+		
+			////////////////////////////////////////////////////		
+		
+		다. doGet(기본),doPost : 반드시 재정의해서 사용해야된다.(*)		
+			 ( html에서 method = "get(기본)| post" )	
+		
+		라. 서블릿맵핑
+			
+			ex. 
+				src
+				|-main
+					|-java
+						|-com
+							|-servlet
+								|-HelloServlet
+			
+			요청: http://localhost:8080/컨텍스트명/servlet/풀패키지의서블릿명
+					http://localhost:8080/hello/servlet/com.servlet.Helloservlet  ==> 현재 사용 안됨
+					
+					- 보안취향, URL이 길다
+					
+			==> [servlet/com.servlet.Helloservlet] 부분을 별칭을 준다 ==> 서블릿 맵핑
+				 http://localhost:8080/hello/서블릿맵핑
+				 
+			# 서블릿 맵핑 방법 2가지
+				
+				가. 어노테이션 이용
+					- @WebServlet("/서블릿맵핑")	# / 필수
+					  @WebServlet("*.do") 			# 확장자패턴
+					  
+				나. web.xml
+				
+				<!-- 서블릿 맵핑 -->
+				<servlet>
+						<!-- servlet-name 태그를 통해 servlet과 servlet-mapping 태그를 연결한다 -->
+					  <servlet-name>WorldServlet</servlet-name>
+					  <servlet-class>com.servlet.WorldServlet</servlet-class>
+				 </servlet>    
+				 <servlet-mapping>
+					  <servlet-name>WorldServlet</servlet-name>
+					  <url-pattern>/World</url-pattern>
+				<servlet-mapping>
+			
+				==> Spring Framework에서 내부적으로 사용되는 서블릿매핑 방법 (DispatcherServlet, / 으로 매핑)
+
+6. 서블릿 LifeCycle
+	- Tomcat 컨테이너가 Servlet의 LifeCycle(생성-소멸) 관리함.
+	  생성 때 호출되는 콜백메서드 (시스템이 호출하는 메서드) 제공 : init()
+	  소멸 때 호출되는 콜백메서드 (시스템이 호출하는 메서드) 제공 : destroy()
+	  요청 때 호출되는 콜백메서드 (시스템이 호출하는 메서드) 제공 : doGet/doPost
+	  
+	1) init() 메서드
+		- 서블릿이 생성될 때 자동으로 호출됨.
+		- 한번만 호출됨 ==> 서블릿은 한번만 생성된다.
+		 
+	2) doGet/doPost 메서드 ( 서비스 메서드라고 부름 )	
+		- 서블릿에 요청할 때 자동으로 호출됨.
+		- 요청할 때 마다 매번 실행됨. (*)
+		
+		코드 구현:
+			- doGet(HttpServletRequest request, HttpServletResponse response){}
+			
+			- doPost(HttpServletRequest request, HttpServletResponse response){}
+		
+			==> HttpServletRequest와 HttpServletResponse는 로컬변수이다
+				 따라서 요청할 때마다 매번 새롭게 생성된다.(*** 가장 중요) // [이유 작성하기]
+	
+	3) destroy() 메서드
+		- 서블릿이 삭제될 때 호출 ( 서버측에서 파일을 수정하며 재시작될때 이전 서블릿이 소멸되면서 새로운 서블릿이 생성된다 )
+		- 단 한번 호출
+		
+	==> 서블릿은 한번만 생성되고, 여러 사용자 요청을 하나의 서블릿이 처리한다.(*)
+	
+	- 서블릿에서 선언하는 변수는 서블릿의 주기와 같이 하기 때문에 불특정 다수에게 노출된다.
+	- 특정인의 요청에만 변수가 노출되게 하고 싶다면 doGet() 에서 선언해야 한다.

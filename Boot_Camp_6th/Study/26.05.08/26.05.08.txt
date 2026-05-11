@@ -1,0 +1,153 @@
+-------------------------------------------------
+2026.05.08
+
+1. directive 태그 ( 지시자 태그 )
+		
+	가. page directive
+		- 용도: JSP에게 특정 정보를 알려줄때 사용.
+		- 문법: 
+			<%@ page 속성명 = "속성값" ... %>
+			
+			<%@ page contentType = "text/html" %>	==> 서블릿의 response.setContentType("text/html")와 동일
+			
+			<%@ page import="java.util.ArrayList" %>
+			<%@ page import="java.util.Date" %>
+			
+			<%
+				ArrayaList list = new ArrayList();
+				Date = new Date();
+			%>			
+	
+	나. include directive
+		- 용도: 화면 재사용, HTML의 <iframe> 기능과 동일
+		- 문법:
+			<%@ include file="jsp파일" %>
+			
+			특징: *.java 변환되기 전에 포함시킴
+			
+		- 문법2:
+			<jsp:include page="jsp파일" />
+			
+			특징: 포함시킬 jsp에 요청을 하고 실행된 결과를 포함시킴
+			
+	다. taglib directive
+	
+		- 용도: JSTL에서 사용됨
+		- 문법: 
+			<%@ taglib preifx="" url="" %>
+			
+2. declaration 태그 ( 거의 사용안함 )
+	
+	- 용도: 서블릿의 인스턴스 변수 및 메서드 (doGET 제외)
+	- 문법: 
+		<%! 
+			인스턴스 변수
+			메서드
+			...
+		%>
+		
+3. scriptlet 태그 ( 가장 많이 사용)
+
+	- 용도: 서블릿의 doGet 메서드 내에서의 작업
+	- 문법: 
+		<%
+			자바코드(메서드 사용 불가)
+		%>
+
+4. expression 태그
+
+	- 용도: 웹 브라우저에 값 출력
+	- 문법: 
+		<%= 표현식 %>
+		<%= 변수 %>
+		<%= 변수.메서드() %>
+		
+5. 내장객체 (내장변수) (외우기)
+
+	1) 개념:
+		jsp가 *.java로 변경될 때, 항상 만들어지는 변수 의미함.
+		이 변수는 <% %> 에서 변수 선언ㅇ벗이 사용 가능함.
+	
+	2) 종류
+		- reqeust	( HttpServletRequest )
+		- response	( HttpServletResponse )
+		- session	( HttpSession )
+		- application	( ServletContext )
+		- config			( ServletConfig )
+		- out				( PrintWriter )
+		
+6. JSP 주석
+ 	<%-- jsp 주석--%>
+	//	<!-- HTML 주석 -->
+	
+7. 게시판( MVC 모델 )
+
+	1) Mode 2 Architecture
+								 ( Controller )		(      				Modedl			        )	
+		웹브라우저 ----------> 서블릿----------> 서비스 ----------> DAO ----------> mysql
+										 | 
+										 | 요청위임
+										 |
+					 <----------	JSP ( View ) 
+					 
+	2) 게시판 테이블
+	
+		create table board
+		(  num int primary key auto_increment,
+       title varchar(100) not null,
+       author varchar(50) not null,
+       content varchar(2000) not null,
+       writeday date  default ( current_date ),
+       readcnt  int default 0
+    ); 
+	 
+		insert into board( title, author, content)
+		values ('테스트', '홍길동','테스트입니다');
+		commit;
+		
+	3) 목록보기																					
+																		BoardserviceImpl			BoardDTO	
+	웹브라우저 ----------> BoardListServlet----------> Boardservice ---------> BoardDAO ----------> mysql
+									 | 
+									 | 요청위임
+									 |
+				  <----------	list.jsp ( View ) 
+	
+	4) 글작성_화면보기
+	
+	웹브라우저 ----------> BoardWriteUIServlet
+									 | 
+									 | 요청위임
+									 |
+				  <----------	write.jsp ( View ) 
+	4)글작성_동작
+	
+	웹브라우저 ----------> BoardWriteServlet
+								 | 
+								 | 요청위임
+								 |
+				<----------	BoardListservlet
+				 
+	5) 글 자세히 보기
+																			BoardserviceImpl			  BoardDTO
+	웹브라우저 ----------> BoardRetrieveServlet---------> Boardservice ----------> BoardDAO ----------> mysql
+									 | 
+									 | 요청위임
+									 |
+				 <----------	retrieve ( View ) 
+	
+	6) 글 수정하기	
+																		 BoardserviceImpl			  BoardDTO
+	웹브라우저 ----------> BoardUpdateServlet---------> Boardservice ----------> BoardDAO ----------> mysql
+									 | 
+									 | 요청위임
+									 |
+				  <---------- BoardListServlet
+				  
+	7) 글 삭제하기	
+																		 BoardserviceImpl			  BoardDTO
+	웹브라우저 ----------> BoardDeleteServlet---------> Boardservice ----------> BoardDAO ----------> mysql
+									 | 
+									 | 요청위임
+									 |
+				  <---------- BoardListServlet

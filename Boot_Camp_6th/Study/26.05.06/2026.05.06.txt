@@ -1,0 +1,220 @@
+-------------------------------------------------
+2026.05.06
+
+7. 서블릿의 thread-safe와 thread-safe
+
+	1) 서블릿의 2가지 변수 사용시 공유하거나 공유하지 않는 개념
+		- thread-safe: 변수 공유하는 상황
+		- thread-safe: 변수 공유하지 않는 상황
+		
+	2) 인스턴스 변수
+		- 서블릿은 단 한번만 생성되기 때문에 인스턴스 변수도 단 한번만 생성됨.
+		  따라서 여러 사용자들ㅇ과 공유할 수 있기 때문에 안전하지 않음.
+		  
+	3) 로컬 변수
+		- doGet/doPost 메서드내의 로컬변수는 요청할 때마다 실행되는 메서드이기 때문에
+		  여러 사용자들과 공유되지 않음. 따라서 안전함.(*)
+		  
+8. 응답처리
+	
+					  요청(HttpServletRequest)
+	웹브라우저 -----------------------------> 서버
+				  <-----------------------------
+					  응답(HttpServletResponse)
+					  
+	1) 개념	
+		- 서블릿에서 html작성해서 웹브라우저에게 전달하는 작업의미.
+		- HttpServletResponse API가 처리함
+		
+		
+	2) 구현방법
+		가. MIME타입 지정
+			- 서버의 서블릿이 웹브라우저에게 전달되는 데이터 종류(MIME타입)를 알려주는 작업의미.
+			
+			문법:
+				response.setContentType("MIME타입지정");
+				
+				response.setContentType("text/html"); // text/plain (일반텍스트)
+																	  text/html:utf-8 : 한글깨질때 사용
+				
+		나. 출력시 사용하는 API 이용
+			
+			문법: PrintWriter out = response.getWriter();
+		
+		다. html 출력
+			
+			문법: 
+				out.print("<html>");
+				...
+				out.print("</html>");
+				
+9. 요청처리 (*)
+
+					  요청(HttpServletRequest)
+	웹브라우저 -----------------------------> 서버
+				  <-----------------------------
+					  응답(HttpServletResponse)
+					  
+	1) 개념
+		- 웹브라우저에서 사용자 입력폼에 값을 입력하고 서블릿에 전달해서 서블릿이 값을 조회하는 작업의미.
+		- HttpServletRequest API가 처리함.
+		
+	2) 사용자 입력 데이터를 가져오는 메서드
+		 
+		 ex.
+			<form action="타겟(서블릿의 메핑값)" method="GET|POST">
+				이름<input type="text" name="username">
+				나이<input type="text" name="age">
+				<input type="submit" value="전송">
+			</form> 
+		
+		 # form의 데이터는 JSON형태로 전달되며 이때 key는 name 이다. 
+		 get 요청: 
+			http://localhost:8080/컨텍스트명/서블릿매핑?key=value&key=value
+			
+			http://localhost:8080/컨텍스트명/서블릿매핑?username=value&age=value
+			
+ 		 post 요청: 
+			http://localhost:8080/컨텍스트명/서블릿매핑
+			body: key=value&key=value
+					username=value&age=value
+				
+		String s = request.getParameter("html 태그의 name값");
+		// 사용자가 입력한 모든 값은 문자열로 서블릿에 전달됨(*)
+	
+		String [] s2 = request.getParameterValues("html 태그의 name값");
+		// html의 체크박스같은 경우
+		
+		Enumeration<String> enu = request.getParameterNames();	
+		// Map의 keySet() 기능
+		// Enumeration(hasMoreElements(), nextElement())은 
+			Iterator(hasNext(), next()) 역할
+			
+			while(enu.hasMoreElements()){
+				String key = enu.nextElement();
+				String value = request.getParameter("key");
+				
+			}
+
+10. scope (*** 가장중요)
+	1) 개념
+		- 자바의 변수( 로컬, 인스턴스, static )처럼
+		  tomcat 컨테이너가 자동으로 데이터를 관리(저장, 조회, 수정, 삭제)하는 3가지 객체의 lifecycle 의미함.
+		  
+	2) 종류
+	
+		가. request scopre (HttpServletRequest)
+				
+			- 저장: request.setAttribute(String key, Object obj);
+				
+			- 조회: Object obj = request.getAttribute(String key);
+									
+			- 삭제: request.removeAtttibute(String key);
+			
+			# scope(Lifecycle): 요청-응답
+				- doGet / doPost 메서드 안에서만 사용이 가능함(*)
+					
+		나. session scope (HttpSession)
+			
+			# session(저장소)이 있으면 리턴, 없으면 새로생성해서 리턴			
+			HttpSession session = request.getsession();
+			HttpSession session = request.getsession(true);
+			------------------------------------------------
+			
+			# session(저장소)이 있으면 리턴, 없으면 null 리턴			
+			HttpSession session = request.getsession(false);
+			
+			- 저장: session.setAttribute(String key, Object obj);
+				
+			- 조회: Object obj = session.getAttribute(String key);
+									
+			- 삭제: session.removeAtttibute(String key);
+			
+			# scope(Lifecycle): 웹브라우저와 scope가 동일 (동일 웹브라우저 기준: 크롬 1개, 엣지 1개)
+				- 브라우저(크롬,엣지,...)당 1개의 세션 메모리 할당. 크롬을 두개 켜도 한개의 세션 메모리를 공유
+				- 이론적으론 브라우저 닫기 전까지 세션 메모리는 유지됨
+				- 보안 이슈로 timeout(30분)이 지정되어있다.
+					//////////////////////////////////////////////////////////					
+ 					<session-config>
+						  <session-timeout>30</session-timeout>
+					</session-config>
+					//////////////////////////////////////////////////////////
+				- 웹브라우저에서 서블릿에 요청하면 Tomcat 서버에서 해당 브라우저의 세션 메모리가 할당된다.
+				- 세션 메모리는 JSON 구조이다.				
+				- 서블릿에서 세션 메모리를 불러온다
+					: HttpSession session = request.getsession();
+				
+				- 세션 저장
+					ex. session.setAttribute("a","b"); ===> 세션 메모리에 "a":"b" 형태로 저장
+					
+				- 응답: 웹브라우저에서 렌더링. ===> 세션 메모리 유지중				
+				- 소멸: 웹브라우저 창을 닫으면 세션 메모리가 삭제된다.
+				
+		다. application scope ( ServletContext )
+			
+			ServletContext ctx = getServletContext();	// ServletConfig 인터페이스 메서드
+			
+			- 저장: ctx.setAttribute(String key, Object obj);
+				
+			- 조회: Object obj = ctx.getAttribute(String key);
+									
+			- 삭제: ctx.removeAtttibute(String key);
+			
+			# scope(Lifecycle): tomcat 컨테이너와 scope가 동일	//생명주기가 가장 길다
+				- tomcat 컨테이너를 종료하지 않으면 데이터를 계속 사용가능
+				
+11. 필터(Fileter)
+								  필터
+					  요청		//
+	웹브라우저 -------------//--------------> 서버
+				  <------------//---------------
+					  응답		//
+					  
+	1) 개념:
+		- 서블릿에 요청하기전 및 응답 후에 특별한 작업처리가 가능.
+		- 선처리 및 후처리 가능
+		
+	2) 구현 방법
+	
+		가. 패키지로 작성
+		나. implments Filter
+		다. doFilter() 메서드 재정의
+		라. 필터매핑
+			- @WebFilter("/매핑")
+			- web.xml 이용
+			ex.
+				<filter>
+					<filter-name>MyFilter</filter-name>
+					<filter-class>com.filter.MyFilter</filter-class>
+				</filter>
+				<filter-mapping>
+					<filter-name>MyFilter</filter-name>
+					<url-pattern>/*</url-pattern>
+				</filter-mapping>
+			
+12. DB 연동( MyBatis 이용 )
+
+	1) 2개의 jar 필요
+		mybatis-3.5.17, mysql-connector-j-8.0.33.jar
+		
+	2) com/config/jdbc.propertise
+			jdbc.dirver=com.mysql.cj.jdbc.Driver
+			jdbc.url=jdbc:mysql://localhost:3306/testdb
+			jdbc.userid=root
+			jdbc.passwd=1234			
+
+   3) com/dto/DeptDTO.java 작성
+
+   4) 2개의 xml 작성
+
+     가. com/config/configuration.xml
+
+     나. com/config/DeptMapper.xml
+
+   5) com.config.MySqlSessionFactory.java 작성
+	 
+	6) layer 작성
+	
+										DeptServiceImpl
+	브라우저 ------------>		DeptService					DeptDAO					mysql
+									
