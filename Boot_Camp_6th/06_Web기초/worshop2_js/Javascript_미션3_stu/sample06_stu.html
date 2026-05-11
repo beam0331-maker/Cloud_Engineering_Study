@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      window.onload = init;
+      function init() {
+        let select = document.querySelector("select");
+        select.addEventListener("change", () => {
+          let img = select.options[select.selectedIndex].innerHTML;
+          document.querySelector("#my").src = img;
+        });
+      }
+    </script>
+  </head>
+  <body>
+    이미지선택하기<br />
+    <select>
+      <option>a.jpg</option>
+      <option>b.jpg</option>
+      <option>c.jpg</option>
+    </select>
+    <img src="a.jpg" width="100" height="100" id="my" />
+  </body>
+</html>

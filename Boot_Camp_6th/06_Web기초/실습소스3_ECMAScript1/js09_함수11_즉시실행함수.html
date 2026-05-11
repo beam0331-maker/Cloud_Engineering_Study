@@ -1,21 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>hello</title>
     <script>
-      
       // 즉시호출함수(즉시실행함수)
 
-         (function(){
-           console.log("즉시호출함수");
-         })();
+      (function () {
+        console.log("즉시호출함수");
+      })();
 
+      var x = function () {
+        console.log("즉시호출함수2");
+      };
 
-
+      x();
     </script>
   </head>
-  <body>
-   
-
-  </body>
+  <body></body>
 </html>

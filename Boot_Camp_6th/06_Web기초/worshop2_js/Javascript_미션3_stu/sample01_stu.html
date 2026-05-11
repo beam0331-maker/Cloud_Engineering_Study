@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      function upBtn() {
+        let quantity = document.querySelector("#quantity");
+        let reuslt = quantity.value;
+        console.log(reuslt);
+        reuslt++;
+        quantity.value = reuslt;
+      }
+      function downBtn() {
+        let quantity = document.querySelector("#quantity");
+        let reuslt = quantity.value;
+        console.log(reuslt);
+        reuslt--;
+        quantity.value = reuslt;
+      }
+    </script>
+  </head>
+  <body>
+    갯수<input type="text" name="quantity" id="quantity" value="1" />
+    <button id="up" onclick="upBtn()">+</button>
+    <button id="down" onclick="downBtn()">-</button>
+  </body>
+</html>

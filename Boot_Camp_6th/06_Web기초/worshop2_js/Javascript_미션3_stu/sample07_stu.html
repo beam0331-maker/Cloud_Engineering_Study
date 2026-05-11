@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      window.onload = init;
+      function init() {
+        let buttons = [];
+        buttons = document.querySelectorAll("button");
+        buttons.forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            let t = Number.parseInt(e.target.textContent);
+            let result = 0;
+            for (let i = 1; i <= t; i++) {
+              result += i;
+            }
+            document.querySelector("#result").textContent = result;
+          });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <button>5</button>
+    <button>10</button>
+    <button>15</button><br />
+    총합:<span id="result"></span>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      window.onload = init;
+      function init() {
+        let imgs = document.querySelectorAll("img");
+        console.log(imgs);
+        let imgA = null;
+        let imgB = null;
+        let imgC = null;
+
+        imgs.forEach((e) => {
+          if (e.src === "http://127.0.0.1:5501/a.jpg") imgA = e;
+          if (e.src === "http://127.0.0.1:5501/b.jpg") imgB = e;
+          if (e.src === "http://127.0.0.1:5501/c.jpg") imgC = e;
+        });
+        imgA.addEventListener("mouseover", () => {
+          document.querySelector("#result").innerHTML = "<h1>a.jpg</h1>";
+        });
+        imgA.addEventListener("mouseover", () => {
+          document.querySelector("#result").innerHTML = "<h1>b.jpg</h1>";
+        });
+        imgA.addEventListener("mouseover", () => {
+          document.querySelector("#result").innerHTML = "<h1>c.jpg</h1>";
+        });
+      }
+    </script>
+  </head>
+  <body>
+    이미지 이름 알아보기<br />
+    <img src="a.jpg" width="100" height="100" />
+    <img src="b.jpg" width="100" height="100" />
+    <img src="c.jpg" width="100" height="100" /><br />
+    파일명:<span id="result"></span>
+  </body>
+</html>

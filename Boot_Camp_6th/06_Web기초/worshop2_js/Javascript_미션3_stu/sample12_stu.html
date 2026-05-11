@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script type="text/javascript">
+      window.onload = init;
+      function init() {
+        let select = document.querySelector("select");
+
+        select.addEventListener("change", () => {
+          let fontSize = select.options[select.selectedIndex].textContent;
+          document.querySelector("#result").style.fontSize = fontSize;
+        });
+      }
+    </script>
+  </head>
+  <body>
+    글꼴크기:
+    <select>
+      <option>16px</option>
+      <option>32px</option>
+      <option>40px</option>
+      <option>56px</option>
+    </select>
+    <div id="result">안녕하세요.</div>
+  </body>
+</html>

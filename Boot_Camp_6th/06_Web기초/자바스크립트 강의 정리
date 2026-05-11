@@ -1,0 +1,696 @@
+-------------------------------------------------
+2026.04.29
+
+프레임 워크 공부할것 아래 두가지
+bootstrap
+tailwind
+
+es5 까지는 표준안이 되지 않은 일반 JS
+es6 부터 표준안이다.
+/////////////////////////////////////////////////
+2. 식별자
+	- 기본적인 명명규칙, 작성법 등 자바와 유사하다
+	
+	1) 기본 데이터형
+		- "number"(수치데이터): 정수와 실수
+		- "string"(문자데이터): 문자와 문자열 및 이스케이프 문자(\t)
+		- "boolean"(논리데이터): true / false. 
+			JS는 true, false가 아니여도 논리 값으로 처리 가능하다. (*)
+			0, "", '' , null, nudefined, NaN => false // [외우기]
+			false 가 아닌 값 => true
+			
+		- undefined: 변수가 초기화되지 않은 상태
+			ex. var 변수명;
+		- null: 객체없음(초기화는 된 상태)
+			ex. var 변수명 = null;
+		- NaN	: Not a Number
+			ex. Number.parseInt("홍길동") // 잘못된 문자열을 숫자로 바꿀려할때
+	
+	2) 참조 데이터형
+		: 객체형(배열)과 함수형 및 클래스
+		- 객체: 두가지 형식이 존재
+			map 형식 : {key:value} 
+			배열 형식: [값, 값2,...] 
+			
+		- 함수: function{} ==> method와 유사하다.
+		- 클래스: class ==> java의 class
+		
+		# 자바스크립트는 자바와 다르게 함수를 데이터로 취급한다
+			==> 함수 또한 변수에 저장이 가능하다 (*)
+	
+	3) 변수
+		가. 변수 선언(초기값은 undefied할당)
+			
+			var 변수명; => OLD
+				- 변수명 중복이 가능
+				- 블록 scope가 아닌 함수 scope를 따른다.
+				  (함수로 만든 블록에서만 사용 가능, 함수가 아닌 블록에서 선언한 변수는 블록 밖에서도 사용가능)
+				  ex. 
+						// {} 스코프에서 선언 -> 함수 아니므로 외부에서 사용가능
+						if(true){
+						  var n2 = 100;
+						}
+						console.log(n2);  //  100
+				-
+			let 변수명; => ES6(권장), 자바문법과 유사
+				- 변수명 중복이 줄가
+				- 블록 scope를 따른다.({} 안에서 선언된 변수는 밖에서 사용불가)
+				
+		나. 변수 초기화
+			변수명 = 값; // 런타임시에 지정된 값으로 할당된다.
+			
+		특징: 데이터형을 지정하지 않는다(실행단계에서 데이터형이 지정된다)
+		 typeof 연산자를통해 데이터 타입을 확인 할 수 있다.
+		 ==> var로 변수를 선언하면 나중에 데이터형이 지정된다.
+		 
+	4) 데이터 자동형변환
+		가. *,/,-사용하는 경우 (+는 자바와 같이 문자열로 연결)
+			ex. var test = “100” * 2; -> 200
+			
+		나. boolean값으로 자동 변환
+			 : 0, "",’’, NaN, null, undefined 은 false로 변환된다
+			 
+	5) call by value vs call by reference
+		: 자바와 같이 참조형은 변수를 전달받은 후 수정하면 같이 영향을 받는다.
+			ex. 
+				 let x = [10,20,30];
+				 let x2 = x;				  
+				 x2[0]= 100;
+				 
+	6) const: 상수 작성시 사용
+		- let 변수와 동일하게 작동한다(block scope, 중복X)
+		- 요소값 변경은 가능하다.(변수명에 할당된 주소를 바꾸는게 아니라 주소가 가르키는 값의 변경이기 때문 JS는 인식을 못한다)
+		ex. 
+			const NUMS = [10, 20, 30];
+			NUMS[0] = 100;
+			// const된 변수값(저장된 주소값)을 바꾸는는거 불가능		
+			// NUMS = [20, 30, 40];	
+		
+/////////////////////////////////////////////////
+3. 연산자 - 대부분 자바와 동일하므로 차이점 위주로 정리한다.
+
+	- 문자열 + 다른 데이터형이: 문자열로 연결된다.
+	- / 연산자는 실수로 출력된다
+		ex. 10/3 = 3.33333
+		
+	1) 동등 연산자
+		가. equal 연산자( ==, != ): 값을 비교한다 			
+			ex. 
+				var w = 10;
+				var w2= “10”;
+				console.log( w == w2); // true
+				
+		나. identical 연산자( ===, !== ): 값과 데이터 타입까지 비교 (권장)
+			ex.
+				var w = 10;
+				var w2= “10”;
+				console.log( w === w2); // false
+				
+		- undefined를 비교할때는 === 연산자를 사용한다.
+			ex.
+				var x ;
+				var x2 = null;				
+				if( x === undefined ){ }// true
+				if( x2 === undefined ){} // false
+				
+	2) 논리연산자
+		- 기본적으로 자바와 같지만, 논리 값이 아닌 객체 비교가 가능하다.
+		
+		가. 값1 && 값2
+			: 값1이 true면 값2가 선택되고
+			  값1이 false면 값1이 선택된다.
+			  (and 연산은 값1의 true일때 값2을 봐야 결과를 안다, 
+				false일때는 값2를 보지 않아도 결과가 정해진다.
+			ex. 10 && "홍길동" => "홍길동"
+				 NaN &&  100 	 => NaN
+		
+		나. 값1 || 값2
+			: 값1이 true면 값1이 선택되고
+			  값1이 flase면 값2가 선택된다.
+			(or 연산은 값1이 true면 true 이고
+			flase일때는 값2를 알아야 결과를 안다)
+
+			ex. 10 || '홍길동'=>  10
+				 NaN || 100		=> 100
+
+/////////////////////////////////////////////////
+4. 문장(statement) - 자바와 차이점 위주로 정리한다.
+	
+	- var 변수는 함수 scope
+		=> 블록 안에서 선언한 변수를 블록 밖에서 사용이 가능하다
+			(가능하면 let 변수로 선언)
+	
+	- Number.parseInt(String): String 변수를 Number로 파싱한다
+	
+/////////////////////////////////////////////////
+5. 객체 및 JSON / 배열 (*)
+
+	시스템 정의 객체(내장객체)  // 클래스와 유사
+		- 자바의 클래스와 동일하게 속성(변수)과 매서드(함수)를 제공함.
+
+		- 데이터 관련 객체
+		: String , Number , Date , Array, Boolean , Object , Math, RegExp
+		
+		- 브라우저 관련 객체( BOM: Browser Object Model )
+		: Window, Screen , Location , History, Navigator
+		
+		- HTML 관련 객체( HTML이 랜더링 되면 자동으로 생성되는 객체 )			
+		: DOM(Document Object Model) 객체
+		
+	사용자 정의 객체
+		- 데이터 관리 목적으로 생성
+		- JSON형식
+		: {KEY:VALUE}, class 이름 (){}
+	
+
+	1) 데이터 관련 객체
+		
+		가. 문자관련: Strig	https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/String
+			- backtick(`)
+			ex. 
+				let name = "홍길동";
+				let age = 20;
+				
+				let result2 = `이름:${name} 나이:${age}`;	// 이름:홍길동 나이:20
+				
+			----------------------------------------------------------------------
+				// 해결1: ""('') 이용 ==> 해결안됨.
+				let table = "<table>";
+				table += " <tr>";
+				table += "  <td>hello</td>";    
+
+				// 해결2: 백틱사용
+				// 더 직관적으로 해결이 가능하다
+				let table2 = `
+								  <table>
+									  <tr> 
+										 <td>hello</td>
+										 <td>${name}</td>    
+									`;
+				
+		나. 수치관련: Number
+		https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Number
+		
+		다. 날짜관련: Date
+		https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Date
+		
+		라. 배열: Array( 자바에서 list가 주로 사용된것과 다르게 JS에서는 배열이 권장된다)(*)
+		https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Date
+			
+			- for(자바 향상된 for)	   
+				for(var x of arr){} ==> 값 반환
+				for(var x in arr){} ==> index값 반환
+			
+			- array.push(값) / array.pop()
+			  : 배열 내부가 스택으로 관리된다.
+			  
+			- array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+		  
+			  array.splice(0,3) ==> 0부터시작해서 3개 삭제
+			  array.splice(0,3,10,20) ==> 0부터시작해서 3개 삭제하고 10과 20 삽입
+			  array.splice(0,0,10,20) =>  0부터 10과 20 삽입
+			  
+			- fill(value),fill(value, start),fill(value, start, end)
+			  : value = 채울값, start = 시작점, end = 끝지점
+			
+			- array.join("구분자"): array의 문자열을 구분자로 이어 하나의 문자열로 출력
+		
+		마. Json(JavaScript Object Notation) 표현식: {key:value} (*)
+			가. 특징
+				- value가 모든 데이터가 가능
+			
+
+	2) 브라우저 관련 객체( BOM: Browser Object Model )
+		- 브라우저가 열리면 자동으로 생성되는 객체이다.
+		
+		- window객체( <== window 이용해서 참조 )
+			: 웹브라우저 창 관련 객체, 
+			  전역객체(*) // Object(최상위 객체)아래 웹브라우저 계열 중 최상위객체
+			
+			ex. Window window = new window();
+			
+			==> screen, history, location, naviagtor, document는 Window객체의 속성으로 제공함.
+			window.screen , window.history 형식으로 사용되어한다.
+			하지만 전역객체이므로 생략이 가능하다.
+			
+			가. setTimeout(function(){}, delay);
+				:단 한번만 실행됨
+				ex.
+					function run(){       
+						setTimeout(function(){
+						  console.log("2초뒤에 출력됨");
+						}, 2000);
+					}
+			
+			나. etInterval(function(){}, delay);
+				:반복실행 -> clearInterval로 정지
+		 
+			다. window.open(url?: string | URL, target?: string, features?: string)
+				: 새창에 URL을 연다(window.close()는 자기 자신창 닫기)
+				ex.		
+					var childWin;
+					// 새창(자식창)을 childWin 변수에 저장
+					function new_win() {			
+					  childWin = window.open("target.html", "", "width=200, height=300, left=200, top=200");        
+					}
+					
+					// 자기 자신을 닫기
+					function self_close() {
+					  window.close();
+					}
+					
+					// 자식창 닫기
+					function child_close() {
+					  childWin.close();
+					}
+					
+		- Screen객체 	: 웹브라우저 화면 관련  객체( <== screen객체 이용해서 참조 )		
+		
+		- Histroy객체 	: 웹브라우저 뒤로/앞으로 관련 객체( <== histroy객체 이용해서 참조 )
+			hisotry.go(n) : n번째 history로 이동한다.
+			ex. 
+				hisotry.go(-1) : 뒤로 한번
+				hisotry.go(2) :  앞으로 두번
+				
+		- Location객체	: 웹브라우저 URL 관련 객체( <== location객체 이용해서 참조 )
+			location.href = "URL" : URL로 이동한다
+			
+		- Navigator객체: 웹브라우저 자체 정보 관련객체( <== navigator객체 이용해서 참조 )
+		
+	3) HTML 문서 관련 객체 (DOM: Document Object Model)
+		- Document 객체( <== document 이용해서 참조 )
+			ex. Document document = new Document();
+		- 웹브라우저에서 임의의 html파일이 보여질 때 자동으로 생성됨
+		- documet 객체를 통해 DOM의 node를 동적 핸들링이 가능하다.
+		- 원래는 window.document 로 사용해야 하지만 전역객체(window)를 생략한다			
+	
+-------------------------------------------------
+26.04.30
+
+6. 객체 (*)
+
+	1) 개념 
+		{key:value} : Json(JavaScript Object Notation) 표현식
+	  
+	2) 특징
+		- value가 모든 데이터가 가능 ex. 수치, 문자, 날짜, null, undefined, 배열, json, 함수, 클래스, ..
+		ex.
+		var person =	{	name:"홍길동",
+								age:20,
+								phone:["010","011"],
+								hobby:{
+											key:value,
+											key:value
+										},
+								getName:function(){return this.name;},
+								setName:function(n){this.name = n};
+							}
+		
+		# 접근방법 => .(dot) 또는 연관배열 ( ["key"] )
+		person.name;
+		person["name"]; <== 변수로 치환이 가능
+		
+		ex. 
+			var xxx= "name";
+			person[xxx];
+		
+		person.getName();
+		person.setName("이순신");
+		
+		# value값은 변수로 사용가능.
+		ex.
+			var name = '홍길동';
+			var age = 20;
+			phone = ["010","011"];
+			ver person = {	name,	// name:name, key와 value가 동일 하면 key만 지정가능
+								age,	// age:age
+								phone}	// phone:phone
+								
+		# value가 함수인 경우에는 자바의 메서드 처럼 축약가능
+		ex.
+		var person =	{	name:"홍길동",								
+								// getName:function(){return this.name;},
+								getName(){return this.name;},
+								// setName:function(n){this.name = n};
+								setName(n){this.name = n};
+							};
+							
+		
+		==> 아래와 같이 JSON의 특징 없이 선언 될 수도 있다.
+		var person = {	name,
+							age,
+							phone,
+							getName(){return this.name;},
+							setName(n){this.name = n;}	
+							};
+							
+		# key값은 변수로 사용가능
+		var xxx = "name";
+		ver person = {	[xxx]:"홍길동",		// name:"홍길동"
+							[xxx+"01"]:"이순신"	// name01:"이순신"
+							age:20,
+						 };
+						 
+		# JSON 작성시 함수앞에 set / get 키워드 지정가능
+			- 반드시 속석처럼 사용해야 된다. (*******)
+			var person = {	name,
+								age,
+								phone,
+								get  userName(){return this.name;},
+								set  userName(n){this.name = n;}	
+								};
+								
+		==> 코드를 통해 구분해야 한다.
+		person.userName = "홍길동";	// set
+		var xxx = person.userName;	// get
+		
+		# 중요 ****************
+		
+		"{key:value}" --------------> {key:value}
+		"[10,20]" ------------------> [10,20]
+		
+		=> 문자열 형태의 json/배열을 josn/배열 형태로 바꿈
+		JSON.parse(json(배열) 문자열)
+		
+		"{key:value}" <-------------- {key:value}
+		"[10,20]" <------------------ [10,20]
+		
+		=> json/배열을 문자열 형태로 바꾼다
+		JSON.stringify(json(배열))
+
+7. spread 연산자 (*) 	// [회고포인트] 불변객체와 spread
+	
+	문법: [...배열]
+			복사되는 형식으로 동작. 새로운 배열을 수정했을 때 원본 배열에 영향이 없음.
+	용도: 배열복사, 배열연결, 배열추가
+	
+	ex. 
+		var arr = [1,2,3];
+		var new_arr = [...arr]; // [1,2,3]; , 새로운 주소로 배열을 복사 == 깊은 복사
+		var new_arr = [10,20,30, ...arr];	// [10,20,30,1,2,3]
+						  [...arr, 10,20,30];	// [1,2,3,10,20,30]
+		var x = [1,2,3,4];
+		var x2 = [5,6,7];
+		
+		var x3 = [...x, ...x2]; //	[1,2,3,4,5,6,7]
+
+8. 함수 (function)
+	
+	1) 용도: 기능처리
+	2) 문법 2가지(*)
+		
+		가. 함수 선언식( 함수명이 있는, 이름이 있는 함수)
+			
+			<script>
+			함수명([값,...])	// 호출가능, <script> 태그에서 이미 생성되어 있다
+			function 함수명([파라미터, ...]){
+						문장;
+						[return 값;]
+					}
+			
+			호출: 함수명([값,...]);
+			생성시점: JS 실행시 생성됨 <script>가 실행될때
+			
+		나. 함수 표현식( 함수명이 없는, 이름 없는 함수 = 익명 함수)
+			
+			// 함수명([값,...])	// 호출불가
+			선언: 
+			var 함수명 = function([파라미터, ...]){
+								문장;
+								[return 값;]
+							 };
+			
+			호출: 변수명([값,...]);
+			생성시점: 코드가 실행될때 생성된다(var 함수명 = function 이 실행 될때)
+			
+	3) 특징
+		- 호출해야 실행됨.
+		- 호출후 호출한 곳으로 돌아옴.
+		- 호출 시 인자값 전달가능. 돌아올때 리턴값 반환 가능
+		- 함수의 파라미터 갯수가 일치하지 않아도 가능(**************))
+		 
+		  파라미터가 필요치보다 적으면 undefined  
+		  ==> default 파라미터를 통해 누락방지
+		  파라미터가 피료치보다 많으면 남는 파라미터는 누락
+		  ==> rest 파라미터를 통해 남는 데이터를 배열로 저장가능
+			
+		  ex
+		  function fun(){}
+		  function fun3(n,n2,n3){}
+		  
+		  fun(10); 	// 10누락
+		  fun3(10); //	n2,n3 -> undefined
+		  
+		  // default 파라미터
+		  function fun(n, n2 = "홍길동", n3 = 10) {}
+		  fun();	// undefined, "홍길동", 10
+		  
+		  // default + rest 혼합사용 가능
+		  function fun(n=10,n2=30, ...n3){}		  
+		  fun(20,30,40,8,5,6,7,8);	//20,30 array[40,8,5,6,7,8]
+		  
+		- spread를 통해 인자 전달 가능		
+		ex. 
+			function fun(n,n2){} 
+
+			var arr=[10,20];			
+			fun(...arr);  // spread 연산자
+
+	4) 일급객채 (first class) (*)
+		
+		function my(){}
+		
+		함수(my) 데이터있음
+		
+		var n = my; // 변수 에 저장
+		
+		fun(my);
+		ex. setTime(함수, 2000);
+			 setTime(function(){}, 2000);
+			 
+		funciton fun(){
+			return my;
+		}	
+	
+		- 개념: 함수를 데이터로 처리해서 함수를 변수에 저장/ 함수 호출시 인자값/ 함수의 리턴값 기능이 가능한 기능을 포함하는 객체 의미.
+		ex. 
+			function yyy() {
+			  console.log("yyy");
+			}		
+			function xxx(f) {
+			  f();
+			}
+			xxx(yyy); // 호출은 xxx()함수, 실제 실행되는 함수는 yyy()
+							 => 콜백함수(callback function)
+							 : 실행하려는 함수를 직접호출하지 않고 단지 호출하고자 하는 함수의 이름만
+								알려주면 시스템이 적절한 시점에 전달된 함수를 호출하는 동작의 함수.
+								
+			var yyy2 = function(){};
+			 function xxx2(){
+				// return function(){};
+				return yyy2;
+			 }
+		   var f = xxx2(); // f에는 yyy2가 리턴된다.
+			f() == yyy2()
+			
+	5) arrow 함수 ( 자바의 람다와 유사 )
+		- 함수 표현식의 축약표현
+		
+		가. 파라미터 없고 리턴없는 함수
+				var f = function(){console.log("fun");};
+				
+				# arrow 함수
+				var f = () =>{console.log("fun");};
+				var f = () = >console.log("fun");
+				
+		나. 파라미터 있고 리턴없는 함수
+				var f = function(n){console.log("fun");};
+				var f = function(n,n2){console.log("fun");};
+				
+				# arrow 함수
+				var f = n => console.log("fun");
+				var f = (n,n2) => console.log("fun");				
+				
+		다. 파라미터 없고 리턴있는 함수
+				var f = function(){return 100;};
+				
+				# arrow
+				var f = () => return 100;
+				var f = () => 100;
+				
+		라. 파라미터 있고 리턴있는 함수
+				var f = function(n, n2){return n+n2;};
+				
+				# arrow
+				var f = (n,n2) => return n+n2;
+				var f = (n,n2) => n+n2;
+				
+	6) generator 함수
+		
+		가. 문법
+			function* xxx(){
+				문장1;
+				yield
+				문장2;
+				문장3;
+			}
+			var gen = xxx();
+			gen.next())
+			
+		나. 특징
+		- 함수호출시 실행되지 않고 generator 객체를 반환하고 실행하기 위해서 next() 호출해야 됨.
+		
+		- yield 키워드 이용해서 시행하고자 하는 작업을 분리해서 실행가능
+		
+		다. 목적
+		- 작업이 많아서 분리해 작업할때.
+	
+	7) 즉시 호출 함수: 함수명() 을 사용하지 않아도 함수 호출 가능.
+		(function () {
+        문장
+      })();
+		
+9. 이벤트 처리
+	
+	1) 개념
+		- 버튼, 위젯에 마우스로 클릭 등과 같이 작업시 특정 동작할 수 있도록 처리하는방법.
+		ex. 버튼클릭시 화면 닫기
+		
+	2) 용어
+		이벤트: 사용자 및 시스템(load)의 동작 의미
+		이벤트 소스: 이벤트가 발생된 위젯 의미 
+			ex. 버튼
+			
+		이벤트 핸들러: 이벤트가 발생될때 처리하느 함수 의미.
+		이벤트 타입: 이벤트 종류 의미 
+			ex. click, dbclick,  keyup, keydown, mouseover, ....
+			ex.
+				<button>ok</button>
+						|
+						|	연결하는 방법: 이벤트처리라고 부름
+						|
+				function fun(){}
+				
+		이벤트 처리 방법 2가지
+		# event 객체를 통해 이벤트가 발생하는 태그에 대한 정보를 가져올 수 있다.
+		  event => 발생한 이벤트와 관련된 모든 정보
+		  event.taget => 이벤트가 발생한 태그
+			가. DOM Level 0
+				- 인라인 방식: 태그 안에서 처리
+					ex.
+						<button 속성명="함수명" ...></button>
+						# 속성명 
+						onclick -> <button onclick="fun()">ok</button> // ok를 눌렀을때 onclick이 활성화
+						
+				- 고전 방식 : 태그 밖에서 처리( 태그와 이벤트 분리 )
+				ex.
+					<script>
+						function fun(){}
+						// 이벤트 연결 ( DOM 방식 )
+						
+						// document.querySelectorAll("선택자") => 여러개, 배열로 리턴된다.
+						// document.querySelector("css선택자");						
+						var btn = document.querySelector("#btn1");  => 첫번째 이슈: btn = null
+						
+						// btn.onclick = fun();	=> 두번째 이슈: 직접 호출하는 함수 
+															== 결과를 리턴한다(함수의 리턴이 없으로 이때는 undefined).
+						btn.onclick = fun;		=> 함수명만 지정(callback 함수)
+					</script>
+					
+					<button id="btn1" >ok</button>
+					<button id="btn">ok2</button>
+					
+					// <script>에서 아직 만들어지지 않은 <body> 안의 button에 접근하기 때문에 btn은 null 이다. ==> <script></script>는 body의 <button> 아래에 위치 해야한다.
+					// 또는 onload를 통해 <body>가 생성된 다음에 함수로 불러온다
+					// onload => <body>내의 태그가 생성되고 호출된다. 
+					ex. 
+						<script>
+							function ok() {}
+							function init() {
+							  // 이벤트연결
+							  var btn = document.querySelector("#x");
+							  console.log(btn);
+							  btn.onclick = fun;
+							}
+						</script>
+						</head>
+						<body onload="init()">
+							<button id="x">ok</button>
+						</body>
+						
+					===================================================
+					ex. 
+						<script>
+							function ok() {}
+							
+							window.onload = init;
+							
+							function init() {
+							  // 이벤트연결
+							  var btn = document.querySelector("#x");
+							  console.log(btn);
+							  btn.onclick = fun;
+							}
+						</script>
+						</head>
+						<body>
+							<button id="x">ok</button>
+						</body>
+						
+			나. DOL Level 2
+			
+				function fun(){}
+				var btn = document.querySelector("#x");
+				// btn.onclick=fun
+				// btn.addEventListener("이벤트타임", 콜백함수);
+				btn.addEventListener("click", fun);
+
+				<button id="x">ok임/button>
+				
+10. DOM 처리 (*)
+
+	1) 개념
+		JS에서 html tag에 접근해서 수정, 삭제, 조회, 추가 등 작업 처리 의미
+	
+	2) 접근방법
+		
+		var 변수 = document.getElemetnById("아이디값");
+		
+		var 변수 = document.querySelector("css선택자");		// 값으로 반환
+		var 변수 = document.querySelectorAll("css선택자"); // 배열로 반환
+		
+		ex.  <button id = "x" <============= document.querySelector("#x")
+														 Button 객체 반환되고 이 객체안의 속성/메서드를 찾아서 활용하자
+														  
+				<p>
+				<p> <========================= document.querySelectorAll("p"), 배열로 반환
+				<p>									 p 태그 객체반환되고 이 객체안의 속성/메서드를 찾아서 활용하자
+				
+11. 객체분해할당( destructuring )
+
+	1) 개념:
+		- 배열 또는 객체(JSON)를 매우 쉽게 요소를 접근하는 방법.
+	
+		ex1. 배열
+			
+			var arrr = [10,20];
+			
+			var x1 = arr[0];
+			var x2 = arr[1];
+			
+			#객체분해할당
+			var [x1, x2] = [10,20];
+		
+		ex2. json
+			
+			var json = {name:"홍길동", age:20};
+			var name = json.name;	// json["name"]
+			var age = json.age;		// json["age"]
+			
+			# 객체분해할당
+			var {key1, key2} = {key1:value1 key2:value2};
+			
+			var {name, age} = {name:"홍길동", age:20};
+			var {name:username, age:userage} = {name:"홍길동", age:20};
+			//  key:별칭 -> 별칭으로 값을 가져온다}
+	

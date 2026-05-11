@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Insert title here</title>
+    <script>
+      window.onload = init;
+      function init() {
+        let rows = document.querySelectorAll("tr");
+        for (let i = 1; rows.length; i++) {
+          let link = rows[i].cells[0].querySelector("a");
+
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            let post = rows[i].cells[0].textContent;
+            let address = rows[i].cells[1].textContent;
+
+            opener.document.querySelector("#post").value = post;
+            opener.document.querySelector("#address").value = address;
+            window.close();
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <table border="1">
+      <tr>
+        <th>우편번호</th>
+        <th>주소</th>
+      </tr>
+      <tr>
+        <td><a href="">12345</a></td>
+        <td>서울시 강남구 XXX 아파트</td>
+      </tr>
+      <tr>
+        <td><a href="">99999</a></td>
+        <td>경기도 고양시 ZZZ 아파트</td>
+      </tr>
+    </table>
+  </body>
+</html>

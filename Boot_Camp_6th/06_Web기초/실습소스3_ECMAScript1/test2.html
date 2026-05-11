@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      function ok() {
+        console.log("ok");
+      }
+      // onload="inint()" 대신에
+      window.onload = init;
+
+      function init() {
+        // 이벤트연결
+        var btn = document.querySelector("#x");
+        // btn.onclick=fun
+        // btn.addEventListenser("이벤트타임", 콜백함수);  ==> =
+        btn.addEventListener("click", ok);
+      }
+    </script>
+  </head>
+
+  <body>
+    <button id="x">ok</button>
+  </body>
+</html>
