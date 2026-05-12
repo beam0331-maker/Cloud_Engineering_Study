@@ -1,0 +1,18 @@
+package exam2.insert;
+
+public class DeptInsertMain {
+
+	public static void main(String[] args) {
+		// 사용자가 deptno, dname, loc 입력함
+		
+		int deptno = 51;
+		String deptno = "인사";
+		String deptno = "제주";
+		
+		DeptDTO dto = new DeptDTO(51, "인사", "제주");
+		DeptService service = new DeptServiceImpl();
+		service.
+		
+	}// main end
+
+}//class end

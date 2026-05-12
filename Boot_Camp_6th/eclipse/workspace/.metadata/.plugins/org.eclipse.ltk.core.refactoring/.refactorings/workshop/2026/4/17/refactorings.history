@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;workshop/JdbcWorkShop/src/workShop_01_2/StudentGrade.java&apos; to &apos;StudentGradeDTO.java&apos;" description="Rename resource &apos;StudentGrade.java&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="JdbcWorkShop/src/workShop_01_2/StudentGrade.java" name="StudentGradeDTO.java" stamp="1776771355556" updateReferences="true"/>
+</session>

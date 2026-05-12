@@ -1,0 +1,28 @@
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@page import="com.dto.BoardDTO"%>
+<%
+BoardDTO dto = (BoardDTO) request.getAttribute("retrieve");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>글자세히보기</title>
+</head>
+<body>
+	<h1>글자세히보기</h1>
+	<form action="BoardUpdateServlet" method="get">
+		글번호: <%= dto.getNum()%><br>
+		조회수: <%= dto.getReadcnt()%><br>
+		작성일: <%= dto.getWriteday()%><br>
+		제목: <input type="text" name="title" value="<%= dto.getTitle()%>"><br>
+		작성자:<input type="text" name="author" value="<%= dto.getAuthor()%>"><br> 
+		내용:	<textarea name="content" rows="10" cols="10"><%= dto.getContent()%></textarea>
+		<br> <input type="submit" value="저장">
+	</form>
+	
+	<a href="BoardListServlet">목록보기</a>
+</body>
+</html>

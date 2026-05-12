@@ -1,0 +1,20 @@
+package com.config;
+
+import java.io.InputStream;
+import java.util.ResourceBundle;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+public class MySqlSessionFactory {
+	
+	static {
+		String resource = "com/config/configuration.xml";
+		InputStream inputStream = null
+		try {
+			inputStream = ResourceBundle.getResourceAsStream(resource);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+	}// ens ststic
+}// end class

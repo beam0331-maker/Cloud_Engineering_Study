@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-
+//mybatis.org//DTD
+ Mapper 3.0//EN"
+  "
+https://mybatis.org/dtd/mybatis-3-mapper.dtd
+">
+<mapper namespace="com.config.productMapper">
+<select id="list" resultType="ProductDTO" >
+	select name, id, amount
+	from products
+</select>
+<insert id="insert" parameterType="ProductDTO">
+	insert into products(name, id, amount)
+	VALUES(#{name},#{id},#{amount})
+</insert>
+<update id="update" parameterType="ProductDTO">
+	update products
+	set amount = amount + #{amount}
+	where id = #{id}
+</update>
+<select id="idlist" resultType="string">
+	select id
+	from products
+</select>
+<delete id="delete" parameterType="string">
+	delete from products
+	where id = #{id}
+</delete>
+<delete id="alldelete">
+	delete from products
+</delete>
+</mapper> 

@@ -1,0 +1,16 @@
+package com.service;
+
+import java.util.List;
+
+import com.dto.DeptDTO;
+
+public class DeptServiceImpl implements DeptService{
+
+	@Override
+	public List<DeptDTO> findAll() {
+		List<DeptDTO> list = 
+		return list;
+	}
+	
+
+}

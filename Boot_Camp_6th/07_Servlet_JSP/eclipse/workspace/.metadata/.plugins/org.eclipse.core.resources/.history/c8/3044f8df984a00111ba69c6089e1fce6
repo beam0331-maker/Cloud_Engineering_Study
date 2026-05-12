@@ -1,0 +1,12 @@
+package com.service;
+
+import com.dao.BoardDAO;
+
+public class BoardServiceImpl implements BoardService {
+	
+	BoardDAO dao;
+	public void setDao(BoardDAO dao) {
+		this.dao = dao;
+	}
+
+}

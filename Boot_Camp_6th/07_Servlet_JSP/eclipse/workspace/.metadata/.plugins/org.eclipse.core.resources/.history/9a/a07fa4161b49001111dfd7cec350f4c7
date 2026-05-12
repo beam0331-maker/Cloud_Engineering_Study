@@ -1,0 +1,10 @@
+package com.service;
+
+import java.util.List;
+
+import com.dto.DeptDTO;
+
+public class DeptServiceImpl {
+	
+	public abstract List<DeptDTO> findAll();
+}

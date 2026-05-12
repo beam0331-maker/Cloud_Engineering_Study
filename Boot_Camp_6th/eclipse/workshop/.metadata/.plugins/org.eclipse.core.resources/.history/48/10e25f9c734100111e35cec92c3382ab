@@ -1,0 +1,22 @@
+package com.service;
+
+import java.sql.Connection;
+import java.util.HashMap;
+import java.util.List;
+
+import com.dao.StudentDAO;
+import com.dto.StudentDTO;
+
+public interface StudentService {
+	
+	
+	public abstract void setDao(StudentDAO dao);
+	public abstract List<StudentDTO> list();
+	public abstract List<StudentDTO> nameSearch(String findName);
+	public abstract List<StudentDTO> dataSearch(HashMap<String, Integer> map);
+	public abstract List<StudentDTO> stuNoSearch(List<String> stuNoList);
+	public abstract int absUpdate(List<String> stuNoList);
+	public abstract int capUpdate();
+	public abstract List<HashMap<String, Object>> stuGradeSearch(String stuNo);
+	public abstract List<StudentDTO> paging(int posts);
+}

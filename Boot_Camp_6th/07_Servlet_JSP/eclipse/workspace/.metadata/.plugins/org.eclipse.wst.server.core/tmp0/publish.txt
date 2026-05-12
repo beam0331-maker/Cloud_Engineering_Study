@@ -1,0 +1,7 @@
+#Tomcat publish data
+#Sun May 10 17:53:27 KST 2026
+org.eclipse.jst.jee.server\:Test=C\:\\cloud_engineering\\Boot_Camp_6th\\07_Servlet_JSP\\apache-tomcat-10.1.54\\webapps\\Test
+org.eclipse.jst.jee.server\:sample12_board=C\:\\cloud_engineering\\Boot_Camp_6th\\07_Servlet_JSP\\apache-tomcat-10.1.54\\webapps\\sample12_board
+org.eclipse.jst.jee.server\:servlet_exam01_stu=C\:\\cloud_engineering\\Boot_Camp_6th\\07_Servlet_JSP\\apache-tomcat-10.1.54\\webapps\\servlet_exam01_stu
+org.eclipse.jst.jee.server\:servlet_exam02_stu=C\:\\cloud_engineering\\Boot_Camp_6th\\07_Servlet_JSP\\apache-tomcat-10.1.54\\webapps\\servlet_exam02_stu
+org.eclipse.jst.jee.server\:servlet_exam03_stu=C\:\\cloud_engineering\\Boot_Camp_6th\\07_Servlet_JSP\\apache-tomcat-10.1.54\\webapps\\servlet_exam03_stu

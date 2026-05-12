@@ -1,0 +1,136 @@
+package com.service;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.config.MySqlSessionFactory;
+import com.dao.StudentDAO;
+import com.dto.StudentDTO;
+
+public class StudentServiceImpl implements StudentService {
+
+	private StudentDAO dao;
+
+	public void setDao(StudentDAO dao) {
+		this.dao = dao;
+	}
+
+	// SqlSession session = MySqlSessionFactory.getSession();
+
+	@Override
+	public List<StudentDTO> list() {
+		List<StudentDTO> list = null;
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			list = dao.list(session);
+		} finally {
+			session.close();
+		} // try-catch-finally end
+		return list;
+	}// list() end
+
+	@Override
+	public List<StudentDTO> nameSearch(String findName) {
+		List<StudentDTO> list = null;
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			list = dao.nameSearch(findName, session);
+		} finally {
+			session.close();
+		} // try-catch-finally end
+		return list;
+	}// nameSerch end
+
+	@Override
+	public List<StudentDTO> dataSearch(HashMap<String, Integer> map) {
+		List<StudentDTO> list = new ArrayList<StudentDTO>();
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			list = dao.dataSearch(map, session);			
+		}finally {			
+			session.close();
+		}//try-catch-finally end	
+		
+		return list;
+	}// dateSearch end		
+
+	@Override
+	public List<StudentDTO> stuNoSearch(List<String> stuNoList) {
+		List<StudentDTO> list = new ArrayList<StudentDTO>();
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {			
+			list = dao.stuNoSearch(stuNoList, session);			
+		}finally {
+			session.close();
+		}//try-catch-finally end
+		
+		
+		return list;
+	}// dateSearch end	
+//	
+//	@Override
+//	public int absUpdate(String[] stuNoArr) {
+//		int result = 0;
+//		Connection con = null;
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			result = dao.absUpdate(stuNoArr,con);			
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (Exception e2) {
+//				e2.printStackTrace();
+//			}
+//		}//try-catch-finally end
+//		return result;
+//	}// absUpdate end
+//	
+//	@Override
+//	public int capUpdate() {
+//		Connection con = null;
+//		int result = 0;
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			result = dao.capUpdate(con);
+//		} catch (SQLException e) {
+//			// TODO: handle exception
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (SQLException e2) {
+//				// TODO: handle exception
+//			}
+//		}// try -cathch-finally end
+//		
+//		return result;
+//	}// capUpdate end
+//	
+//	@Override
+//	public List<StudentDTO> stuNoSearch(int in) {
+//		Connection con = null;
+//		List<StudentDTO> gradeList = new ArrayList<StudentDTO>();
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			gradeList = dao.stuNoSearch(in, con);
+//						
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (SQLException e2) {
+//				e2.printStackTrace();
+//			}
+//		}
+//		return gradeList;
+//	}
+
+}// class end

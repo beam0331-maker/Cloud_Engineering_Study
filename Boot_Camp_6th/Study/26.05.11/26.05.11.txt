@@ -42,7 +42,7 @@ https://spring.io/
 		
 		- Spring: @Transactional 어노테이션 사용.
 			
-			@Transactional <== DML이 성공하면 자동으로 commit하고 실패(에러발생)하면 자동으로 rollback처리됨.
+			@Transactional <== DML이 성공하면 자동으로 commit하고 실패(runtime 계열 에러발생)하면 자동으로 rollback처리됨.
 			public int transacction(...){
 				insert문 처리
 				delete문 처리
@@ -75,9 +75,9 @@ https://spring.io/
 			
 			ex. 클라이언트가 웹브라우저 이외의 장치가 많이 나옴. ( 핸드폰, 테블릿, 냉장고, TV, ... )
 			
-											요청 ( JSON )
+									요청 ( JSON )
 			클라이언트	<------------------------------>	서버
-			- 웹브라우저  				응답( 다양한 클라이언트가 인식할 수 있는 공통포맷 ==> JSON)
+			- 웹브라우저  		응답( 다양한 클라이언트가 인식할 수 있는 공통포맷 ==> JSON)
 			- 핸드폰
 			- 자동차
 			- 냉장고
@@ -146,7 +146,7 @@ https://spring.io/
 			BeanFactory (인터페이스)
 				  |
 				  |
-			ApplicationContext(인터페페이스)
+			ApplicationContext(인터페이스)
 				  |
 				  |
 			AnnotationConfigaApplicationContext (Java SE 환경의 IoC Container)
@@ -157,7 +157,7 @@ https://spring.io/
 	5) 의존성 주입( Dependencty Injection : DI)
 		https://docs.spring.io/spring-framework/reference/6.2/core/beans/dependencies/factory-collaborators.html
 			
-		- 개념: 임의의 클래스에서 다른 클래스를 참조할 때, 직접 생성해서 참조하는 거시 아니고 
+		- 개념: 임의의 클래스에서 다른 클래스를 참조할 때, 직접 생성해서 참조하는 것이 아니고 
 				  외부에서 생성한 후에 생성자 또는 setter메서드를 이용해서 설정하고 사용하는 방법을 의미함.
 				  
 			가. 생성자 주입( Constructor-based Dependency Injection ) (권장)
@@ -166,13 +166,14 @@ https://spring.io/
 	
 				BoardDAO dao;
 				
-				# BoardListSevlet에서 생성했는데, 이 영할이 IoC Container 역할
-				BoardService service = new BoardServiceImpl(new BoardDAO());
-				
 				// 생성자 주입
 				public BoardServiceImpl(BoardDAO dao) {
 					this.dao = dao;
 				}
+				
+				# BoardListSevlet에서 생성했는데, 이 역할이 IoC Container 역할
+				BoardService service = new BoardServiceImpl(new BoardDAO());				
+				
 				
 			나. set 메서드 주입 ( Setter-based Dependency Injection )
 			
@@ -214,7 +215,7 @@ https://spring.io/
 	나. 설정 자동화: 특정 starter(*.jar)를 설정하면 SpringBoot가 알아서 자동으로 환경설정을 맞춰줌.
 						  ex. XXX-stater-web 설정하면 자동으로 내장 tomcat을 설치
 	
-	다. 독립적으로 실행한 jar 지원.
+	다. 독립적으로 실행하는 jar 지원.
 		- Java SE환경: 어플리케이션 개발 후 배포하기 위해서 jar 파일로 압축함.(빌드한다고함)
 		- Java EE환경: 어플리케이션 개발 후 배포하기 위해서 war 파일로 압축함.(빌드한다고함)
 		
@@ -308,7 +309,7 @@ https://spring.io/
 		- 빌드된 jar 실행
 			java -jar xxx.jar
 			
-4. 의존성 설정
+4. 의존성 설정 //[더 찾아볼것]
 
 	- build.gradle 파일에 의존성을 설정한다.
 	  자동으로 관련된 jar파일들이 다운로드 됨.

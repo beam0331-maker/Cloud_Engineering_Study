@@ -1,0 +1,14 @@
+package com.dto;
+
+import org.apache.ibatis.type.Alias;
+
+@Alias("DeptDTO")
+public class DeptDTO {
+
+	int deptno;
+	String dname;
+	String loc;
+	
+	
+	
+}

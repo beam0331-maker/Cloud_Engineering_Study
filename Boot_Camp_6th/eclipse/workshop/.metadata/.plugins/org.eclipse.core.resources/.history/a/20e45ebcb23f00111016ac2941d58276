@@ -1,0 +1,172 @@
+package com.service;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.dao.StudentDAO;
+
+public class StudentServiceImpl implements StudentService {
+
+
+//	
+//	private StudentDAO dao;
+//
+//	public void setDao(StudentDAO dao) {
+//		this.dao = dao;
+//	}
+//
+	@Override
+	public List<StudentDAO> list() {
+		List<StudentDTO> list = null;
+		Connection con = null;		
+			
+		
+		try {
+			con = DriverManager.getConnection(url, userid, passwd);
+			list = dao.list(con);
+		} catch (SQLException e) {
+			System.out.println("StudentServiceImpl : " + e.getMessage());
+		}finally {
+			
+			try {
+				if(con != null) con.close();
+				
+			} catch (Exception e2) {
+				System.out.println("Connecton Close err : " + e2.getMessage());
+			}
+			
+		}// try-catch-finally end
+		
+		return list;
+	}// list() end
+//	
+//	@Override
+//	public List<StudentDTO> nameSearch(String findName) {
+//		List<StudentDTO> list = null;
+//		Connection con = null;	
+//		
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			list = dao.nameSearch(findName, con);
+//			
+//		} catch (SQLException e) {
+//			System.out.println("StudentServiceImpl : " + e.getMessage());
+//		}finally {
+//			
+//			try {
+//				if(con != null) con.close();
+//				
+//			} catch (Exception e2) {
+//				System.out.println("Connecton Close err : " + e2.getMessage());
+//			}
+//			
+//		}// try-catch-finally end
+//		
+//		return list;
+//	}// nameSerch end
+//	
+//	@Override
+//	public List<StudentDTO> dateSearch(int start, int end) {
+//		List<StudentDTO> list = new ArrayList<StudentDTO>();
+//		Connection con = null;
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			list = dao.dateSearch(start, end, con);			
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (Exception e2) {
+//				e2.printStackTrace();
+//			}
+//		}//try-catch-finally end
+//		
+//		
+//		return list;
+//	}// dateSearch end	
+//	
+//	@Override
+//	public List<StudentDTO> stuNoSearch(String[] stuNoArr) {
+//		List<StudentDTO> list = new ArrayList<StudentDTO>();
+//		Connection con = null;
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			list = dao.stuNoSearch(stuNoArr, con);			
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (Exception e2) {
+//				e2.printStackTrace();
+//			}
+//		}//try-catch-finally end
+//		
+//		
+//		return list;
+//	}// dateSearch end	
+//	
+//	@Override
+//	public int absUpdate(String[] stuNoArr) {
+//		int result = 0;
+//		Connection con = null;
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			result = dao.absUpdate(stuNoArr,con);			
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (Exception e2) {
+//				e2.printStackTrace();
+//			}
+//		}//try-catch-finally end
+//		return result;
+//	}// absUpdate end
+//	
+//	@Override
+//	public int capUpdate() {
+//		Connection con = null;
+//		int result = 0;
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			result = dao.capUpdate(con);
+//		} catch (SQLException e) {
+//			// TODO: handle exception
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (SQLException e2) {
+//				// TODO: handle exception
+//			}
+//		}// try -cathch-finally end
+//		
+//		return result;
+//	}// capUpdate end
+//	
+//	@Override
+//	public List<StudentDTO> stuNoSearch(int in) {
+//		Connection con = null;
+//		List<StudentDTO> gradeList = new ArrayList<StudentDTO>();
+//		try {
+//			con = DriverManager.getConnection(url, userid, passwd);
+//			gradeList = dao.stuNoSearch(in, con);
+//						
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}finally {
+//			try {
+//				if(con != null) con.close();
+//			} catch (SQLException e2) {
+//				e2.printStackTrace();
+//			}
+//		}
+//		return gradeList;
+//	}
+	
+}// class end

@@ -1,0 +1,42 @@
+package com.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+
+@WebServlet("/LoginServlet")
+public class LoginServlet extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		String userid = request.getParameter("userid");
+		String passwd = request.getParameter("passwd");
+		
+		// DB연동해서 검증했다고 가정한다.
+		if("admin".equals(userid)) {
+			// 로그인정보가 모두 일치해서 성공한 경우
+			// 공유할 데이터를 세션에 저장
+			
+			// 1. 세션얻기
+			HttpSession session = request.getSession();
+			
+			// 2. 세션 데이터 저장
+			session.setAttribute("userid", "admin");
+			session.setAttribute("username", "홍길동");
+			
+			// 3. 요청위임
+			response.sendRedirect("loginSuccess.jsp");
+			
+		} else {
+			// 로그인 정보가 틀려서 실패한 경우
+			response.sendRedirect("error.jsp");
+		}
+		
+	}
+
+}

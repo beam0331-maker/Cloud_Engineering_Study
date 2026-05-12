@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>1. reqest.getParmater</h1>
+	<form action="타겟(서블릿의 메핑값)" method="GET|POST">
+				이름<input type="text" name="username">
+				나이<input type="text" name="age">
+				<input type="submit" value="전송">
+			</form>
+</body>
+</html>

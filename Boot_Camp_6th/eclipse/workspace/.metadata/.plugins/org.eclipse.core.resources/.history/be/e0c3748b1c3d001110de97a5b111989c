@@ -1,0 +1,19 @@
+package exam2.insert;
+
+public class DeptDTO {
+	private int deptno;
+	private String dname;
+	private String log;
+	
+	public DeptDTO() { 
+	}
+
+	public DeptDTO(int deptno, String dname, String log) {
+		this.deptno = deptno;
+		this.dname = dname;
+		this.log = log;
+	}
+	
+	
+	
+}

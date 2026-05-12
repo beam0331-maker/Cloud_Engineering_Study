@@ -1,0 +1,13 @@
+package com.service;
+
+import com.dao.DeptDAO;
+
+public class EmpServiceImpl implements EmpService {
+	
+	DeptDAO dao;
+	
+	public void setDao(DeptDAO dao) {
+		this.dao = dao;
+	}
+	
+}

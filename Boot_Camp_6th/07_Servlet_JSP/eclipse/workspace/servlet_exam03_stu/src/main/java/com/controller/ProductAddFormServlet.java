@@ -1,0 +1,32 @@
+package com.controller;
+
+import java.io.IOException;
+import java.util.List;
+
+import com.dao.ProductDAO;
+import com.dto.Product;
+import com.service.Service;
+import com.service.ServiceImpl;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+
+
+@WebServlet("/ProductAddFormServlet")
+public class ProductAddFormServlet extends HttpServlet {
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+	response.sendRedirect("productAddForm.jsp");
+		
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
+
+}

@@ -1,0 +1,7 @@
+package com.service;
+
+import com.dao.ProductDAO;
+
+public interface ProductService  {
+	void setDAO(ProductDAO dao);
+}

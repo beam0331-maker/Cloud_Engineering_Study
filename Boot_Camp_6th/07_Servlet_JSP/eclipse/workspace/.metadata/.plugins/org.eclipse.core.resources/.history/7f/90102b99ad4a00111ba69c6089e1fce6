@@ -1,0 +1,32 @@
+package com.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.dto.BoardDTO;
+import com.mysql.cj.Session;
+
+public class BoardDAO {
+	
+	public List<BoardDTO> list(SqlSession session){
+		List<BoardDTO> list = session.selectList("com.config.BoardMapper.list");
+		return list;
+	}// end list
+	
+	public int write(SqlSession session , BoardDTO dto) {
+		int n = session.insert("com.config.BoardMapper.write", dto);
+		return n;
+	}	
+	
+	public BoardDTO retireve(SqlSession session , int num) {
+		BoardDTO dto = session.selectOne("com.config.BoardMapper.retrieve", num);
+		return dto;
+	}
+	
+	public int readcnt(SqlSession session , int num) {
+		int n = session.update("com.config.BoardMapper.readcnt", num);
+		return n;
+	}
+	
+}

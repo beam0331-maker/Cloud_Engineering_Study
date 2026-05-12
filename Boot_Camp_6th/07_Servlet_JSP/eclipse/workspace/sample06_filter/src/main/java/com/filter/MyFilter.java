@@ -1,0 +1,26 @@
+package com.filter;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpFilter;
+import java.io.IOException;
+
+//@WebFilter("/*")
+public class MyFilter implements Filter {
+       
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		
+		// 서블릿이 요청받기 전 작업구현( 요청필터라고 부름 )		
+		System.out.println("Myfillter, befor servlet request");
+		
+		chain.doFilter(request, response);
+		
+		// 서블릿이 요청받은 후 작업 구현 ( 응답 필터라고 부름 )
+		System.out.println("Myfillter, after servlet request");
+	}
+}

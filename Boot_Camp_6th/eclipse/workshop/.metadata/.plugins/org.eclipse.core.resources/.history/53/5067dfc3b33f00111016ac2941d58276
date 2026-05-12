@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.config.EmpMapper">  
+	
+	<resultMap id="userResultMap" type="EmpDTO">
+		<!-- property: 변수명, column: 컬럼명 -->
+		<!-- id => PK 설정 -->
+		<id property="empno" column="empno"/>
+		<result property="username" column="ename"/>
+		<result property="job" column="job"/>
+		<result property="mgr" column="mgr"/>
+		<result property="hiredate" column="hiredate"/>
+		<result property="salary" column="sal"/>
+		<result property="commission" column="comm"/>
+		<result property="deptno" column="deptno"/>	
+	</resultMap>
+	
+	<select id="list" resultType="list">
+		select
+			STUDENT_NO,
+			DEPARTMENT_NO,
+			STUDENT_NAME,
+			rpad(substr(STUDENT_SSN,1,8),14,'*') as STUDENT_SSN,
+			concat(substr(STUDENT_ADDRESS,1,10),'...') as STUDENT_ADDRESS,
+			date_format(ENTRANCE_DATE, '%Y/%m/%d') as ENTRANCE_DATE,
+			ABSENCE_YN,
+			COACH_PROFESSOR_NO
+			from tb_student	
+	</select>
+	
+
+</mapper>

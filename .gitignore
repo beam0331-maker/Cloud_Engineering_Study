@@ -1,58 +1,60 @@
-### 1. OS & 공통 임시 파일 ###
+### 1. OS & 시스템 임시 파일 ###
 Thumbs.db
 *.log
-*.temp
+*.bak
+*.exe
+*.lnk
 .DS_Store
-local.properties
-*txt.bak
-*.zip
 
-### 2. IDE 설정 (IntelliJ, Eclipse, VS Code 합치기) ###
-# IntelliJ: 개인 설정만 제외 (공통 설정은 공유 가능하게)
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/dictionaries
-.idea/shelf/
-.idea/mysql/
-.idea/dataSources/
-.idea/httpRequests/
-*.iml
-*.iws
-*.ipr
+### 2. 빌드 결과물 및 도구 설정 (IDE/라이브러리) ###
+# 컴파일 및 빌드 부산물
+bin/
+build/
+out/
+target/
+.gradle/
+tmp/
 
-# Eclipse & VS Code
+# IDE 및 도구 설정 (IntelliJ, Eclipse, VS Code)
+.idea/
 .metadata/
 .settings/
 .project
 .classpath
 .factorypath
 .vscode/
-!.vscode/settings.json
+*.iml
 
-### 3. Java & Spring Boot & Gradle ###
-*.class
-*.exe
-# JAR 제외하되 Wrapper는 살리기
+# 외부 라이브러리 및 압축 파일 (직접 추가된 항목)
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
+*.zip
+*.pdf
 
-.gradle/
-build/
-out/
-bin/
-tmp/
+# Eclipse 프로그램 자체 (프로젝트 폴더 내 설치 방지)
+**/eclipse/
+**/eclipse-ee/
+**/eclipse-se/
 
-### 4. 학습용 특수 규칙 (작성하신 부분 최적화) ###
-/Algorithm_Study/*
-!/Algorithm_Study/src/
+### 3. 화이트리스트 전략 (모든 폴더의 src만 추적) ###
+# 모든 파일/폴더를 일단 추적 제외
+/*
 
-/Boot_Camp_6th/MySQL/*.pdf
-/Boot_Camp_6th/MySQL/workshop/*.png
-/Velog_Backup/프롬프터/
-/Boot_Camp_6th/04_Jdbc/workshop/
+# 최상위 루트 설정 파일 예외 허용
+!/.gitignore
+!/README.md
+!/build.gradle
+!/pom.xml
+!/gradle/
+!/gradlew
+!/gradlew.bat
 
-# Boot_Camp_6th/eclipse 관련 복잡한 규칙들
-/Boot_Camp_6th/eclipse/**/*
-!/Boot_Camp_6th/eclipse/workshop/
-!/Boot_Camp_6th/eclipse/workspace/
-!**/src/
+# 폴더 계층 구조 탐색 허용 (src를 찾기 위해 입구를 열어둠)
+!**/
+
+# 모든 하위 폴더에 존재하는 src 폴더와 그 내부 파일은 허용
+!**/src/**
+
+### 4. 특별 예외 허용 (필요 시 주석 해제) ###
+# 소스 코드가 아니지만 추적하고 싶은 특정 텍스트 파일이 있다면 여기에 작성
+# !**/알고리즘 공부용 프롬프트.txt
+# !Velog_Backup/프롬프터/

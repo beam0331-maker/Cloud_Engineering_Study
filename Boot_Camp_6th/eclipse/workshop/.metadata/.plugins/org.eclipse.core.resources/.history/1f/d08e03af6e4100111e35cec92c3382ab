@@ -1,0 +1,55 @@
+package com.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.dto.StudentDTO;
+
+public class StudentDAO {
+
+	public List<StudentDTO> list(SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.list");
+		return list;
+	}// list end
+
+	public List<StudentDTO> nameSearch(String findName, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.nameSearch", findName);
+		return list;
+	}// nameSerch end
+
+	public List<StudentDTO> dataSearch(HashMap<String, Integer> map, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.dataSearch", map);
+		return list;
+	}// dateSearch end
+
+	public List<StudentDTO> stuNoSearch(List<String> stuNoList, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.stuNoSearch", stuNoList);
+		return list;
+	}// stuNoSearch end
+
+	public int absUpdate(List<String> stuNoList, SqlSession session) {
+		int result = session.update("com.dao.StudentMapper.absUpdate", stuNoList);
+		return result;
+	}// absUpdate end
+
+	
+	public int capUpdate(SqlSession session) {
+		int result = session.update("com.dao.StudentMapper.capUpdate");		
+		return result;
+	}// capUpdate end
+	
+	public List<HashMap<String, Object>> stuGradeSearch(String stuNo, SqlSession session) {
+		HashMap<String, Object> gradeMap = session.selectOne("com.dao.StudentMapper.stuGradeSearch", stuNo);		
+		return gradeMap;
+	}// stuNoSearch end
+	
+	
+	
+}// class end

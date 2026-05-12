@@ -1,0 +1,38 @@
+package com.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+import com.dao.BoardDAO;
+import com.dto.BoardDTO;
+import com.service.BoardService;
+import com.service.BoardServiceImpl;
+@WebServlet("/BoardWriteServlet")
+public class BoardWriteServlet extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		BoardService service = new BoardServiceImpl();
+		service.setDAO(new BoardDAO());
+		
+		String title = (String)request.getParameter("title");
+		String author = (String)request.getParameter("author");
+		String content = (String)request.getParameter("content");		
+		
+		BoardDTO dto = new BoardDTO(); 
+		dto.setTitle(title);
+		dto.setAuthor(author);
+		dto.setContent(content);
+		
+		System.out.println(dto.toString());
+		
+		service.insert(dto);
+		response.sendRedirect("BoardListServlet");		
+	}
+
+}

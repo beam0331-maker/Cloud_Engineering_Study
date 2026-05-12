@@ -1,0 +1,58 @@
+package com.controller;
+
+import java.io.IOException;
+import java.security.Provider.Service;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import com.dao.ProductDAO;
+import com.dto.Product;
+import com.service.ProductService;
+import com.service.ProductServiceImpl;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+
+@WebServlet("/productReg")
+public class ProductRegistrationServlet extends HttpServlet {
+	
+	
+	private HashMap<String, Product> products = new HashMap<String, Product>();
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		
+		ProductService service = new ProductServiceImpl();
+		service.setDAO(new ProductDAO());		
+		
+		String name = request.getParameter("name");
+		String id = request.getParameter("id");
+		int amount = Integer.parseInt(request.getParameter("amount")); 
+		
+		
+		
+		Set<String> keyList = products.keySet();
+		
+		if(keyList.contains(id)) {
+			Product product = products.get(id);
+			amount = product.getAmount() + amount;
+		} else {
+			Product product =  new Product(name, id, amount);
+		}
+		
+		
+		products.put(id, product);
+		service.insert(product);
+		
+		List<Product> list = service.list();		
+		
+		request.setAttribute("products", products);
+		
+		request.getRequestDispatcher("productInfo.jsp").forward(request, response);
+	}
+}

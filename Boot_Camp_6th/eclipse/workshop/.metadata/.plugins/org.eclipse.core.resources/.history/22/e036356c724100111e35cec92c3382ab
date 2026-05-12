@@ -1,0 +1,117 @@
+package com.service;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.config.MySqlSessionFactory;
+import com.dao.StudentDAO;
+import com.dto.StudentDTO;
+
+public class StudentServiceImpl implements StudentService {
+
+	private StudentDAO dao;
+
+	public void setDao(StudentDAO dao) {
+		this.dao = dao;
+	}
+
+	// SqlSession session = MySqlSessionFactory.getSession();
+
+	@Override
+	public List<StudentDTO> list() {
+		List<StudentDTO> list = null;
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			list = dao.list(session);
+		} finally {
+			session.close();
+		} // try-catch-finally end
+		return list;
+	}// list() end
+
+	@Override
+	public List<StudentDTO> nameSearch(String findName) {
+		List<StudentDTO> list = null;
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			list = dao.nameSearch(findName, session);
+		} finally {
+			session.close();
+		} // try-catch-finally end
+		return list;
+	}// nameSerch end
+
+	@Override
+	public List<StudentDTO> dataSearch(HashMap<String, Integer> map) {
+		List<StudentDTO> list = new ArrayList<StudentDTO>();
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			list = dao.dataSearch(map, session);			
+		}finally {			
+			session.close();
+		}//try-catch-finally end	
+		
+		return list;
+	}// dateSearch end		
+
+	@Override
+	public List<StudentDTO> stuNoSearch(List<String> stuNoList) {
+		List<StudentDTO> list = new ArrayList<StudentDTO>();
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {			
+			list = dao.stuNoSearch(stuNoList, session);			
+		}finally {
+			session.close();
+		}//try-catch-finally end
+		
+		
+		return list;
+	}// dateSearch end	
+	
+	@Override
+	public int absUpdate(List<String> stuNoList) {
+		int result = 0;
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			result = dao.absUpdate(stuNoList, session);
+//			session.commit();
+		}finally {
+			session.close();
+		}//try-catch-finally end
+		return result;
+	}// absUpdate end	
+
+	@Override
+	public int capUpdate() {
+		SqlSession session = MySqlSessionFactory.getSession();
+		int result = 0;
+		try {			
+			result = dao.capUpdate(session);
+//			session.commit();
+		} finally {
+			session.close();
+		}// try -cathch-finally end
+		
+		return result;
+	}// capUpdate end
+	
+	@Override
+	public List<HashMap<String, Object>> stuGradeSearch(String stuNo) {		
+		SqlSession session = MySqlSessionFactory.getSession();
+		List<HashMap<String, Object>> gradeList = new ArrayList<HashMap<String,Object>>();
+		try {			
+			gradeList = dao.stuGradeSearch(stuNo, session);
+			
+		}finally {
+			session.close();
+		}
+		return gradeList;
+	}
+
+}// class end

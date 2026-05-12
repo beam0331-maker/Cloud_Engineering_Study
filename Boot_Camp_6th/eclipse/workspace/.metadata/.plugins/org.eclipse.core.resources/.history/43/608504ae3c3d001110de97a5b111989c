@@ -1,0 +1,11 @@
+package exam2.finalproject;
+
+import java.util.List;
+
+import exam2.insert.DeptDTO;
+import exam2.insert.DuplicatedDeptnoException;
+
+public interface DeptService {
+	public abstract void setDao(DeptDAO dao);
+	public abstract List<DeptDTO>list();public abstract int insert(DeptDTO dto) throws DuplicatedDeptnoException;
+}

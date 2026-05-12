@@ -1,0 +1,60 @@
+package com.service;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.config.MySqlSessionFactory;
+import com.dao.BoardDAO;
+import com.dto.BoardDTO;
+
+public class BoardServiceImpl implements BoardService {
+	
+	BoardDAO dao;
+	@Override
+	public void setDao(BoardDAO dao) {
+		this.dao = dao;
+	}
+	
+	@Override
+	public List<BoardDTO> list() {
+		List<BoardDTO> list = null;
+		SqlSession session = MySqlSessionFactory.getSession();		
+		try {
+			list = dao.list(session);	
+		} finally {
+			session.close();
+		}		
+		return list;
+	}
+
+	@Override
+	public int write(BoardDTO dto) {
+		SqlSession session = MySqlSessionFactory.getSession();
+		int n = 0;
+		try {
+			n = dao.write(session, dto);
+			session.commit();
+		} finally {
+			session.close();
+		}
+		return 0;
+	}
+
+	@Override
+	public BoardDTO retireve(int num) {
+		BoardDTO dto = null;	
+		SqlSession session = MySqlSessionFactory.getSession();
+		try {
+			// 조회수 증가 
+			int n = dao.readcnt(session, num);
+			dto = dao.retireve(session, num);
+		} finally {
+			session.close();
+		}
+		return dto;
+	}
+	
+	
+
+}

@@ -1,0 +1,8 @@
+package com.servlet;
+
+import jakarta.servlet.annotation.WebServlet;
+
+@WebServlet("/BoardRetrieveServlet")
+public class BoardRetrieveServlet {
+	
+}

@@ -1,0 +1,28 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%
+	int num = 10;
+	for(int i = 0 ; i < 3;i++){
+		System.out.println(">>>"+i);
+	}
+	// 내장변수 사용
+	System.out.println("request: " + request);
+	System.out.println("response: " + response);
+	System.out.println("session: " + session);
+	System.out.println("application: " + application);
+	System.out.println("config: " + config);
+	System.out.println("out: " + out);
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>scriptlet</title>
+</head>
+<body>
+	<h1>scriptlet</h1>
+</body>
+</html>
+<%
+	String name = "홍길동";
+%>>

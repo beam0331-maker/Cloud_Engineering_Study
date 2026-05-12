@@ -1,0 +1,49 @@
+package com.servlet;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+@WebServlet("/SetServlet")
+public class SetServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	
+		// 3가지 scope에 저장된 데이터 조회
+		
+		// 1. request scope		
+		String s = (String)request.getAttribute("request");
+		
+		// 2. session scope
+		HttpSession session = request.getSession();
+		String s2 = (String)session.getAttribute("session");
+		
+		// 3. application scope
+		ServletContext ctx = getServletContext();
+		String s3 = (String)ctx.getAttribute("application");
+		
+		// 응답처리
+		response.setContentType("text/html");
+		PrintWriter out = response.getWriter();
+		
+		out.print("<html>");
+		out.print("<body>");
+		out.print("request scope 값: " + request.getAttribute("request"));
+		out.print("session scope 값: " + session.getAttribute("session"));
+		out.print("application scope 값: " + ctx.getAttribute("application"));
+		out.print("<h1>안녕하세요</h1>");
+		out.print("</body>");
+		out.print("</html>");
+		
+	}
+
+}

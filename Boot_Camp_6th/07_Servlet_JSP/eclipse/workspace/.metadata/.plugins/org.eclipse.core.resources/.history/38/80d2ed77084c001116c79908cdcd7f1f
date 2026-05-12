@@ -1,0 +1,17 @@
+package com.service;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.dao.BoardDAO;
+import com.dto.BoardDTO;
+
+public interface BoardService {
+	void setDAO(BoardDAO dao);
+	List<BoardDTO> list();
+	int insert(BoardDTO dto);
+	BoardDTO retrieve(int num);
+	int update(BoardDTO dto);
+	int readcnt(int num); 
+}

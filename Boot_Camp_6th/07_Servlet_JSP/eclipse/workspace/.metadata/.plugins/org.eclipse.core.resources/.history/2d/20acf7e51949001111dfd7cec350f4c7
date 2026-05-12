@@ -1,0 +1,8 @@
+package com.dao;
+
+public class DeptDAO {
+	public List<DeptDTO> findALl(SqlSession session){
+		List<DeptDTO> list = session.selectList("com.config.DeptMapper.findAll");
+		return list;
+	}
+}

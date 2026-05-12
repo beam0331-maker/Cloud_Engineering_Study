@@ -1,0 +1,29 @@
+package com.servlet;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/LifeCycleServlet")
+public class LifeCycleServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	
+	public void init(ServletConfig config) throws ServletException {
+		System.out.println("init() method");
+	}
+	public void destroy() {
+		System.out.println("destroy() method");
+	}
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// 특정 사용자만 사용할 수 있도록 모든 변수는 롴러변수로 만들어야 한다.
+		int num = 0;
+		System.out.println("doGet() method ....");
+	}
+
+}

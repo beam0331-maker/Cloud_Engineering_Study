@@ -1,0 +1,22 @@
+package com.service;
+
+import java.util.List;
+
+import com.dao.BoardDAO;
+import com.dto.BoardDTO;
+
+public class BoardServiceImpl implements BoardService {
+
+	BoardDAO dao;
+	@Override
+	public void setDAO(BoardDAO dao) {
+		this.dao = dao;
+	}
+
+	@Override
+	public List<BoardDTO> list() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

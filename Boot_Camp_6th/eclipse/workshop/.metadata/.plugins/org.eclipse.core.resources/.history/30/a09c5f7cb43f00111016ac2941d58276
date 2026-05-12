@@ -1,0 +1,15 @@
+package com.dto;
+
+public class StudentDTO {
+	
+	private String studentNo;
+	private String departmentNo;
+	private String studentName;
+	private String studentSsn;
+	private String studentAddress;
+	private String entraceDate;
+	private char absenceYn;
+	private String coachProfessorNo;
+			
+
+}

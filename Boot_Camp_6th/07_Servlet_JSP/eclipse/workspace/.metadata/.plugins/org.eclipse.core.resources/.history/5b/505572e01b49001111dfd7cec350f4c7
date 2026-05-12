@@ -1,0 +1,24 @@
+package com.service;
+
+import java.util.List;
+
+import com.dao.DeptDAO;
+import com.dto.DeptDTO;
+
+public class DeptServiceImpl implements DeptService{
+	
+	DeptDAO dao;
+	@Override
+	public void setDao(DeptDAO dao) {
+		this.da = dao;
+		
+	}
+
+	@Override
+	public List<DeptDTO> findAll() {
+		List<DeptDTO> list = 
+		return list;
+	}
+	
+
+}

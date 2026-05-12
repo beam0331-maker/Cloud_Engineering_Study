@@ -1,0 +1,13 @@
+package com.service;
+
+import com.dao.ProductDAO;
+
+public class ProductServiceImpl implements ProductService{
+	
+	ProductDAO dao;
+	
+	@Override
+	public void setDAO(ProductDAO dao) {		
+		this.dao = dao;
+	}
+}

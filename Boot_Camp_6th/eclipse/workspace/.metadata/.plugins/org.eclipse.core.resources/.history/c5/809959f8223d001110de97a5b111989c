@@ -1,0 +1,21 @@
+package exam2.insert;
+
+public class DeptInsertMain {
+
+	public static void main(String[] args) {
+		// 사용자가 deptno, dname, loc 입력함
+		
+		int deptno = 51;
+		String dname = "인사";
+		String loc = "제주";
+		
+		DeptDTO dto = new DeptDTO(deptno, dname, loc);
+		DeptService service = new DeptServiceImpl();
+		service.setDao(new DeptDAO());
+		if(service.insert(dto) >= 1) System.out.println("저장성공");
+		
+		
+		
+	}// main end
+
+}//class end

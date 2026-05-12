@@ -1,0 +1,25 @@
+package com.sevlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet("/MemberServlet3")
+public class MemberServlet3 extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		System.out.println("MemberServlet.doGet");
+		
+		// 파라미터 얻기
+		String username = request.getParameter("username");
+		String age = request.getParameter("age");
+		
+		System.out.println(username + " " + age);
+	}
+
+}

@@ -1,0 +1,192 @@
+-------------------------------------------------
+2026.05.12 
+
+/////////////////////////////////////////////////
+4장. 빈 생성 및 DI 설정
+////////////////////////////////////////////////
+1. 빈생성 방법
+	1). 권장 패키지 방법( 추천 )
+		
+		- 개념: @SpringBootApplication을 가진 빈의 패키지와 같거나 서브패키지로 만들면 자동으로 빈으로 등록되어 생성된다.	
+		
+		- 구현방법 2STEP
+			
+			step1 : @SpringBootApplication을 가진 빈의 패키지와 같거나 서브패키지로 만들면 자동으로 빈으로 등록
+			step2 : 자동으로 생성할 빈을 지정
+					ex.- @Component 		( 번용적 )
+						- @Service			( 서비스 레이어 )
+						- @Repository		( DAO 레이어 )
+						- @Controller		( 서블릿 역할 )
+						- @RestController	( 서블릿 역할 )
+						- @Configuration	( 설정정보 추가 )
+						...
+		
+		- 다양한 어노테이션을 지원하는 이유
+		  가. 프레임워크에게 명시적으로 의도한바를 더 자세하게 알려줌. 
+		  나. AOP사용시 부갖거인 작업을 더 자세하게 설정할 수 있음.
+
+	2). 다른 패키지로 만든 경우
+		
+		- 패키지명으로 알려줘야됨.
+		ex.
+			@SpringBootApplication(scanBasePackages = {"com.other" /*, "다른패키지"*/})
+			@SpringBootApplication(scanBasePackageClasses = {com.other.EmpDAO.class})
+
+	3)_. @Configuration + @Bean 이용한 명시적 생성
+		- @Configuration 역할: 클래스 레벨
+			지정된 클래스를 설정 (Configuration)클래스임을 알려주는 어노테이션. 
+			이 파일안에 명시적으로 생성할 빈을 등록함. 			
+			
+		- @Bean 역할: 메서드 레벨 
+			명시적으로 생성한 객체를 메서드의 리턴타입으로 지정하여 빈으로 등록함
+			
+2. 의존성 주입 ( Dependency Injection: DI)
+
+	1) 생성자 이용 ( Constructor-Based Dependency Injection )
+	
+	
+										DeptService
+										@Service						@Repository
+		DeptApplication ---->	DeptServiceImpl	----> DeptDAO
+										
+										DeptDAO dao;
+										public DeptServiceImpl(DetpDAO dao){
+										this.dao = dao
+										}
+										
+										
+		- 단일 주입
+		ex.
+			public class DeptServiceImpl {
+			DeptDAO dao ;
+			public DeptServiceImpl(DeptDAO dao) {
+				System.out.println("ServiceImpl");
+				this.dao = dao;
+			}
+			
+		- 멀티 가능
+		ex.
+			public class DeptServiceImpl {
+			DeptDAO deptDao ;
+			EmpDAO empDao ;
+
+			public DeptServiceImpl(DeptDAO deptDao, EmpDAO empDao) {
+				System.out.println("ServiceImpl");
+				this.deptDao = deptDao;
+				this.empDao = empDao;
+			}
+		
+		- @Qualifier 어노테이션 (@Primary 사용가능 )
+		
+											DeptService
+										@Service						   CommonDAO(인터페이스)
+		DeptApplication ---->	DeptServiceImpl	----> DeptDAO	EmpDAO
+										
+										CommonDAO dao ;
+										public DeptServiceImpl( @Qualifier("DeptRepository") CommonDAO dao) {
+											System.out.println("ServiceImpl");
+											this.dao = dao;
+										}
+										
+		@Primary: 주입할 수 있는 후보가 여러개인 경우 우선권을 부여하는 방식
+		@Qualifier: 주입할 수 있는 후보가 어러개인 경우 주입할 빈의 이름을 설정하는 방식
+						@Primary 보다 우선이다
+		
+	2) 필드 이용 ( Field Dependency Injection )
+		
+		- @Autowired
+		
+-------------------------------------------------
+3. 빈의 scope
+https://docs.spring.io/spring-framework/reference/core/beans/factory-scopes.html#page-title
+
+	1) 개념
+		ApplicationContext(IoC Conatext)가 생성한 빈은 싱글톤(Singleton)이 기본값.
+		=> 하나의 빈을 여러사람이 공유하는것.
+		
+	2) 설정값 종류
+		- singleto	: 기본, 단 한번만 생성. 여러 사용자가 공유 가능
+		- rototype	: 요청할 때마다 매번 생성. 여러 사용자가 공유 불가
+		
+		- request	: HttpServletRequest scope ( 요청-응답 )
+		- session	: HttpSession ( 웹브라우저와 동일 )
+		- application: ServletContet ( tomcat )
+	
+	3) 문법
+		
+		- singleton
+			@Scope("singleton")
+			@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+			
+		- prototype
+			@Scope("prototype")
+			@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	
+-------------------------------------------------	
+4. 빈의 초기화 및 cleanup 작업
+	
+	- 서블릿의 init(), destroy()와 비슷한 역할로서 메서드를 재정의했음.
+	
+	- spring에서는 메서드명을 내마음대로 지정 가능.
+		
+		@PostConstruct
+		public void start(){
+			// 초기화 작업
+		}
+		
+		@PreDestory
+		public void shutdown(){
+			// 자원 밥납
+		}
+	
+	- 생선자 생성 > @PostConstruct > main > @PreDestory
+
+-------------------------------------------------	
+5. external configuration
+https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html
+
+	1) 개념
+		어플리케이션 실행시 필요한 정보( ex. 서버포트, 프로파일(dev, prod), 로그레벨(ERROR, WARN, INFO,DEBUG,TRACE))를 코드가 아니 외부파일(applicawtion.yml) 또는 환경변수로 분리해서 관리하는 방법 의미.
+		
+		ex. 
+			#applicaiton.yml
+				
+				server:
+					port: 8090
+					
+			# 실행시 환경변수값 설정
+				
+				java -jar demo.jar --server.port=8090
+				
+	2) 관리구조
+		
+		- 우선순위가 있다.
+		
+		Environment ( 최상위 인터페이스 )
+		- PropertrySource
+			CommandLinePropertySource	<== cmd에서 설정값 지정, 우선순위가 가장 높다
+													ex. --server.port = 8090
+													
+			Java System properties 		<== JVM 인자 설정값 지정, 
+													ex. -Dserver.port=8092
+													
+			OS environment variables.	<== OS 환경변수, 
+													ex. SERVER_PORT = 8093
+													
+			Config data (application.yml)	<== server:
+															port: 8090
+		- Profiles
+			활성화 프로필 선택:
+			spring:
+				profiles:
+					activ: dev|prod
+																
+	3) 외부에 설정된 환경변수(설정값)를 bean에서 사용하는 방법
+		
+		가. @Value
+			- 단일값 조회
+			
+		나. @ConfigurationProperties
+			- 멀티값 조회 적당하고 클래스단위로 관리 가능함
+		
+		

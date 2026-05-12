@@ -1,0 +1,17 @@
+import org.apache.ibatis.session.SqlSession;
+
+import com.config.MySqlSessionFactory;
+
+public class EmpMain {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+	
+		SqlSession session = MySqlSessionFactory.getSession();
+		
+		List<Emp> list1 = session.selectList("com.config.EmpMapper.findaAll")
+		
+		session.close();		
+	}
+
+}

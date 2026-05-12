@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>1. reqest.getParmater 메서드 이용(GET)</h1>
+	<form action="MemberServlet" method="GET">
+		이름<input type="text" name="username">
+		나이<input type="text" name="age">
+		<input type="submit" value="전송">
+	</form>
+	<h1>2. reqest.getParmater 메서드 이용(POST)</h1>
+	<form action="MemberServlet2" method="POST">
+		이름<input type="text" name="username">
+		나이<input type="text" name="age">
+		<input type="submit" value="전송">
+	</form>
+	<h1>3. reqest.getParmaterValues 메서드 이용(GET)</h1>
+	<form action="MemberServlet3" method="GET">
+		이름<input type="text" name="username">
+		나이<input type="text" name="age">
+		취미:<br>
+		야구<input type="checkbox" name="hobby" value="야구"><br>
+		축구<input type="checkbox" name="hobby" value="축구"><br>
+		농구<input type="checkbox" name="hobby" value="농구"><br>
+		<input type="submit" value="전송">
+	</form>
+	<h1>3. reqest.getParameterNames 메서드 이용(GET)</h1>
+	<form action="MemberServlet4" method="GET">
+		이름<input type="text" name="username">
+		나이<input type="text" name="age">
+		주소<input type="text" name="addre">
+		이메일<input type="text" name="email">
+		<input type="submit" value="전송">
+	</form>
+</body>
+</html>

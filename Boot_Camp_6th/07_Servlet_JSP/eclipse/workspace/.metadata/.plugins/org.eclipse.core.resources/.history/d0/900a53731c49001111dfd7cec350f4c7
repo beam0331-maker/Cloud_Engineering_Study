@@ -1,0 +1,33 @@
+package com.service;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.config.MySqlSessionFactory;
+import com.dao.DeptDAO;
+import com.dto.DeptDTO;
+
+public class DeptServiceImpl implements DeptService{
+	
+	DeptDAO dao;
+	@Override
+	public void setDao(DeptDAO dao) {
+		this.dao = dao;	
+	}
+
+	@Override
+	public List<DeptDTO> findAll() {
+		SqlSession session = MySqlSessionFactory.getSession();
+		List<DeptDTO> =  null;
+		try {
+			list = dao.findAll(session);
+		} finally {
+			session.close();
+		}
+		
+		return list;
+	}
+	
+
+}

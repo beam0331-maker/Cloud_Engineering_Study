@@ -1,0 +1,85 @@
+package com.service;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.config.MySqlSessionFactory;
+import com.dao.BoardDAO;
+import com.dto.BoardDTO;
+
+public class BoardServiceImpl implements BoardService {
+
+	BoardDAO dao;
+	@Override
+	public void setDAO(BoardDAO dao) {
+		this.dao = dao;
+	}
+
+	@Override
+	public List<BoardDTO> list() {
+		SqlSession session = MySqlSessionFactory.getSession();
+		List<BoardDTO> list = null;
+		try {
+			list = dao.list(session);
+		} finally {
+			session.close();
+		}
+		return list;
+	}// end list
+
+	@Override
+	public int insert(BoardDTO dto) {
+		SqlSession session = MySqlSessionFactory.getSession();
+		int n = 0;
+		try {
+			n = dao.insert(session, dto);
+			if(n == 1)session.commit();
+		} finally {
+			session.close();
+		}
+		return n;		
+	}// end insert
+
+	@Override
+	public BoardDTO retrieve(int num) {
+		SqlSession session = MySqlSessionFactory.getSession();
+		BoardDTO dto = null;
+		try {
+			int n = dao.readcnt(session, num);
+			dto = dao.retrieve(session, num);			
+			session.commit();
+		} finally {
+			session.close();
+		}
+		return dto;
+	}
+
+	@Override
+	public int update(BoardDTO dto) {
+		SqlSession session = MySqlSessionFactory.getSession();
+		int n = 0;
+		try {
+			n = dao.update(session, dto);
+			if(n == 1)session.commit();
+		} finally {
+			session.close();
+		}
+		return n;
+	}//end update
+
+	@Override
+	public int delete(int num) {
+		SqlSession session = MySqlSessionFactory.getSession();
+		int n = 0;
+		try {
+			n = dao.delete(session, num);
+			session.commit();
+		} finally {
+			session.close();
+		}
+		return 0;
+	}
+
+
+}

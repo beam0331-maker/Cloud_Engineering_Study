@@ -1,0 +1,35 @@
+package com.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import com.dao.BoardDAO;
+import com.dto.BoardDTO;
+import com.service.BoardService;
+import com.service.BoardServiceImpl;
+
+
+@WebServlet("/BoardRetrieveServlet")
+public class BoardRetrieveServlet extends HttpServlet {
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		BoardService service = new BoardServiceImpl();
+		service.setDAO(new BoardDAO());		
+		
+		int num = Integer.parseInt(request.getParameter("num"));
+				
+		BoardDTO dto = service.retrieve(num);
+		
+		
+		request.setAttribute("dto", dto);
+		request.getRequestDispatcher("retrieve.jsp").forward(request, response);
+		
+		
+	}
+
+}

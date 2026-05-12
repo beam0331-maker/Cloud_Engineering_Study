@@ -1,0 +1,28 @@
+package com.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.dto.BoardDTO;
+
+public class BoardDAO {
+	public List<BoardDTO> list(SqlSession session){
+		List<BoardDTO> list = session.selectList("com.config.BoardMapper.list");
+		return list;
+	}// end list
+	
+	public int insert(SqlSession session, BoardDTO dto) {
+		int n = session.insert("com.config.BoardMapper.insert",dto);
+		return n;
+	}// end insert
+	
+	public BoardDTO retrieve(SqlSession session, int num) {
+		BoardDTO dto = session.selectOne("com.config.BoardMapper.retrieve" ,num);
+		return dto;		
+	}// end retrieve
+	
+	public int update(SqlSession session, BoardDTO dto) {
+		int n = session.insert("com.config.BoardMapper.update",dto);
+		return n;
+	}// end update

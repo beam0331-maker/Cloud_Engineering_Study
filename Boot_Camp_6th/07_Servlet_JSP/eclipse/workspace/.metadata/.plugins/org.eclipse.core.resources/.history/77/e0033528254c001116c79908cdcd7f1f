@@ -1,0 +1,28 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>예약정보</title>
+</head>
+<body>
+<%
+	String birthday = (String)request.getAttribute("birthday");
+	String ticket = (String)request.getAttribute("ticket");
+	Integer age = (Integer)request.getAttribute("age");
+	String grade = (String)request.getAttribute("grade");
+	Double discountPrice = (Double)request.getAttribute("discountPrice");
+	Double totalPrice = (Double)request.getAttribute("totalPrice");
+%>
+<h3>예약정보</h3>
+<hr>
+<b>입력한 생년월일:<%= birthday%> </b>
+<b>선택한 티겟:<%= ticket%></b>
+<br>
+나이:<%= age%>세<br> 
+등급:<%= grade%><br> 
+할인 적용 금액: <%= Integer.parseInt(discountPrice)%>원<br> 
+지불금액: <%= totalPrice%>원<br> 
+</body>
+</html>

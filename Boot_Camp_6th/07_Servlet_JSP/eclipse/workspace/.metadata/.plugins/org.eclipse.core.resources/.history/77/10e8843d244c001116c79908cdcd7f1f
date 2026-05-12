@@ -1,0 +1,58 @@
+package com.controller;
+
+import java.io.IOException;
+import java.time.LocalDate;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+
+
+
+@WebServlet("/reserveTicket")
+public class ReserveTicketServlet extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request, response);
+		
+		String birthday = request.getParameter("birthday");
+		String ticket = request.getParameter("type");		
+		
+		request.setAttribute("birthday", birthday);
+		request.setAttribute("ticket", ticket);
+		
+		LocalDate now = LocalDate.now();
+		int year = now.getYear();		
+		String[] birthdayDate =  birthday.split("/");
+		int age = year - Integer.parseInt(birthdayDate[0]);
+		
+		String grade = null;
+		double discountPrice = 0;
+		double totalPrice = 0;
+		
+		if(age <= 19) {
+			grade = "미성년자";
+			discountPrice = Integer.parseInt(ticket)*0.4;
+			totalPrice = Double.parseDouble(ticket) - discountPrice;			
+		}else if (age < 60) {
+			grade = "성인";
+			discountPrice = Integer.parseInt(ticket)*0.1;
+			totalPrice = Double.parseDouble(ticket) - discountPrice;		
+		}else {
+			grade = "경로우대자";
+			discountPrice = Integer.parseInt(ticket)*0.5;
+			totalPrice = Double.parseDouble(ticket) - discountPrice;		
+		}
+		
+		request.setAttribute("grade", grade);
+		request.setAttribute("discountPrice", discountPrice);
+		request.setAttribute("totalPrice", totalPrice);
+		
+		
+		request.getRequestDispatcher("ticket.jsp").forward(request, response);
+	}
+
+}

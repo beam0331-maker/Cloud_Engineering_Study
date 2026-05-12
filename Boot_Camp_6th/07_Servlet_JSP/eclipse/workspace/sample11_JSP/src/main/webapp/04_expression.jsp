@@ -1,0 +1,45 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%
+String name = "hong";
+int age = 10;
+%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>expression</title>
+</head>
+<body>
+	<h1>expression</h1>
+	이름:
+	<%=name%>,
+	<%=name.toUpperCase()%>
+	<br> 나이:
+	<%=age%><br>
+	<hr>
+	이름:<%
+	out.print(name);
+	%>
+	나이:<%
+	out.print(age);
+	%>
+	<hr>
+	<h1>배열반복 출력</h1>
+	<%
+	String[] names = { "홍길동", "이순신" };
+	for (String s : names) {
+		
+	%>
+	<%=s%><br>
+	<%
+	
+	} //end for
+	%>
+	<%
+		if(true){
+	%>
+	<%= name %>
+	<% } %>> 
+</body>
+</html>

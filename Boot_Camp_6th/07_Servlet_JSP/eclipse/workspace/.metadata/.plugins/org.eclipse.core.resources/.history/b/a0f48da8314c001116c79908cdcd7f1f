@@ -1,0 +1,14 @@
+package com.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.dto.Product;
+
+public class ProductDAO {
+	public List<Product> list(SqlSession session){
+		List<Product> list = session.selectList("com.config.productMapper.list");
+		return list;
+	}
+}

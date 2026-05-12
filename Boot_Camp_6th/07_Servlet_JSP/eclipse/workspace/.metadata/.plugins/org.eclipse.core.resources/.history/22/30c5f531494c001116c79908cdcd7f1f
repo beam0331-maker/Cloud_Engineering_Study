@@ -1,0 +1,48 @@
+package com.controller;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.dao.ProductDAO;
+import com.dto.Product;
+import com.service.Service;
+import com.service.ServiceImpl;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+
+
+@WebServlet("/ProductAddServlet")
+public class ProductAddServlet extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Service service = new  ServiceImpl();
+		service.setDAO(new ProductDAO());
+		
+		String name = request.getParameter("name");
+		String id = request.getParameter("id");
+		String amount = request.getParameter("amount");		
+		
+		Product product = new Product(name, id, Integer.parseInt(amount));
+		Set<String> idSet = new HashSet<String>(service.idlist());		
+		if(idSet.contains(id)) {
+			service.update(product);			
+		}else {
+			service.insert(product);
+		}
+		
+		
+	 }
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
+
+}

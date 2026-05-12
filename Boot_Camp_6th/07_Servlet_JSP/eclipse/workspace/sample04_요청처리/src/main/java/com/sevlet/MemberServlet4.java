@@ -1,0 +1,43 @@
+package com.sevlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+
+@WebServlet("/MemberServlet4")
+public class MemberServlet4 extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		System.out.println("MemberServlet.doGet");
+		
+		// 파라미터 얻기
+		
+		Enumeration<String> enu = request.getParameterNames();
+						
+		response.setContentType("text/html");
+		PrintWriter out = response.getWriter();
+		
+		out.print("<html>");
+		out.print("<body>");
+		out.print("<h1>Hello World</h1>");
+		while(enu.hasMoreElements()) {
+			String key = enu.nextElement();
+			String value = request.getParameter(key);
+			out.print(key +"\t"+value);
+		}
+			
+		out.print("</body>");
+		out.print("</html>");
+		
+		
+		
+	}
+
+}

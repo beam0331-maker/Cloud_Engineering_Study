@@ -1,0 +1,187 @@
+package com.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+
+import com.dto.StudentDTO;
+
+public class StudentDAO {
+
+	public List<StudentDTO> list(SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.list");		
+		return list;
+	}// list end
+
+	public List<StudentDTO> nameSearch(String findName, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.nameSearch",findName);			
+		return list;
+	}// nameSerch end
+	
+	public List<StudentDTO> dataSearch(HashMap<String, Integer> map, SqlSession session) {
+		List<StudentDTO> list = session.selectList("com.dao.StudentMapper.dataSearch", map);
+		return list;
+	}// dateSearch end
+	
+	public List<StudentDTO> stuNoSearch(String[] stuNoArr, SqlSession session) {
+	List<StudentDTO> list = session.selectList("com.dao.StudentMapper.stuNoSearch", session);	
+	return list;
+}// stuNoSearch end
+	
+	
+	
+	
+	
+	
+
+//	public List<StudentDTO> stuNoSearch(int in, SqlSession session) {
+//				
+//		List<StudentDTO> gradeList = new ArrayList<StudentDTO>();
+//		
+//		PreparedStatement pstmt = null;
+//		ResultSet rs = null;
+//
+//		try {
+//			String sql = 
+//			"""
+//			select	
+//				TERM_NO,
+//			    STUDENT_NO,
+//			    STUDENT_name,    
+//			    CLASS_NAME,
+//			    point,
+//			    case when point between 0 and 1.9 then "F 학점"
+//					 when point between 2.0 and 2.9 then "D 학점"
+//			         when point between 3.0 and 3.4 then "C 학점"
+//			         when point between 3.5 and 3.9 then "B 학점"
+//			         else "A 학점"
+//				end as GRAD 
+//			from tb_student s join tb_grade g using (STUDENT_NO)
+//							  join tb_class c using (CLASS_NO)
+//			where STUDENT_NO = ?					
+//			order by TERM_NO
+//			   """;
+//			
+//			pstmt = con.prepareStatement(sql);
+//			pstmt.setInt(1, in);
+//			rs = pstmt.executeQuery();
+//			while (rs.next()) {
+//				
+//				String termNo = rs.getString("TERM_NO");
+//				String stuNo = rs.getString("STUDENT_NO");				
+//				String stuName = rs.getString("STUDENT_NAME");
+//				String className = rs.getString("CLASS_NAME");	
+//				float point = rs.getFloat("point");
+//				String grade = rs.getNString("GRAD");
+//				gradeList.add(new StudentDTO(termNo,stuName, stuNo, className, point, grade));
+//			
+//			}
+//
+//		} catch (SQLException e) {
+//
+//			System.err.println(e.getMessage());
+//
+//		} finally {
+//			try {
+//				if (rs != null)
+//					rs.close();
+//				if (pstmt != null)
+//					pstmt.close();
+//			} catch (Exception e2) {
+//				System.err.println(e2.getMessage());
+//			}
+//
+//		} // try-catch-finally end
+//		
+//		return gradeList;
+//	}// stuNoSearch end
+//	
+//	
+//	
+//	
+//		
+//	
+//	
+
+//
+//	
+//
+
+//
+//	public int absUpdate(String[] stuNoArr, Connection con) {
+//		int result = 0;
+//		PreparedStatement pstmt = null;
+//		String sql = """
+//				update tb_student
+//				set ABSENCE_YN = 'y'
+//				where STUDENT_NO = ?
+//				""";
+//
+//		try {
+//
+//			for (String stuNo : stuNoArr) {
+//				pstmt = con.prepareStatement(sql);
+//				pstmt.setString(1, stuNo);
+//				int n = pstmt.executeUpdate();
+//				if (n >= 1)
+//					result++;
+//
+//			} // for end
+//
+//		} // for end
+//
+//		catch (SQLException e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if (pstmt != null)
+//					pstmt.close();
+//			} catch (SQLException e2) {
+//				e2.printStackTrace();
+//			}
+//		} // try-catch-finally end
+//
+//		return result;
+//	}// absUpdate end
+//
+//	public int capUpdate(Connection con) {
+//		int result = 0;
+//		PreparedStatement pstmt = null;
+//		String sql = """
+//				update tb_department
+//					set CAPACITY = case WHEN CAPACITY between 0 and 20 then CAPACITY+5
+//					WHEN CAPACITY between 21 and 25 then CAPACITY+4
+//                    WHEN CAPACITY between 26 and 30 then CAPACITY+3
+//                    else CAPACITY
+//				end
+//				""";
+//
+//		try {
+//			pstmt = con.prepareStatement(sql);
+//			result = pstmt.executeUpdate();
+//			// for end
+//
+//		} // for end
+//
+//		catch (
+//
+//		SQLException e) {
+//			e.printStackTrace();
+//		} finally {
+//			try {
+//				if (pstmt != null)
+//					pstmt.close();
+//			} catch (SQLException e2) {
+//				e2.printStackTrace();
+//			}
+//		} // try-catch-finally end
+//
+//		return result;
+//	}// capUpdate end
+}// class end

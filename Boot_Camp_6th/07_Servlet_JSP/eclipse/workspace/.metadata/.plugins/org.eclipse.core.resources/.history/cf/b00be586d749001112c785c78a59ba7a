@@ -1,0 +1,21 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<% 
+String userid = (String)request.getAttribute("id");
+String address = (String)request.getAttribute("address");
+String email = (String)request.getAttribute("email");
+%>
+<h1>로그인 성공</h1>
+안녕하세요. <%= userid %><br>
+주소: <%= address %><br>
+email: <%= email %><br>
+<a href="">로그아웃</a>
+</body>
+</html>

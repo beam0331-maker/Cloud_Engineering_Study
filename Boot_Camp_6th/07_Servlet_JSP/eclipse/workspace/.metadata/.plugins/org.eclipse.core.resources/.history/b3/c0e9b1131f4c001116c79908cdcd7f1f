@@ -1,0 +1,37 @@
+package com.controller;
+
+import java.io.IOException;
+import java.time.LocalDate;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+
+
+
+@WebServlet("/reserveTicket")
+public class ReserveTicketServlet extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request, response);
+		
+		String birthday = request.getParameter("birthday");
+		String ticket = request.getParameter("type");		
+		
+		request.setAttribute("birthday", birthday);
+		request.setAttribute("ticket", ticket);
+		
+		LocalDate now = LocalDate.now();
+		
+		int year = now.getYear();
+		
+		String[] birthdayDate =  birthday.split("/");
+		int age = year - Integer.parseInt(birthdayDate[0]);
+		
+		request.getRequestDispatcher("ticket.jsp").forward(request, response);
+	}
+
+}

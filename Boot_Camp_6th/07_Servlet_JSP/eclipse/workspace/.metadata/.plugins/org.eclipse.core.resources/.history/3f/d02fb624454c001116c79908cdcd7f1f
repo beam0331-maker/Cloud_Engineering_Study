@@ -1,0 +1,30 @@
+package com.controller;
+
+import java.io.IOException;
+import java.util.List;
+
+import com.dao.ProductDAO;
+import com.service.Service;
+import com.service.ServiceImpl;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+
+@WebServlet("/ProductListServlet")
+public class ProductListServlet extends HttpServlet {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		Service service = new  ServiceImpl();
+		service.setDAO(new ProductDAO());
+		List<ProductDTO> list =  service.list();
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
+
+}

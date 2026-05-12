@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy Project &apos;JdbcWorkShop&apos;" description="Copy Project &apos;JdbcWorkShop&apos;" destination="C:/cloud_engineering/Boot_Camp_6th/eclipse/workshop" element="/JdbcWorkShop" flags="7" id="org.eclipse.ltk.core.refactoring.copyproject.resource" name="MyBatisWorkShop" stamp="1777015566287"/>
+</session>

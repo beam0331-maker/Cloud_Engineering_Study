@@ -1,0 +1,21 @@
+package com.servlet;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+// http://localhost:8080/hello/HelloServlet
+@WebServlet("/tes")
+public class HelloServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		// html만들어서 응답해야됨.
+		System.out.println("HelloServlet"); // 웹브라우저가 아닌 Tomcat서버의 console에 출력됨 
+	}
+
+}
