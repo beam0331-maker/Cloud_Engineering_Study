@@ -458,8 +458,8 @@ https://spring.io/
 		
 		- @Qualifier 어노테이션 (@Primary 사용가능 )
 		
-											DeptService
-										@Service						   CommonDAO(인터페이스)
+										DeptService
+										@Service						  CommonDAO(인터페이스)
 		DeptApplication ---->	DeptServiceImpl	----> DeptDAO	EmpDAO
 										
 										CommonDAO dao ;
@@ -569,4 +569,1794 @@ https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html
 		나. @ConfigurationProperties
 			- 멀티값 조회 적당하고 클래스단위로 관리 가능함
 		
+-------------------------------------------------
+2026.05.13
+1. 프로파일(Profile)
+
+	1) 개념
+		: 개발할 때는 다양한환경이 존재함( ex. 개발환경, 프로덕션 환경, 테스트환경,...)
+	
+	2) 
+		문법1:
 		
+		기본: application.yml
+				application-프로파일명.yml
+				
+		ex.	applicaiton-dev.yml
+				application-pord.yml
+				
+		최정파일:
+			application.yml		<== 공통적으로 사용하는 설정저장
+			application-dev.yml	<== 개발시 사용하는 설정저장
+			application-prod.yml	<== 프로덕션시 사용하는 설정저장
+			
+		문법2: Bean도 관리 가능
+		ex.
+		
+		@Component
+		@Profile("prod")
+		public class PordClass {
+			 public PordClass() {
+				  System.out.println("PordClass");
+			 }
+		}
+		
+		@Configuration
+		public class ProfileConfiguration {
+
+			 @Bean
+			 @Profile("prod")
+			 public String creatProd(){
+				  System.out.println("creatProd");
+				  return "prod 관련 객체 생성";
+			 }
+		}
+			
+			
+	3) 프로파일 활성화
+		
+			spring:
+				prfiles:
+					active: 프로파일명
+					
+		java 0jar myapp.jar --spring.profiles.active=prod
+		
+/////////////////////////////////////////////////
+5장. DB 연동
+/////////////////////////////////////////////////
+
+1. Spring JDBC
+	
+	1) 기존 JDBC
+		- 명시적으로 Connnetcion 얻고 PreparedStatement로 SQL전송, Resultset 결과 처리.
+		- 반드시 예외처리 필수( SQLExecption(비 런타임계열) 예외가 발생됨 )
+		- 트랜잭션 처리가 까다롭다.
+		
+		===> 보일러플레이트 코드라고 부름.
+		
+		
+	2) Spring JDBC 특징
+		: JDBC 코드 단순화
+			- close 불필요
+			- 예외처리 불필요
+			- 손쉬운 트랜잭션처리 (@Transactional 용)
+			- ConnectionPool 자동 제공 
+				ex. DBCP2	( Spring Framework )
+					 Hikari	( Spring Boot )
+					 
+	3) JdbcTemplate 클래스 이용 ( <= MyBatis의 SqlSession 역할 )
+		
+		가. MyBatis 메서드
+			
+			- SELECT : selectOne()
+						  selectList()
+						  
+			- INSERT : insert()
+			- DELETE : delete()
+			- UPDATE : update()
+			
+			- 트랜잭션 처리
+				session.commit();
+				session.rollback();
+			
+		나. JdbcTemplate 메서드
+		
+			- SELECT : queryForObject()	<== selectOne() 동일
+						  query() 				<== selectList() 동일
+						  
+			- INSERT : update()
+			- DELETE : update()
+			- UPDATE : update()
+			
+			- 트랜잭션 처리
+				@Transactional
+	
+	4) 의존성 설정( starter, *.jar)
+		
+		implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+		
+2. 코드 구현1  - JdbcTemplate + h2 연동
+	
+	1) 의존성 설정
+	
+		implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+		
+	2. DB 설치
+		- 인메모리 DB ( h2 )
+		
+		- 의존성 설정
+		
+			runtimeOnly 'com.h2database:h2'
+			
+			implementation 'org.springframework.boot:spring-boot-starter-web' # h2 관리자 접속용( 웹에서 접속가능 )
+			
+			
+	3) application.yml 추가설정
+	
+		server:
+			port: 8080
+		
+		# h2 관리자 접속 활성화 <== 웹에서 접속하기 위한 정보를 console에 출력.
+		spring:
+			h2:
+				console:
+					enabled:true
+					
+		==> 실행하면 콘솔에 다음과 같으 정보가 출력된다.
+		....
+		H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:848d73ff-fa79-4963-aeae-f8d4ec12c8c4'
+		
+			# 'jdbc:h2:mem:해시값' : 해시값은 매번 바뀐다. 고정가능 후술
+		
+		웹브라우저에서 요청
+			http://localhost:8080/h2-console
+			
+	4) h2 연동하기 위한 4가지 정보 설정
+	
+		spring:
+			datasource:
+				url: jdbc:h2:mem:testdb					# testdb로 현재 인메모리 db의 해시값을 고정
+				driver-class-name: org.h2.Driver
+				username: sa
+				password:
+				
+	5) 파일로 create문과 insert문 작성	https://docs.spring.io/spring-boot/docs/1.2.0.M2/reference/html/howto-database-initialization.html#howto-intialize-a-database-using-spring-jdbc
+	
+		가. src/main/resource/schema.sql
+			
+			create table todo( 
+				id int,
+				name varchar(255) not null,
+				job varchar(255) not null,
+				primary key (id)				
+				);
+			
+		나. src/main/resource/data.sql
+		
+		
+			insert into todo( id, name, job) values(1,'홍길동', 'Lean Spring');
+			insert into todo( id, name, job) values(2,'홍길동', 'Lean Vuejs');
+			insert into todo( id, name, job) values(3,'홍길동', 'Lean SQL');
+		
+	6) 코드 작성
+										TodoService							TodoDTO
+										@Service								@Repository
+		Application	--------->	TodoServiceImpl	--------->	TodoRepository	---------> h2
+																				
+		@Autowired					@Autowired							@Autowired
+		TodoService xxx			TodoRepository xx;				JdbcTemplate template
+												
+										// DML
+										@Transactional
+										save(){}
+										
+2. 코드구현3 - JdbcTemplate + MySQL 연동
+
+	
+	1) 의존성 설정
+	
+		implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+		
+	2. DB 설치
+		- 물리적인 DB ( MySQL )
+		
+		- 의존성 설정
+		
+			implementation 'com.mysql:mysql-connector-j:8.3.0'
+			
+	3) MySQL 연동하기 위한 4가지 정보 설정
+	
+		spring:
+			datasource:
+				url: jdbc:mysql://localhost:3306/testdb
+				driver-class-name: com.mysql.cj.jdbc.Driver
+				username: root
+				password: 1234
+		
+		# scheam.sql과 data.sql 관리간으 (slways|never)
+		sql:
+			init:
+				mode: always
+				
+	4) scheam.sql과 data.sql	https://docs.spring.io/spring-boot/docs/1.2.0.M2/reference/html/howto-database-initialization.html#howto-intialize-a-database-using-spring-jdbc
+	
+		가. src/main/resource/schema.sql
+			drop table todo;
+			create table todo( 
+				id int,
+				name varchar(255) not null,
+				job varchar(255) not null,
+				primary key (id)				
+				);
+			
+		나. src/main/resource/data.sql
+		
+			insert into todo( id, name, job) values(1,'홍길동', 'Lean Spring');
+			insert into todo( id, name, job) values(2,'홍길동', 'Lean Vuejs');
+			insert into todo( id, name, job) values(3,'홍길동', 'Lean SQL'); 
+			
+	5) h2에서 사용했던 코드는 그대로 사용됨.
+	
+
+2. 코드구현3 - MyBatis + MySQL 연동			
+
+	1) 의존성 설정
+	
+		// implementation 'org.springframework.boot:spring-boot-starter-data-jdbc' <== Spring JDBC
+		
+		implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+		
+	2. DB 설치
+		- 물리적인 DB ( MySQL )
+		
+		- 의존성 설정
+		
+			implementation 'com.mysql:mysql-connector-j:8.3.0'
+			
+	3) MySQL 연동하기 위한 4가지 정보 설정
+	
+		spring:
+			datasource:
+				url: jdbc:mysql://localhost:3306/testdb
+				driver-class-name: com.mysql.cj.jdbc.Driver
+				username: root
+				password: 1234
+				
+				
+			# scheam.sql과 data.sql 관리가능 (slways|never)
+			sql:
+				init:
+					mode: always
+					
+		# TodoMapper.xml 과 DTO 별칭 설정
+		mybatis:
+		  mapper-location: com/exam/config/TodoMapper.xml
+		  # com/exam/config/*Mapper.xml : Mpper.xml 로 끝나는 모든 파일
+		  type-alias-package: com.exam.dto
+				
+	4) scheam.sql과 data.sql
+	
+	5) xml 파일 작성
+	
+		- 기존 MyBatis 연동시 필요한 xml파일
+			a. configuration.xml	==> SpringBoot에서는 application.ymal 파일이 대체한다.
+			b. Mapper.xml
+			
+		- Spring MyBatis 연동시 필요한 xml 파일
+		  : Mapper.xml		// 반드시 src/main/resource 폴더에 저장해야된다.(*)
+	
+	6) 아키텍처	
+	
+												TodoMybatisService							TodoDTO
+												@Service											@Repository
+		Application	--------------->	TodoMyBatisServiceImpl	----------->	TodoMyBatisRepository	---> MySql
+																									(TodoMapper.xml과 연동)
+		@Autowired							@Autowired										@Autowired
+		TodoMyBatisRepository xxx		TodoMyBatisRepository xx;					SqlSessionTemplate template;
+																									
+												// DML
+												@Transactional
+												save(){}
+												
+2. 코드구현4 - MyBatis + MySQL 연동			
+
+	1) 의존성 설정
+	
+		// implementation 'org.springframework.boot:spring-boot-starter-data-jdbc' <== Spring JDBC
+		
+		implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+		
+	2. DB 설치
+		- 물리적인 DB ( MySQL )
+		
+		- 의존성 설정
+		
+			implementation 'com.mysql:mysql-connector-j:8.3.0'
+			
+	3) MySQL 연동하기 위한 4가지 정보 설정
+	
+		spring:
+			datasource:
+				url: jdbc:mysql://localhost:3306/testdb
+				driver-class-name: com.mysql.cj.jdbc.Driver
+				username: root
+				password: 1234
+				
+				
+			# scheam.sql과 data.sql 관리가능 (slways|never)
+			sql:
+				init:
+					mode: always
+					
+		# TodoMapper.xml 과 DTO 별칭 설정
+		mybatis:
+		  mapper-location: com/exam/config/TodoMapper.xml
+		  # com/exam/config/*Mapper.xml : Mpper.xml 로 끝나는 모든 파일
+		  type-alias-package: com.exam.dto
+				
+	4) scheam.sql과 data.sql
+	
+	5) xml 파일 작성
+	
+		- 기존 MyBatis 연동시 필요한 xml파일
+			a. configuration.xml	==> SpringBoot에서는 application.ymal 파일이 대체한다.
+			b. Mapper.xml
+			
+		- Spring MyBatis 연동시 필요한 xml 파일
+		  : Mapper.xml		// 반드시 src/main/resource 폴더에 저장해야된다.(*)
+	
+	6) 아키텍처	
+	
+												TodoMybatisService							
+												@Service											@Mapper
+		Application	--------------->	TodoMyBatisServiceImpl	----------->	TodoMapper( Interface )	---> MySql
+																									(TodoMapper.xml과 연동)
+		
+		@Autowired							@Autowired										
+		TodoMyBatisRepository xxx		TodoMyBatisRepository xx;					
+																									
+												// DML
+												@Transactional
+												save(){}
+												
+		규칙1: TodoMapper.xml의 namespace 값과 일치하도록 Mapper interface를 만든다.
+		규칙2: TodoMapper interface의 추상메서드 이름은 반드시 TodoMapper.xml의 id값과 일치해야 된다.
+		규칙3: TodoMapper interface의 추상메서드 리턴타입은 반드시 TodoMapper.xml의 id값과 일치해야 된다.
+		규칙2: TodoMapper interface의 추상메서드 파라미터는 반드시 TodoMapper.xml의 id값과 일치해야 된다.
+
+-------------------------------------------------
+2026.05.14
+
+1. H2와 MySQL 이용한 Profile 실습
+
+	1) 의존성 설정
+		
+		// sprint boot mybatis
+		implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+		
+		// myslq
+		implementation 'com.mysql:mysql-connector-j:8.3.0'
+		
+		// h2
+		runtimeOnly 'com.h2database:h2'		
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		
+		
+	2) prod 와 dev 프로파일 설저
+	
+		기본: application.yml # 공통 기능 설정
+		prod: applicaiton-prod.yml
+		dev: applicaiton-dev.yml
+	
+		활성화
+		spring:
+			profiles:
+				active: prod|dev
+				
+		# application.yml
+		spring:
+			profiles:
+				active: prod|dev
+		
+		mybatis:
+		  mapper-locations: com/exam/config/TodoMapper.xml		  
+		  type-aliases-package: com.exam.dto
+		  
+		  
+		# application-prod.yml
+		spring:
+			datasource:
+				url: jdbc:mysql://localhost:3306/testdb
+				driver-class-name: com.mysql.cj.jdbc.Driver
+				username: root
+				password: 123
+			sql:
+				init:
+					mode: always
+					
+		# applicaiton-dev.yml
+		
+			# h2 관리자 콘솔 활성화
+			spring:
+			  h2:
+				 console:
+					enabled: true
+
+			# h2 DB 연동
+			  datasource:
+				 url: jdbc:h2:mem:testdb
+				 driver-class-name: org.h2.Driver
+				 username: sa
+				 password:
+				 
+/////////////////////////////////////////////////
+6장. Spring MVC
+/////////////////////////////////////////////////
+
+1. 아키텍쳐
+	
+	1) 서블릿 / JSP 기반의 MVC 아키텍쳐
+	
+		웹브라우저  -----> 서블릿 <-----> 서비스 <-----> DAO <-----> MySQL
+								서블릿맵핑 ex. @Webservlet("/list")
+									|				@Webservlet("/write")
+									|	
+									|	응답처리 : 데이터 와 JSP 설정
+									|
+									|	포워드 및 리다이렉트 ex. response.sendRedirect("list");
+						<-----  jsp
+		
+		# 서블릿을 직접 생성했음.
+		  기능에 따라 여러개의 서블릿을 생성함
+		
+		# 서블릿을 선택하기 위한 요청?
+			http://서버IP:포트번호/컨텍스트명/서블릿맵핑
+			ex. http://localhos:8080/app/list
+				 http://localhos:8080/app/write
+	
+		# servlet이 JSP를 선택하는 방법
+		가. forward:	request.getRequsetDispatcher("list.jsp").forward(request, response);
+		나. redirect:	reponse:sendRedirect("list.jsp");
+		
+		# 사용자 입력데이터를 서블릿이 얻는 방법
+		String userid = request.getParameter("userid"); // <input name = "userid">
+		String[] hobbies = request.getParameterValue("hobby");	// <input name="hobby" type="checkbox">
+		
+	2) SPring 기반의 MVC 아키텍쳐(*)
+							
+									 ----------> HandlerMapping(요청매핑 등록, RequestMappingHandlerMapping)
+									|					key | value
+									|				  -----|-------
+									|					/a	 |	findAll()
+									|	            /b  | save()
+									V
+							DispatcherServlet
+		웹브라우저 -------> 서블릿 ----------------> Controller <-----> service <-----> Repository <-----> MySQL
+																	ex. 게시판
+																	
+																	request 작업
+																	---------------------
+																	// 요청 매핑값
+																	(request mapping)을 설정
+																	@RequestMapping("/a") )
+																	findAll(){}
+																	@RequestMapping("/b")
+																	save(){}
+																	@RequestMapping("/c")
+																	delete(){}
+																	@RequestMapping("/d")
+																	update(){}
+																	---------------------
+																	response 작업
+											모델과 뷰정보		: Model(데이터)과 View(thyleaf, jsp) 처리
+											<--------------	가. Model을 scope저장 (reqest, session, application)											
+																	나. View 정보를 지정( 이전 서블릿_JSP에서는 list.jsp 라고 전체 파일명을 알려줌)
+																		단, 파일명만 알려줌.( 즉, list 만 설정함 )
+																		파일명만 알려주는 이유: 다양한 뷰 컴포넌트를 활용하기 위함
+																		(jsp와 과련된 의존성을 설정하면 list.jsp 를 찾고 
+																			thymleaf 관련 의존성을 설정하면 list.html을 찾음)
+											뷰정보(ex.list)
+											--------------->	ViewResolber( 뷰관련 의존성 파악: Thymleaf)					
+											<---------------	
+												list.html	
+															
+															
+		# 서블릿은 제공된다 : DispatcherServlet
+		  서블릿은 DispatcherServlet 하나만 생성된다.
+		  서블릿맵핑( @Webservlet("/") )	=> http://localhos:8080/app/
+		  
+		# 실제 처리하는 작업은 다른 클래스에서 처리함. => Controller에서 처리함
+		
+		# Controller안에서 메서드를 선태하는 방법
+		  : http://서버IP:포트번호/컨텍스트명/서블릿맵핑/요청매핑값
+			ex. 
+				http://localhos:8080/app/a ==> findAll(){} 실행
+				http://localhos:8080/app/b ==> save(){} 실행
+			
+	# 각 역할 정리
+	- DispathcerServlet: 모든 요청을 처리 (Front Controller Pattern)
+	- HandlerMapping: 요청URL을 분석하여 요청처리를 담당하는 Controller 메서드 선택
+	- Controller: 서블릿/JSP 버전에서 서블릿 역할 담당.
+					ex. 사용자 입력데이터 처리, 음답처리(Model View 처리)				
+	
+	- Service: 로직과 트랙잭션처리
+	- Repository: DB연동
+	- ViewResolver: 논리적이름(ex. list)을 이용해서 
+						 실제처리되는 View완성(ex. list.html)
+						 
+/////////////////////////////////////////////////
+2. Spring MVC  구축
+
+	1) 의존성 추가
+		
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+		
+	2) thymeleaf 설정
+		https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html
+		
+		src/main/resource/
+		application.yml
+		static
+		|- 이미지 
+		|- css
+		|- js
+		templates
+		|- main.html(thyemleaf)
+		
+////////////////////////////////////////////////////////////////		
+		<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		</head>
+		<body>
+		<h1>main</h1>
+		<p th:text="'hello'"></p>
+		</body>
+		</html>
+////////////////////////////////////////////////////////////////	
+
+	3) Controller 작성
+		- POJO 기반
+		- @Controller 지정 ( json 기반 RESTful 서비스: @RestController)
+		- 실제 구현해야되는 기능을 메서드로 정의함.
+			ex.
+				@RequestMapping("/요청매핑값")
+				public 리턴타입 hello(){
+				}
+			
+			리턴타입이 String인 경우는 뷰정보를 설정한 것이다.			
+			
+			요청하는 방법: http://서버ip:포트번호/컨텍스트명/서블릿매핑/요청매핑값
+			
+/////////////////////////////////////////////////
+3. @RequestMapping 저리
+
+	1) 용도
+		요청 URL( http://서버IP:포트번호/컨텍스트명/서블릿맵핑/요청매핑값 )에서
+		/ 요청매핑값을 추출해서 일치하는 Controller의 메서드를 선택하는 용도
+			
+	2) 다양한 패턴이 제공
+	
+		@RequestMapping("/hello") # 단일요청, 정확하게 일치해야됨
+		@RequestMapping(value = "/hello") # 단일요청, 정확하게 일치해야됨
+		
+		@RequestMapping(value = {"/hello2","/hello3"}) # 멀티요청, 정확하게 일치해야됨
+		@RequestMapping(value ="/yyy*") # 특정값으로 시작( ex. yyy33, yyy111 가능 ) 
+		@RequestMapping(value ="/zzz/*") # 특정경로 하나 ( ex. zzz/, zzz/ccc, /zzzz/ccc/ddd(404 오류))
+		@RequestMapping(value ="/xyz/**") # 특정경로 여러개 ( ex. xyz/, xyz/ccc, /xyz/ccc/ddd)
+		
+		@RequestMapping(value ="/aaa/*/bbb") # 중간에 특정경로 하나 ( ex. aaa/eee/bbb, aaa/ccc/bbb)
+		
+		@RequestMapping(value ="/ccc/**/ddd") # 중간에 특정경로 dufjro ( ex. ccc/x/d/ddd)
+		
+		# 요청뿐만 아니고 다음과 같이 mybatis  mapper 등록할때도 사용이 가능하다.
+		mybatis:
+			mapper-locations: com/exam/config/**/*.xml
+		
+		
+	
+		반드시 다음과 같이 설정해야 된다
+		'spring.mvc.pathmatch.matching-strategy=ant_path_matcher'
+		
+		  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher	
+		
+		
+		
+	3) 클래스 레벨의 @RequestMapping 용도
+		
+		ex.
+			@Controller
+			@RequestMapping("/xxx")
+			puiblic class HomeController(){
+				
+				// http://localhost:8080/xxx/hello		// 클래스 레벨의 요청매핑값도 포합되게 된다.
+				@RequestMapping("/hello") 
+				public String hello(){
+				}
+				
+				// http://localhost:8080/xxx/hello22
+				@RequestMapping("/hello22") 
+				public String hello22(){
+				}				
+			}
+			
+	4) GET(기본)/POST 구별해서 요청 처리 
+	
+		가. 이번 서블릿
+									GET
+			웹브라우저 --------------------> doGET 메서드
+									
+									POST
+			웹브라우저 --------------------> doPost 메서드
+			
+		나. Spring MVC			
+									GET
+			웹브라우저 --------------------> @RequestMapping( value="/매핑값", method=HttpMetho.GET)
+			
+									POST
+			웹브라우저 --------------------> @RequestMapping( value="/매핑값", method=HttpMetho.POST)
+	
+	//////////////////////////////////////////////////
+	실제 사용가능한 패턴은 다음과 같다. 
+	1. 화면 작성
+	<h2>2. POST 요청</h2>
+	<form action="member" method="post">
+		 id: <input type="text" name="userid"> <br>
+		 pw: <input type="text" name="passwd"> <br>
+		 <input type="submit" value="회원가입">
+	</form>
+	
+	2. Controller 작업
+	
+		가. 화면보는 요청 (GET 요청)
+		
+		  //1. GET 요청 처리하는 코드
+		 // @RequestMapping(value = "/memberForm")
+		 @RequestMapping(value = "/member", method = RequestMethod.GET) // GET 방식으로 요청
+		 public String memberGET(){
+			  System.out.println("memberGET");
+			  return "memberForm";
+		 }
+		
+		나. 실제 처리하는 요청 (POST 요청)
+		
+		@RequestMapping(value = "/member", method = RequestMethod.POST) // POST 방식으로 요청
+		 public String memberPOST(){
+			  System.out.println("memberPOST");
+			  return "memberForm";
+		 }
+		 
+		중요한 점은 GET과 POST의 요청매핑값이 /member로 동일함. method방식으로 구별됨.
+-----------------------------------------------------------------------------------------
+
+5. @Requestmapping(method = RequestMetho.GET)
+	@Requestmapping(method = RequestMetho.PSOT)를 대체하는 어노테이션 제공
+	
+	- @GetMappint("/member")
+	- @PostMappint("/member")
+	
+	- @RquestMapping --> 현재는 클래스레벨인 경우 사용됨.
+		ex. 
+			@Controller
+			@RequestMapping("/member")
+			puiblic class HomeController(){
+						
+				@GetMapping("/hello") ==> http://localhost:8080/xxx/hello
+				public String hello(){
+				}						
+			}
+			
+-------------------------------------------------=
+2026.05.15
+
+1. Controller의요청 처리 작업
+	
+	1) 사용자입력 데이터 처리
+		
+		가. 이전 서블릿 처리
+			
+			doGet(HttpsServletRequest request, HttpServletResoponse response){
+				
+				String s =requetst.getParameter("username");
+				String age =requetst.getParameter("age");
+				
+				Stirng[] s2= request.getParmeterValues("key");
+				
+				// 최종
+				LoninDTO dto = new LoginDTO();
+				dto.setUsername(username);
+				dto.setAge(age);
+			}
+			
+		나. Spring 처리
+		
+			 @GetMapping("/loginForm")
+			 public String loginForm(){
+				  System.out.println("loginForm");
+				  return "loginForm";
+			 }
+
+			 @GetMapping("/login2")
+			 public String hello2(HttpServletRequest request, HttpServletResponse response){
+				  String userid=request.getParameter("userid");
+				  String password=request.getParameter("password");
+				  System.out.println(userid + " " +  password);
+				  return "main";
+			 }
+
+			 @GetMapping("/login3")
+			 public  String hello3(@RequestParam(name = "userid") String userid,
+										 @RequestParam(value = "password") String password)// value는 name의 별칭
+			 {
+				  System.out.println(userid + ":" +  password);
+				  return "main";
+			 }
+
+			 // 파라미터 name 태그와 변수명이이 같다면 파라미터 name 태그 생략가능
+			 @GetMapping("/login4")
+			 public  String hello4(@RequestParam String userid,
+										 @RequestParam String password)// value는 name의 별칭
+			 {
+				  System.out.println(userid + ":" +  password);
+				  return "main";
+			 }
+
+			 // @RequestParam은 필수, 반드시 동일한 name 태그로 넘겨줘야 한다. ( 필수 속성 )
+			 // 해당 name으로 전달하지 않으면 400 에러 발생
+			 // 필수 속성을 비활성화 시킬 수 있다. (required = false)
+			 // 비활성화하면 null값으로 설정됨
+			 // 기본값 설정이 가능하다 (defaultValue = "초기값")
+			 @GetMapping("/login5")
+			 public  String hello5(@RequestParam(name = "userid") String userid,
+										  @RequestParam(value = "password", required = false, defaultValue = "9999") String password)// value는 name의 별칭
+			 {
+				  System.out.println(userid + ":" +  password);
+				  return "main";
+			 }
+
+			 // 사용자 입력 파라미터값이 자동으로 DTO에 저장가능.
+			 @GetMapping("/login6")
+			 public  String hello6(LoginDTO loginDTO) {
+				  System.out.println(loginDTO);
+				  return "main";
+			 }
+
+			 // 사용자 입력 파라미터값을 @RequestParam Map<String,Stirng>형태로 저장가능.
+			 @GetMapping("/login")
+			 public  String hello(@RequestParam Map<String, String> map) {
+				  System.out.println(map);
+				  return "main";
+			 }
+
+2. 요청 Header값 얻기
+	
+	1) 이전 서블릿
+	
+		doGet(HttpsServletRequest request, HttpServletResoponse response)
+		
+		// 요청 Header값 얻기
+			
+			Enumeration<String> enu = request.getHeaderNames();
+			while(enu.hasMoreElements()){
+				String key = enu.nextElement();
+				Stirng value = request.getHeader(key);
+			}
+			
+			String value = request.getHeader("user-agent");
+			
+		# request 정보
+		accept-language: 인코딩된 언어를 확인 가능하다, 다국어 처리에서 사용된다.
+		user-agent: 접속한 유저 정보를 확인가능.( 브라우저, 주소, 윈도 etc)
+		accept: content_type 확인 가능.( ex. text/html )	
+		
+		
+	2) Spring 처리	
+	
+    @GetMapping("/main2")
+    public String getSingleHeader(@RequestHeader(name = "user-Agent") String userAgent,
+                                  @RequestHeader(name = "connection")String connection ) {
+       System.out.println("user-Agent: " + userAgent);
+       System.out.println("connection: " + connection);
+       return "main";
+    }
+	 
+3. Cookie 값 얻기
+
+	1) 서블릿
+	
+		# 쿠키 생성
+      Cookie c = new Cookie("xxx", String value);
+      
+		#쿠키 time-out 지정
+		c.setMaxAge(초단위);
+      response.addCookie(c);
+
+      #쿠키 참조
+      Cookie [] cookies = request.getCookies();
+	   for(Cookic c : cookies){
+	      String key = c.getName();
+	      if("xxx".equals(key)){
+	      String 
+			
+			
+	2) Spring
+	
+		// Spring 쿠키 참조
+		@GetMapping("/get2")
+		public String main3(@CookieValue("userid") String userid) {
+
+			System.out.println(userid);
+			 return "main";
+		}
+
+4. 멀티값 요청처리
+
+	1) 이전 서블릿
+	
+		<h1>3. reqeust.getParameterValues 메서드이용(GET)</h1>
+		<form action="MemberServlet3" method="GET">
+			이름<input type="text" name="username">
+			나이<input type="text" name="age">			
+			취미:
+			야구<input type="checkbox" name="hobby" value="야구"><br>    
+			축구<input type="checkbox" name="hobby" value="축구"><br>    
+			농구<input type="checkbox" name="hobby" value="농구"><br>    
+			
+			이메일1: <input type="text" name="email"><br>    
+			이메일2: <input type="text" name="email"><br>    
+			<input type="submit" value="전송">
+		</form>
+		
+		String[] hobiies = request.getParametrValues("hobby");
+		
+	2) Spring
+			
+		 @GetMapping("/login2")
+		 public String login2(@RequestParam String userid,
+									@RequestParam String password,
+									@RequestParam String[] email){
+			  System.out.println(userid);
+			  System.out.println(password);
+			  System.out.println(Arrays.toString(email));
+			  return "loginForm";
+		 }
+
+		 @GetMapping("/login3")
+		 public String login3(@RequestParam String userid,
+									@RequestParam String password,
+									@RequestParam List<String> email){
+			  System.out.println(userid);
+			  System.out.println(password);
+			  System.out.println(email);
+			  return "loginForm";
+		 }
+
+		 @GetMapping("/login")
+		 public String login(LoginDTO dto ){
+			  System.out.println(dto.getUserid());
+			  System.out.println(dto.getPassword());
+			  System.out.println(dto.getEmail());
+			  return "loginForm";
+		 }
+		 
+5. Controller에서 모델(Model: View에서 보여줄 데이터)생성하기
+
+	1) 이전 서블릿
+		doGet(HttpsServletRequest request, HttpServletResoponse response)
+		
+		//scope에서 저장
+		
+		// request scope
+		request.setAttribute(key,value);
+		
+		// session scope
+		HttpSession session = request.getSession();
+		session.setAttrubute(key,value);
+		
+		// application scope
+		ServletContext applictioan = getServletContext();
+		applicaiton.setAttribute(key,value);
+		
+		// jsp 선택
+		// forward
+		// redirect
+		
+	2) Spring
+	
+		- 기본 scope는 request 임. ( 요청 ~ 응답 )
+		
+			가. request scope에 저장하는 방법
+			
+		    @GetMapping("/m")
+			 public String main(HttpServletRequest request) {
+				  request.setAttribute("userid","test01");
+				  request.setAttribute("email","test01@exam.com");
+				  return "main";
+			 }
+
+			 @GetMapping("/m2")
+			 public String main2(Model model) {
+				  model.addAttribute("userid","test02");
+				  model.addAttribute("email","test02@exam.com");
+				  return "main2";
+			 }
+
+			 @GetMapping("/m3")
+			 public String main2(Map<String, String> map) {
+				  map.put("userid","test03");
+				  map.put("email","test03@exam.com");
+				  return "main3";
+			 }
+
+			 @GetMapping("/m4")
+			 public String main4(@ModelAttribute("xxx") LoginDTO loginDTO) {
+				  // 모델이 된다 --> html에서 보여줄 수 있음.
+				  // 자동으로 ("loginDTO",loginDTO)
+				  // 명시적으로 key 지정 가능. @ModelAttribute("key")
+				  // 이제는 ("key",loginDTO)
+
+				  // DB연동해서 가져온 LoginDTO 데이터(모델)
+				  // request.setAttribute("dto",loginDTO);
+				  // model.addAttribute("dto",loginDTO);
+				  // map.put("dto",loginDTO);
+
+				  loginDTO.setUserid("test04");
+				  loginDTO.setPassword("q1w2e3r4");
+
+				  return "main4";
+			 }
+
+			 @GetMapping("/m5")
+			 public String main5(@ModelAttribute("yyy") ArrayList<String> nameList) {
+				  // 자동으로 모델로 저장됨.
+				  // @ModelAttribute("yyy") 지정 --> 모델 저장할때 ("key", nameList) 저장됨
+
+				  nameList.add("hello");
+				  nameList.add("world");
+				  nameList.add("test");
+				  return "main5";
+			 }
+
+			 @GetMapping("/m6")
+			 // 정보가 명시적으로 지정되므로 권장하지 않는다.
+			 public ModelAndView main6() {
+
+				  // ModelAndView
+				  ModelAndView mv = new ModelAndView();
+				  // view 지정
+				  mv.setViewName("main6");
+
+				  // 모델 지정
+				  mv.addObject("userid","test06");
+				  mv.addObject("dto", new LoginDTO("test06", "123456"));
+				  mv.addObject("list", Arrays.asList("hello", "world", "test06"));
+				  mv.addObject("dtolist", Arrays.asList(new LoginDTO("testId01", "testPw01"),
+							 new LoginDTO("testId02","testPw02"),
+							 new LoginDTO("testId03","testPw03")));
+
+				  return mv;
+			 }
+			 
+			나. session scop에 저장하는 방법
+				
+				- 이전 서블릿
+					HttpSession session = rquest.getSession();
+					session.setAttribute("aaa","홍길동");
+					
+				- Spring
+					  public String main(Model model) {
+
+						  // requsets scope에 저장
+						  model.addAttribute("aaa", "홍길동1");
+
+						  // session scope에 저장
+						  model.addAttribute("bbb", "홍길동2");
+						  model.addAttribute("ccc", "홍길동3");
+
+						  return "target"; //target.html
+					 }
+					
+					
+			다. application scope에 저장하는 방법
+			
+				- 이전 서블릿
+					ServletContext applicaiton = request.getServletContext();
+					applicaiton.setAttribute("key",value);
+					'
+				
+				- Spring
+					
+					@Autowired
+					ServletContext application;
+					
+					// application scope에 저장
+					application.setAttribute("ddd", "홍길동4");
+					
+				# thymeleaf
+				requset: <p th:text=${aaa}></p>
+				session: <span th:text=${session.bbb}></span><br>
+				session: <span th:text=${session.ccc}></span><br>
+				application: <span th:text=${application.ddd}></span>
+				
+-------------------------------------------------
+2026.05.18
+
+1. Controller의 리턴타입 종류
+
+	1) 개요
+		:	Controller의 리턴타입은 메서드의 파라미터가 다양하게 설정할 수 있는 것처럼 동일하게 다양한 타입을 사용할 수 있다.
+	
+	2) String 타입
+		- 뷰 정보를 의미
+		- 모델은 파라미터로 설정.
+		
+	3) ModelAndView 타입
+		- 뷰정보와 모델정보를 ModelAndView에 한번에 설정
+		
+		    // 1. String 타입
+			 // 뷰정보만 있고 모델 정보는 없다.
+			 // 화면만 보여주는 경우
+			 @GetMapping("/m")
+			 public String main() {
+
+				  return "main";
+			 }
+
+			 // 2. ModelAndView 타입
+			 // 뷰정보, 모델 정보 다 있음.
+			 @GetMapping("/m2")
+			 public ModelAndView main2() {
+				  ModelAndView mv = new ModelAndView();
+				  mv.setViewName("main"); // view 설정
+				  mv.addObject("userid","정범석");
+				  return mv;
+			 }
+
+			 // 3. DTO 타입
+			 // 뷰 정보 없고, 모델 정보있음
+			 // 뷰정보는 요청매핑값으로 유추된다
+			 // ==> 요청매핑값을 html의 이름과 맞춰야 한다.
+			 // model의 키값을 변경 가능하다.
+			 @GetMapping("/m3")
+			 public @ModelAttribute("dto") LoginDTO main3() {
+				  LoginDTO dto = new LoginDTO("정범석","1234");
+				  return dto;
+			 }
+
+
+			 // 4. ArrayList 타입
+			 // 뷰 정보 없고, 모델 정보있음
+			 // 뷰정보는 요청매핑값으로 유추된다
+			 // ==> 요청매핑값을 html의 이름과 맞춰야 한다.
+			 // model의 키값을 변경 가능하다.
+			 @GetMapping("/m4")
+			 public @ModelAttribute("nameList") ArrayList<String> main4() {
+				  ArrayList<String> list = new ArrayList<>();
+				  list.add("Hello");
+				  list.add("World");
+				  list.add("123");
+				  return list;
+			 }
+
+			 // 5. void 타입
+			 // 뷰정보 없고, 모델 정보 없다.
+			 // 뷰정보는 요청매핑값으로 유추된다
+			 // ==> 요청매핑값을 html의 이름과 맞춰야 한다.
+			 @GetMapping("/m5")
+			 public void main5() {
+
+			 }
+			 
+/////////////////////////////////////////////////			 
+2. JSON 통신
+
+	1) 이전 방식
+						요청:
+						ex. http://localhost:8080/app/login?key=value
+		웹브라우저 -----------------------------------------------> 서버
+					  <-----------------------------------------------
+						응답: html
+						
+	2) JSON 통신	
+						
+						요청: JSON
+						{
+							"userid":"홍길동"
+							"password":"1234"
+						}
+						@RequestBody + POST(*****) + Content-Type:application/json(****)
+		클라이언트 -----------------------------------------------> 서버
+(ex. 웹브라우저) <-----------------------------------------------
+						응답: JSON( xml, html, 일반 텍스트 도 가능)
+						@ResponseBody
+						
+		
+		# 클라이언트 역할의 도구: 
+			- curl ( cmd에서 요청 )
+			- postman ( GUI 기반 )
+			- Talend Test API ( 크롬 브라우저 플러그인 )
+			
+/////////////////////////////////////////////////			
+3. redirect와 forward 및 flash scope( flash attribute )
+
+	1) 이전 서블릿
+	
+		가. 포워드(forward)
+			- 문법: request.GetRequestDispatcher("list.html").forward(request, response);				
+			- 특징:
+				내부적으로 list.html에 요청이 되기 때문에 URL이 변경되지 않음
+				request scope에 저장된 데이터를 list.html에서 참조 가능.
+			
+		나. 리다이렉트(redirect)
+			- 문법: response.sendRedirect("*.html");
+			- 특징:
+				내부적으로 웹브라우저에 응답했다가, 웹브라우저에서 새롭게 list.html 에 요청이 되기 때문 URL이 변경됨				
+				request scope에 저장된 데이터를 list.html에서 참조 불가능.
+				
+				
+	2) spring
+	
+		가. 포워드(forward)
+			- 문법:		
+			 
+			 @GetMapping("/list")			 
+			 public String aaa() {
+				  return "list";
+			 }
+			 
+			 @GetMapping("/aaa")			 
+			 public String aaa() {
+				  return "forward:list";
+			 }
+
+			
+		나. 리다이렉트(redirect와)
+			- 문법:
+			
+			 @GetMapping("/list")			 
+			 public String aaa() {
+				  return "list";
+			 }
+			 
+			 @GetMapping("/aaa")			 
+			 public String aaa() {
+				  return "list";
+			 }
+			 
+			 
+	3) redirect + request scope에 저장된 데이터를 참조 가능. ( flash scope라고 부름 )
+		https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/flash-attributes.html		
+		
+		scope 라이프 사이클 
+		request scope < flash scope < session scope < application scope
+		
+		문법:
+			 @GetMapping("/flash")
+			 public String flash(RedirectAttributes model){
+				  model.addFlashAttribute("userid","홍길동3");
+				  System.out.println("flash");
+				  return "redirect:main";
+			 }
+			 
+/////////////////////////////////////////////////			 
+4. PRG( Post-Redirect-GET ) pattern
+
+	1) 개념
+		Post 요청에 대해서 GET 요청으로 다시 redirect 처리하는 패턴
+		=> POST로 시작해서 GET으로 끝나게 하는 방식(멱등성을 보장하기 위해 사용)
+		
+		멱등성: 여러번 실행해도 결과가 동일함을 의미함.
+		
+								GET
+		브라우저 ------------------------> 
+			
+			- 조회할때 사용 (Select 작업)			
+			- 새로고침을 여러번 해도 서버에 영향이 없음.
+			- 멱등성을 가진다.
+		
+								POST
+		브라우저 ------------------------> 
+			
+			- 생성/수정/삭제 시 사용 (insert/update/delete 작업)
+			- 새로고침을 여러번 하면 서버에 영향이 있기 때문에 항상 경고창으로 재요청 확인이 필요하다.
+			- 멱등성이 없음.
+		
+	2) POST로 최종 종료되었을때의 문제	
+	
+		- 새로고침하면 동일한 요청이 계속 보내지는 멱등성 이유 발생
+		- URL 복사해서 다른 브라우저에서 요청하면 연결이 안되는 이슈 발생
+		
+			@GetMapping("/main")
+			 public String  hello4(){
+			  return "main";
+			 }
+
+			// 그냥 post로 끝난 경우
+			 @PostMapping("/write")
+			 public String  write(){
+			  return "write";
+			 }
+
+	 
+			// PRG 패턴
+			 @PostMapping("/write")
+			 public String  write(){
+			  return "redirect:success";
+			 }
+
+			  @GetMapping("/success")
+			 public String  hello4(){
+			  return "main";
+			 } 
+			 
+/////////////////////////////////////////////////			 
+5. Filter
+	
+	1) 이전 서블릿
+		
+		- implements Filter
+			doFilter(ServletRequest request, ServletResponse reponse, FilterChian chain) 메서드 재정의
+		- web.xml에 필터 등록
+	 
+	2) Spring
+		- implements
+			doFilter(ServletRequest request, ServletResponse reponse, FilterChian chain) 메서드 재정의
+		- web.xml 대신에 @Configuration + @Bean
+		
+		예시:
+		
+		# Filter 자바 파일
+		
+		 public class MyFilter implements Filter {
+			 @Override
+			 public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+				  System.out.println("Request Filter");
+				  filterChain.doFilter(servletRequest,servletResponse);
+				  System.out.println("Response Filter");
+			 }
+		}
+		
+		# Filter config 자바 파일
+		
+		@Configuration	// 클래스 빈등록
+		public class FilterWebConfig implements WebMvcConfigurer {
+			 @Bean	// 메서드 빈등록
+			 public FilterRegistrationBean<MyFilter> filterRegistrationBean(){
+				  FilterRegistrationBean<MyFilter> filterRegistrationBean = new FilterRegistrationBean(new MyFilter());
+				  filterRegistrationBean.addUrlPatterns("/*");    // 모든 요청에서 filter가 적용된다
+				  return filterRegistrationBean;
+			 }
+		}
+		
+/////////////////////////////////////////////////		
+6. Interceptor ( 요청을 3군데에서 가로채기 가능 )
+
+	1. 아키텍쳐
+				
+						filter								 	preHandle()																	
+	웹브라우저 ------||------> Dispatcher Servlet ------||------> Controller -------> Service -------> DAO
+																 <-----||-------				 <-------			<-------
+												|					postHandle()
+												|
+												|
+				  <------||------	main.html
+				   afterCompletion()
+					
+		- preHandle(): return true 일때 Controller로 넘어간다.
+		
+		
+	2. 구현
+	
+		# Interceptor 자바 파일
+		
+		@Component
+		public class MyInterceptor implements HandlerInterceptor {
+
+			 @Override
+			 public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+				  System.out.println("preHandle");
+				  // 조건체크
+				  boolean result = true;
+				  if(result){
+						return true;
+				  } else {
+						response.sendRedirect("/main2");
+						return false;
+				  }
+			 }
+
+			 @Override
+			 public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+
+				  System.out.println("postHandle");
+
+				  // View 정보  변경가능
+				  // 조건체크
+				  boolean result = true;
+				  if(result){
+						modelAndView.addObject("userid","홍길동");
+						modelAndView.setViewName("success");
+				  }
+			 }
+
+			 @Override
+			 public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+				  System.out.println("afterCompletion");
+			 }
+		}
+		
+		
+		# interceptor config 파일
+		
+		@Configuration
+		public class InterceptorWebConfig implements WebMvcConfigurer {
+
+			 // Interceptor를 등록하는 메서드가 제공되어 재정의 하면된다.
+			 @Autowired
+			 MyInterceptor myInterceptor;
+
+			 @Override
+			 public void addInterceptors(InterceptorRegistry registry) {
+
+				  // Interceptor 자바파일이 bean으로 등록되지 않았을경우
+				  // registry.addInterceptor(new MyInterceptor());
+				  registry.addInterceptor(myInterceptor).addPathPatterns("/main","/aaa/*","/bbb*");
+			 }
+		}
+		
+/////////////////////////////////////////////////	
+7. 예외처리 
+	
+	1) 개념 
+	 - 스프링에서 발생되는 예외는 항상 RuntimeException 계열임.(*****)
+		=> try-catch 및 throws 하지 않음
+	 - RuntimeException 계열의 예외는 항상 호출한곳으로 예외가 전달된다.
+		=> DAO에서 발생되거나, Service에서 발생되거나 항상 Controller로 모인다. 
+		 
+		==> Controller에서 예외처리를 해야 된다(***) // [추가사항] : 런타임, 비런타임 구분해서 정리
+	
+	 - Controller에서는 try-catch가 아닌 에노테이션 이용(선언적 예외처리)
+		: @ExceptionHandler 이용
+	
+	웹브라우저 ------------> Dispatcher Servlet ------------> Controller -------> Service -------> DAO
+															  <------------		 	 	<-------			  <-------
+												|				
+												|
+												|
+				  <------------	main.html
+	
+	2) 예외처리 2가지 방법
+	
+		가. 로컬
+			- 특징: Controller내에서 발생된 예외만 처리 가능
+			
+			- 구현:
+			
+				@GetMapping("/main")
+				public String main(){
+					 System.out.println("main");
+
+					 // 예외발생
+					 if(true) throw new IllegalArgumentException("IllegalArgumentException 예외 발생");
+
+					 return "main";
+				}
+				 @GetMapping("/main2")
+				 public String main2(){
+
+					  // 예외발생
+					  if(true) throw new NullPointerException("NullPointerException 예외 발생");
+					  System.out.println("main2");
+					  return "main";
+					 }
+					 
+					 // 로컬
+					 // 특정 Controller 내에서 처리
+					 // 2가지 기능: View + Model
+					 // @ExceptionHandler  => 모든 오류 예외처리
+					 // value를 통해 특정 오류만 예외처리 가능
+					 
+				 @ExceptionHandler(value = {IllegalArgumentException.class, NullPointerException.class})
+				 // public ModelAndView handleException(Exception ex, HttpServletRequest request){}
+				 
+				 public String handleException(Exception e, Model model){
+					 model.addAttribute("message",e.getMessage());
+					 return "error/error";    // error 폴더 안에 있는 파일임을 명시 해야 된다.
+				 }
+					 
+		나. 전역
+			
+			- 구현:
+			
+				@ControllerAdvice
+				public class GlobalExceptionHandler {
+					 @ExceptionHandler(value= {IllegalArgumentException.class, NullPointerException.class, ArithmeticException.class})
+					 public String handleException(Exception e, Model model) {
+						  model.addAttribute("message",e.getMessage());
+						  return "error/error";
+					 }
+				}
+				
+/////////////////////////////////////////////////
+#################################################
+2026.05.19
+
+8. 사용자 입력 데이터 유효성 검증1 :  @Valid + BindigResult // 화면이 있을때 주로 사용하는 방법
+																				// BindigResult가 오류를 체크한다
+	1) 개념:
+		- 사용자 입력태그의 값을 검증하는 작업
+			ex. 글자길이, 필수사항, 이메일, 값의 범위(1~10) etc...
+			
+	2) 검증작업
+	
+		- 클라이언트
+		
+			a. HTML5에서 제공해주는 속성이용
+			ex.
+				<form action="login" method="get">
+					 아이디:<input type="text" name="userid" required><br>
+					 비밀번:<input type="text" name="password" required><br>
+					 email:<input type="email" name="email"><br>
+					 나이:<input type="number" name="age" max="10"><br>
+					 <input type="submit" value="로그인">
+				</form> 
+				
+			b. Javacript 이용
+			
+		2) 검증작업2
+		
+			가. 의존성 설정			
+				implementation 'org.springframework.boot:spring-boot-starter-validation'
+				
+				==> 검증할 때 사용할 수 있는 애노테이션 사용 가능
+				ex. @NotNull, @NotBlank, @Size, @Min, @Max, @Email
+					 [ @Future, @Past ]( 날짜를 현재보다 미래/과거로 설정해야 유효 ) ,[ @Postive, @Negativ ]( 숫자의 음수 양수를 체크 )
+			
+			나. DTO 작성: TodoDTO
+				
+				 @NotBlank(message = "적어도 한글자 이상 입력하세요.")
+				 String userid;
+
+				 @Size(min = 5, message = "최소 5글자 이상 입력하시요")
+				 String description;
+
+				 @NotNull
+				 @FutureOrPresent(message = "현재 날짜 또는 미래 날짜 입력하시오")
+				 LocalDateTime targetDate;
+				 
+			다. Controller 작성.  ex. TodoController.java
+
+				- 중요한 핵심은 반드시 사용자 입력 화면을 보여주는 @GetMapping, 사용자 입력을 처리하는 @PostMapping 필요함.
+				- 또한 @GetMapping 과 @PostMapping에서 TodoDTO 모델을 공유해야됨.
+ 
+				//사용자 입력 화면 보기
+				 @GetMapping("/add-todo")
+				 public String showTodoPage(Model model) {
+
+				// @PostMapping의 @ModelAttribute("xxx") 값과 반드시 일치해야됨.
+				model.addAttribute("xxx", new TodoDTO());
+				return "write";  // write.html
+				 }
+
+				 //사용자 입력 처리 하기
+				 @PostMapping("/add-todo")
+				 public String addTodo(@Valid @ModelAttribute("xxx")  TodoDTO todoDTO,
+						  BindingResult bindingResult, Model model) {
+				//검증실패
+				if(bindingResult.hasErrors()){
+					 return "write";
+				}
+				//검증성공
+				return "redirect:main";  //PRG 패턴
+				 }
+
+			라. write.html
+			
+				<form th:object="${xxx}" th:action="@{/add-todo}" method="post">
+					아이디:<input type="text" th:field="*{userid}" ><br>
+					<p th:if="${#fields.hasErrors('userid')}" th:errors="*{userid}"></p>
+					 할일:<input type="text" th:field="*{description}"><br>
+					 <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+					 목표날짜:<input type="date" th:field="*{targetDate}"><br>
+					 <p th:if="${#fields.hasErrors('targetDate')}" th:errors="*{targetDate}"></p>
+					<input type="submit" value="할일 저장">
+				</form>
+			 
+			 # 다음과 같이 자동으로 변경됨. 
+				 <form th:object="${xxx}">
+					<input type="text" th:field="*{userid}" >
+					==> <input type="text" name="userid" id="userid" value="" >
+					
+-------------------------------------------------					
+8. 사용자 입력 데이터 유효성 검증2 :  @Validated + @ControllerAdvice
+
+	가. 의존성 설정			
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	나. DTO 작성: TodoDTO
+	
+		 String userid;		 
+		 String description;		 
+		 LocalDateTime targetDate;
+		 
+		 ==> @Validated는 @Valid와 다르게 검증 어노테이션(@NotNull)을 DTO가 아닌 Controller의 메서드 파라미터에 사용이 가능함.
+		 
+	다. Controller 작성: @Valiated + @NotNull
+	
+		@Controller
+		@Validated
+		public class TodoController {
+		
+			 // 사용자 입력 화면 보기
+			 @GetMapping("/add-todo")
+			 public String showTodoPage() {
+				  return "write"; //write.html
+			 }
+
+			 // 사용자 입력 처리
+			 @PostMapping("/add-todo")
+			 public String addTodo(@NotBlank(message = "적어도 한글자 이상 입력.")
+										  String userid,
+										  @Size(min = 5, message = "최소 5글자 이상 입력.")
+										  String description,
+										  @NotNull @FutureOrPresent(message = "현재 날짜 또는 미래 날짜를 입력.")
+										  LocalDate targetDate){
+				  // 검증실패: 예외가 발생 =============> @ControllerAdvice
+				  // 검증성공
+				  System.out.println(userid);
+				  System.out.println(description);
+				  System.out.println(targetDate);
+				  return "redirect:main"; // PRG패턴
+			 }
+
+			 // 성공했을때 보여줄 화면
+			 @GetMapping("/main")
+			 public String main(){
+				  return "main"; //main.html
+			 }
+		}
+	
+	
+	라. 전역 예외 처리 @ControllerAdvice
+	
+		@ControllerAdvice
+		public class GlobalExceptionHandler {
+			 @ExceptionHandler(value = ConstraintViolationException.class)
+		//  public String handleException(Exception e, Model model) {
+			 public String handleException(Exception e, RedirectAttributes redirectAttributes, Model model) {
+				  redirectAttributes.addFlashAttribute("errorMessage", "유효성 검증 실패");
+				  return "redirect:add-todo"; // PRG 패턴
+				}
+			}
+			
+	마. HTML 작성	
+		<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+		<form  th:action = "@{/add-todo}" method="post">
+			 아이디: <input type="text" name = "userid"><br>
+			 할일: <input type="text" name="description"><br>
+			 목표날짜: <input type="date" name="targetDate" ><br>
+			 <input type="submit" value="할일 저장">
+		</form>
+	
+/////////////////////////////////////////////////
+
+9. Thymeleaf 정리
+	https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html
+	
+	1) 의존성
+		implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+		
+	2) 기본 HTML 설정	
+	 
+		- html xmlns:th="http://www.thymeleaf.org" 필수
+		
+		ex.
+			<!DOCTYPE html>
+			<html xmlns:th="http://www.thymeleaf.org" lang="en">
+			<head>
+				 <meta charset="UTF-8">
+				 <title>Main</title>
+			</head>
+			<body>
+			<h1>Main</h1>
+			</body>
+			</html>
+			
+	3) 구현
+
+	  가. 1. scope에 저장하고 html에 보여주기
+	  
+		  <!DOCTYPE html>
+			<html xmlns:th="http://www.thymeleaf.org" lang="en">
+			<head>
+					 <meta charset="UTF-8">
+				 <title>Title</title>
+			</head>
+			<body>
+			<h1>1. scope에 저장하고 html에 보여주기</h1>
+			리터럴 : <p th:text="123+1"></p>
+			리터럴 : <p th:text="'hello'"></p>
+			request : <p th:text="${request}"></p>
+			request2 : <p th:utext="${request2}"></p>
+			session : <p th:text="${session.session2}"></p>
+			session : <p th:text="${session.xxx}"></p>
+			application : <p th:text="${application.application2}"></p>
+			</body>
+			</html>
+
+
+	 나. scope에 객체 저장하고 html에 보여주기
+
+		<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		</head>
+		<body>
+		<h1>2. scope에 객체 저장하고 html에 보여주기</h1>
+		<h2>가. 중첩형태로 접근</h2>
+		login객체:<p th:text="${login}"></p>
+		login객체:<p th:text="${login.toString()}"></p>
+		userid:<p th:text="${login.userid}"></p>
+		password:<p th:text="${login.password}"></p>
+		<h2>나. 객체 속성형태로 접근</h2>
+		<div th:object="${login}">
+			 아이디:<p th:text="*{userid}"></p>
+			 비번:<p th:text="*{password}"></p>
+		</div>
+		</body>
+		</html>
+
+	  다. .제어문 처리: if, swtich, 3항연산자, 반복문
+
+		<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+			 <style>
+			 .xxx{
+			  color:red;
+			 }
+			 .yyy{
+				color:blue;
+			 }
+			 </style>
+		</head>
+		<body>
+		<h1>3.제어문 처리: if, swtich, 3항연산자, 반복문</h1>
+		<h2>가. 조건문(단일 if)</h2>
+		<p th:if="${login.userid == 'inky4832'}">
+			 참1
+		</p>
+		<p th:if="${login2.userid == null }">
+			 참2
+		</p>
+		<h2>나. 3항 연산자</h2>
+		<p th:text="${login.userid == 'inky4832'}?'참3':'거짓'"></p>
+		<p th:class="${login.userid == 'inky4832'}?'xxx':'yyy'">css 적용된 텍스트</p>
+
+		<h2>다. switch </h2>
+		 <div th:switch="${login.userid}">
+			<p th:case="inky4832">inky4832입니다.</p>
+			<p th:case="inky4833">inky4833입니다.</p>
+			<p th:case="*">default 입니다.</p>
+			<p></p>
+		 </div>
+		<h2>라. 반복문 </h2>
+		<ul th:each="dto: ${myList}">
+			 <li th:text="${dto.userid} + '  ' + ${dto.password}"></li>
+		</ul>
+		<h2>라. 반복문2 - index, count, first,  last </h2>
+		<ul th:each="dto, yyy: ${myList}">
+			 <li th:text="${dto.userid} + '  ' + ${dto.password} + ' ' +${yyy.index} + '  ' + ${yyy.first} "></li>
+		</ul>
+
+		</body>
+		</html>
+
+		라. 경로(링크)
+
+			<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		<link rel="stylesheet" type="text/css" th:href="@{css/test.css}">
+		</head>
+		<body>
+		<h1>4. 경로(링크)</h1>
+		<p>Hello</p>
+		<img th:src="@{images/my.gif}" width="100" height="100" ><br>
+		<a th:href="@{http://google.com}">구글</a><br>
+		<a th:href="@{m4-1}">m4-1(상대)</a><br>
+		<a th:href="@{/m4-1(id='aaa',pw='1234')}">m4-1(절대)-컨텍스트명뒤의/이다.</a><br>
+		<a th:href="@{/m4-1(id=${userid},pw='1234')}">m4-1(절대)-컨텍스트명뒤의/이다.</a><br>
+
+
+		<form th:action="@{m4-2}" method="get">
+			 아이디:<input type="text" name="userid" required><br>
+			 비밀번:<input type="text" name="password" required><br>
+			 <input type="submit" value="로그인">
+		</form>
+
+
+		</body>
+		</html>
+
+		 마. 유틸리티
+			<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		<link rel="stylesheet" type="text/css" th:href="@{css/test.css}">
+		</head>
+		<body>
+		<h1>5. 유틸리티</h1>
+		<h2>가. 날짜 유틸티리</h2>
+		today:<p th:text="${#temporals.format(today, 'dd/MM/yyyy')}"></p>
+		<h2>나. 문자열 유틸티리</h2>
+		<p th:text="${#strings.toUpperCase(username)}"></p>
+		<p th:text="${#strings.length(username)}"></p>
+		<p th:text="${#strings.substring(username,0,4)}"></p>
+
+		<h2>다. 숫자 유틸티리</h2>
+		<p th:text="${#numbers.formatInteger(price,3,'POINT')}"></p>
+		<p th:text="${#numbers.formatInteger(price,3,'COMMA')}"></p>
+		<p th:text="${#numbers.formatCurrency(price)}"></p>
+
+		<h2>라. 리스트 유틸티리</h2>
+		size:<p th:text="${#lists.size(myList)}"></p>
+		값이 없냐?<p th:text="${#lists.isEmpty(myList)}"></p>
+		값이 포함되냐?<p th:text="${#lists.contains(myList, 'A')}"></p>
+
+
+
+		</body>
+		</html>
+
+		 사. 화면재사용
+
+		# include/top.html
+			  <!DOCTYPE html>
+			<html xmlns:th="http://www.thymeleaf.org" lang="en">
+			<head>
+				 <meta charset="UTF-8">
+				 <title>Title</title>
+			</head>
+			<body>
+			  <div th:fragment="copy">
+				 &copy; 2011 The Good Thymes Virtual Grocery
+			  </div>
+			  <div th:fragment="header">
+					로그인/회원가입
+			  </div>
+			</body>
+			</html>
+
+
+		# main6.html
+			  <!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		<link rel="stylesheet" type="text/css" th:href="@{css/test.css}">
+		</head>
+		<body>
+		<h1>6. 화면재사용</h1>
+		<div th:replace="~{ include/top :: header}"></div>
+		<p>안녕하세요</p>
+		<hr>
+		<div th:replace="~{ include/top :: copy}"></div>
+
+		</body>
+		</html>
+		 

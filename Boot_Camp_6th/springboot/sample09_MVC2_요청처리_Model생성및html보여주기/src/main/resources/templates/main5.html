@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1> Main4 </h1>
+userid: <p th:text="${xxx.userid}"></p>
+passwd: <span th:text="${xxx.password}"></span>
+
+<h1> Main4 </h1>
+<div th:object="${xxx}">
+    userid: <p th:text="*{userid}"></p>
+    passwd: <span th:text="*{password}"></span>
+</div>
+</body>
+</html>
