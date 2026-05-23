@@ -1,0 +1,10 @@
+
+# applicaiton.yml
+spring:
+  profiles:
+    active: prod
+
+# TodoMapper.xml 과 DTO 별칭 설정
+mybatis:
+  mapper-locations: com/exam/config/*.xml
+  type-aliases-package: com.exam.dto

@@ -1,0 +1,14 @@
+
+
+# MySQL DB 연동
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+
+# scheam.sql과 data.sql 관리가능 (slways|never)
+  sql:
+    init:
+      mode: always # never

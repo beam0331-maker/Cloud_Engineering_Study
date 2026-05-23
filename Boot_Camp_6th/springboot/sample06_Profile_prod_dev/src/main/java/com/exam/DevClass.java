@@ -4,6 +4,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("prod")
-public class PordClass {
+@Profile("dev")
+public class DevClass {
+    public DevClass() {
+        System.out.println("DevClass");
+    }
 }

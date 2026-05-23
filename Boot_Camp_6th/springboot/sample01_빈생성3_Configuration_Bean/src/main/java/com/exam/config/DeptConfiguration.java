@@ -1,4 +1,4 @@
-package com.exam.config;
+package com.exam.mapper;
 
 import com.exam.controller.DeptController;
 import com.exam.dao.DeptDAO;

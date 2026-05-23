@@ -3,27 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-<link rel="stylesheet" type="text/css"
-th:href="@{/css/test.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/css/test.css}">
 </head>
 <body>
-<h1>5. 유틸리티</h1>
-<h2>가. 날짜 유틸리티</h2>
-today: <span th:text="${#temporals.format(today, 'dd/MM/yyyy')}"></span>
-
-<h2>나. 문자열 유틸리티</h2>
-toUpperCase: <span th:text="${#strings.toUpperCase(username)}"></span><br>
-length: <span th:text="${#strings.length(username)}"></span><br>
-substring: <span th:text="${#strings.substring(username,0,4)}"></span><br>
-
-<h2>다. 숫자 유틸리티</h2>
-formatInteger(POINT): <span th:text="${#numbers.formatInteger(num,3,'POINT')}"></span><br>
-formatInteger(COMMA): <span th:text="${#numbers.formatInteger(num,3,'COMMA')}"></span><br>
-formatCurrency: <span th:text="${#numbers.formatCurrency(num)}"></span><br>
+<h1>6. 화면재사용</h1>
+<p>안녕하세요</p>
+<hr>
+<div th:replace="~{include/top :: copy}"></div>
+<div th:replace="~{include/top :: header}"></div>
 </body>
-
-<h2>라. 리스트 유틸리티</h2>
-size: <span th:text="${#lists.size(mylist)}"></span><br>
-isEmpty: <span th:text="${#lists.isEmpty(mylist)}"></span><br>
-contains: <span th:text="${#lists.contains(mylist, 'A')}"></span><br>
 </html>

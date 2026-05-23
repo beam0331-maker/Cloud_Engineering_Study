@@ -1,4 +1,4 @@
-package com.exam.config;
+package com.exam.mapper;
 
 import com.exam.dto.MemberDTO;
 import org.apache.ibatis.annotations.Mapper;

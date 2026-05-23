@@ -2,6 +2,42 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성1_권장패키지.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성1_권장패키지.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성1_권장패키지.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성1_권장패키지.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성1_권장패키지.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성1_권장패키지.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성2_다른패키지_scanBasePackage.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성2_다른패키지_scanBasePackage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성2_다른패키지_scanBasePackage.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성2_다른패키지_scanBasePackage.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성2_다른패키지_scanBasePackage.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성2_다른패키지_scanBasePackage.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성3_Configuration_Bean.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성3_Configuration_Bean.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성3_Configuration_Bean.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성3_Configuration_Bean.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample01_빈생성3_Configuration_Bean.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample01_빈생성3_Configuration_Bean.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용1.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용1.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용1.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용1.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용1.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용2_multi.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용2_multi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용2_multi.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용2_multi.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용2_multi.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용2_multi.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용3_Qualifer.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용3_Qualifer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용3_Qualifer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용3_Qualifer.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용3_Qualifer.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입1_생성자이용3_Qualifer.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired2_multi.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired2_multi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired2_multi.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired2_multi.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired2_multi.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired2_multi.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired3_Qualifer.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired3_Qualifer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired3_Qualifer.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired3_Qualifer.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired3_Qualifer.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample02_의존성주입2_필드주입_Autowired3_Qualifer.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample03_Bean_Scope_singleton_prototype.iml" filepath="$PROJECT_DIR$/.idea/modules/sample03_Bean_Scope_singleton_prototype.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample03_Bean_Scope_singleton_prototype.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample03_Bean_Scope_singleton_prototype.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample03_Bean_Scope_singleton_prototype.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample03_Bean_Scope_singleton_prototype.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample04_PostConstruct_PreDestory.iml" filepath="$PROJECT_DIR$/.idea/modules/sample04_PostConstruct_PreDestory.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample04_PostConstruct_PreDestory.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample04_PostConstruct_PreDestory.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample04_PostConstruct_PreDestory.test.iml" filepath="$PROJECT_DIR$/.idea/modules/sample04_PostConstruct_PreDestory.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample13_REST2_ApiResponse.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample13_REST2_ApiResponse.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample13_REST3_ResponseEntity_ApiResponse.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample13_REST3_ResponseEntity_ApiResponse.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample13_REST4_예외처리.main.iml" filepath="$PROJECT_DIR$/.idea/modules/sample13_REST4_예외처리.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/springboot.iml" filepath="$PROJECT_DIR$/.idea/springboot.iml" />
     </modules>
   </component>

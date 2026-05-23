@@ -1,0 +1,21 @@
+
+
+app:
+  name: demo
+  user:             # JSON "usuer:[{"name":"KIM","age":20},{...}]
+    - name: KIM
+      age: 20
+    - name: LEE
+      age: 30
+
+  phones:            # JSON "phones":["010","02","052"]
+    - 010
+    - 02
+    - 052
+
+  emails: ["aaa@example.come","bbb@example.com"]
+
+  message: |
+    hello
+    world
+  pool-size: 10

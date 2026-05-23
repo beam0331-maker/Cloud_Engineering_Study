@@ -1,15 +1,145 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.34/ec547ef414ab1d2c040118fb9c1c265ada63af14/lombok-1.18.34.jar" />
+        </processorPath>
+        <module name="sample13_REST4_예외처리.main" />
+      </profile>
+    </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="com.exam.demo" target="21" />
       <module name="com.exam.demo.main" target="21" />
       <module name="com.exam.demo.test" target="21" />
+      <module name="sample01_빈생성1_권장패키지" target="21" />
+      <module name="sample01_빈생성1_권장패키지.main" target="21" />
+      <module name="sample01_빈생성1_권장패키지.test" target="21" />
+      <module name="sample01_빈생성2_다른패키지_scanBasePackage" target="21" />
+      <module name="sample01_빈생성2_다른패키지_scanBasePackage.main" target="21" />
+      <module name="sample01_빈생성2_다른패키지_scanBasePackage.test" target="21" />
+      <module name="sample01_빈생성3_Configuration_Bean" target="21" />
+      <module name="sample01_빈생성3_Configuration_Bean.main" target="21" />
+      <module name="sample01_빈생성3_Configuration_Bean.test" target="21" />
       <module name="sample02_의조선주입1_생성자이용1.main" target="21" />
       <module name="sample02_의조선주입1_생성자이용1.test" target="21" />
+      <module name="sample02_의존성주입1_생성자이용1" target="21" />
+      <module name="sample02_의존성주입1_생성자이용1.main" target="21" />
+      <module name="sample02_의존성주입1_생성자이용1.test" target="21" />
+      <module name="sample02_의존성주입1_생성자이용2_multi" target="21" />
+      <module name="sample02_의존성주입1_생성자이용2_multi.main" target="21" />
+      <module name="sample02_의존성주입1_생성자이용2_multi.test" target="21" />
+      <module name="sample02_의존성주입1_생성자이용3_Qualifer" target="21" />
+      <module name="sample02_의존성주입1_생성자이용3_Qualifer.main" target="21" />
+      <module name="sample02_의존성주입1_생성자이용3_Qualifer.test" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired.main" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired.test" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired2_multi" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired2_multi.main" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired2_multi.test" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired3_Qualifer" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired3_Qualifer.main" target="21" />
+      <module name="sample02_의존성주입2_필드주입_Autowired3_Qualifer.test" target="21" />
       <module name="sample02_의존성주입2_필드주입_Autowired_multi" target="21" />
       <module name="sample02_의존성주입2_필드주입_Autowired_multi.main" target="21" />
       <module name="sample02_의존성주입2_필드주입_Autowired_multi.test" target="21" />
+      <module name="sample03_Bean_Scope_singleton_prototype" target="21" />
+      <module name="sample03_Bean_Scope_singleton_prototype.main" target="21" />
+      <module name="sample03_Bean_Scope_singleton_prototype.test" target="21" />
+      <module name="sample04_PostConstruct_PreDestory" target="21" />
+      <module name="sample04_PostConstruct_PreDestory.main" target="21" />
+      <module name="sample04_PostConstruct_PreDestory.test" target="21" />
+      <module name="sample05__external_configuration1_value" target="21" />
+      <module name="sample05__external_configuration1_value.main" target="21" />
+      <module name="sample05__external_configuration1_value.test" target="21" />
+      <module name="sample05__external_configuration2_ConfigurationProperties" target="21" />
+      <module name="sample05__external_configuration2_ConfigurationProperties.main" target="21" />
+      <module name="sample05__external_configuration2_ConfigurationProperties.test" target="21" />
+      <module name="sample05_external_configuration2_ConfigurationProperties02_Validation" target="21" />
+      <module name="sample05_external_configuration2_ConfigurationProperties02_Validation.main" target="21" />
+      <module name="sample05_external_configuration2_ConfigurationProperties02_Validation.test" target="21" />
+      <module name="sample06_Profile_prod_dev" target="21" />
+      <module name="sample06_Profile_prod_dev.main" target="21" />
+      <module name="sample06_Profile_prod_dev.test" target="21" />
+      <module name="sample07_DB1_H2_JdbcTemplate" target="21" />
+      <module name="sample07_DB1_H2_JdbcTemplate.main" target="21" />
+      <module name="sample07_DB1_H2_JdbcTemplate.test" target="21" />
+      <module name="sample07_DB2_MySQL_JdbcTemplate" target="21" />
+      <module name="sample07_DB2_MySQL_JdbcTemplate.main" target="21" />
+      <module name="sample07_DB2_MySQL_JdbcTemplate.test" target="21" />
+      <module name="sample07_DB3_MySQL_MyBatis1_basic" target="21" />
+      <module name="sample07_DB3_MySQL_MyBatis1_basic.main" target="21" />
+      <module name="sample07_DB3_MySQL_MyBatis1_basic.test" target="21" />
+      <module name="sample07_DB3_MySQL_MyBatis2_Mapper인터페이스" target="21" />
+      <module name="sample07_DB3_MySQL_MyBatis2_Mapper인터페이스.main" target="21" />
+      <module name="sample07_DB3_MySQL_MyBatis2_Mapper인터페이스.test" target="21" />
+      <module name="sample08_h2_MySql_Profile실습_prod_dev" target="21" />
+      <module name="sample08_h2_MySql_Profile실습_prod_dev.main" target="21" />
+      <module name="sample08_h2_MySql_Profile실습_prod_dev.test" target="21" />
+      <module name="sample09_MVC1_요청처리1_RequestMapping" target="21" />
+      <module name="sample09_MVC1_요청처리1_RequestMapping.main" target="21" />
+      <module name="sample09_MVC1_요청처리1_RequestMapping.test" target="21" />
+      <module name="sample09_MVC1_요청처리2_사용자입력처리" target="21" />
+      <module name="sample09_MVC1_요청처리2_사용자입력처리.main" target="21" />
+      <module name="sample09_MVC1_요청처리2_사용자입력처리.test" target="21" />
+      <module name="sample09_MVC1_요청처리3_header값얻기" target="21" />
+      <module name="sample09_MVC1_요청처리3_header값얻기.main" target="21" />
+      <module name="sample09_MVC1_요청처리3_header값얻기.test" target="21" />
+      <module name="sample09_MVC1_요청처리4_Cookie값얻기" target="21" />
+      <module name="sample09_MVC1_요청처리4_Cookie값얻기.main" target="21" />
+      <module name="sample09_MVC1_요청처리4_Cookie값얻기.test" target="21" />
+      <module name="sample09_MVC1_요청처리5_사용자입력처리_멀티" target="21" />
+      <module name="sample09_MVC1_요청처리5_사용자입력처리_멀티.main" target="21" />
+      <module name="sample09_MVC1_요청처리5_사용자입력처리_멀티.test" target="21" />
+      <module name="sample09_MVC2_요청처리_Model생성및html보여주기" target="21" />
+      <module name="sample09_MVC2_요청처리_Model생성및html보여주기.main" target="21" />
+      <module name="sample09_MVC2_요청처리_Model생성및html보여주기.test" target="21" />
+      <module name="sample09_MVC3_Controller_리턴타입" target="21" />
+      <module name="sample09_MVC3_Controller_리턴타입.main" target="21" />
+      <module name="sample09_MVC3_Controller_리턴타입.test" target="21" />
+      <module name="sample09_MVC4_JSON통신" target="21" />
+      <module name="sample09_MVC4_JSON통신.main" target="21" />
+      <module name="sample09_MVC4_JSON통신.test" target="21" />
+      <module name="sample09_MVC4_JSON통신_RequestBody_ResponseBody" target="21" />
+      <module name="sample09_MVC4_JSON통신_RequestBody_ResponseBody.main" target="21" />
+      <module name="sample09_MVC4_JSON통신_RequestBody_ResponseBody.test" target="21" />
+      <module name="sample09_MVC5_redirect_forward" target="21" />
+      <module name="sample09_MVC5_redirect_forward.main" target="21" />
+      <module name="sample09_MVC5_redirect_forward.test" target="21" />
+      <module name="sample09_MVC6_Filter" target="21" />
+      <module name="sample09_MVC6_Filter.main" target="21" />
+      <module name="sample09_MVC6_Filter.test" target="21" />
+      <module name="sample09_MVC7_Interceptor" target="21" />
+      <module name="sample09_MVC7_Interceptor.main" target="21" />
+      <module name="sample09_MVC7_Interceptor.test" target="21" />
+      <module name="sample10_사용자입력검증1_Valid_BindResult" target="21" />
+      <module name="sample10_사용자입력검증1_Valid_BindResult.main" target="21" />
+      <module name="sample10_사용자입력검증1_Valid_BindResult.test" target="21" />
+      <module name="sample10_사용자입력검증2_Validated_ControllerAdvice" target="21" />
+      <module name="sample10_사용자입력검증2_Validated_ControllerAdvice.main" target="21" />
+      <module name="sample10_사용자입력검증2_Validated_ControllerAdvice.test" target="21" />
+      <module name="sample10_예외처리1_로컬처리_ExceptionHandler" target="21" />
+      <module name="sample10_예외처리1_로컬처리_ExceptionHandler.main" target="21" />
+      <module name="sample10_예외처리1_로컬처리_ExceptionHandler.test" target="21" />
+      <module name="sample10_예외처리2_전역처리_ExceptionHandler_ControllerAdvice" target="21" />
+      <module name="sample10_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.main" target="21" />
+      <module name="sample10_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.test" target="21" />
+      <module name="sample11_Thymeleaf" target="21" />
+      <module name="sample11_Thymeleaf.main" target="21" />
+      <module name="sample11_Thymeleaf.test" target="21" />
+      <module name="sample13_REST2" target="21" />
+      <module name="sample13_REST2.main" target="21" />
+      <module name="sample13_REST2.test" target="21" />
+      <module name="sample9_예외처리1_로컬처리_ExceptionHandler" target="21" />
+      <module name="sample9_예외처리1_로컬처리_ExceptionHandler.main" target="21" />
+      <module name="sample9_예외처리1_로컬처리_ExceptionHandler.test" target="21" />
+      <module name="sample9_예외처리2_전역처리_ExceptionHandler_ControllerAdvice" target="21" />
+      <module name="sample9_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.main" target="21" />
+      <module name="sample9_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.test" target="21" />
       <module name="Test" target="21" />
       <module name="Test.main" target="21" />
       <module name="Test.test" target="21" />
@@ -76,6 +206,108 @@
       <module name="sample05__external_configuration2_ConfigurationProperties" options="-parameters" />
       <module name="sample05__external_configuration2_ConfigurationProperties.main" options="-parameters" />
       <module name="sample05__external_configuration2_ConfigurationProperties.test" options="-parameters" />
+      <module name="sample05_external_configuration2_ConfigurationProperties02_Validation" options="-parameters" />
+      <module name="sample05_external_configuration2_ConfigurationProperties02_Validation.main" options="-parameters" />
+      <module name="sample05_external_configuration2_ConfigurationProperties02_Validation.test" options="-parameters" />
+      <module name="sample06_Profile_prod_dev" options="-parameters" />
+      <module name="sample06_Profile_prod_dev.main" options="-parameters" />
+      <module name="sample06_Profile_prod_dev.test" options="-parameters" />
+      <module name="sample07_DB1_H2_JdbcTemplate" options="-parameters" />
+      <module name="sample07_DB1_H2_JdbcTemplate.main" options="-parameters" />
+      <module name="sample07_DB1_H2_JdbcTemplate.test" options="-parameters" />
+      <module name="sample07_DB2_MySQL_JdbcTemplate" options="-parameters" />
+      <module name="sample07_DB2_MySQL_JdbcTemplate.main" options="-parameters" />
+      <module name="sample07_DB2_MySQL_JdbcTemplate.test" options="-parameters" />
+      <module name="sample07_DB3_MySQL_MyBatis1_basic" options="-parameters" />
+      <module name="sample07_DB3_MySQL_MyBatis1_basic.main" options="-parameters" />
+      <module name="sample07_DB3_MySQL_MyBatis1_basic.test" options="-parameters" />
+      <module name="sample07_DB3_MySQL_MyBatis2_Mapper인터페이스" options="-parameters" />
+      <module name="sample07_DB3_MySQL_MyBatis2_Mapper인터페이스.main" options="-parameters" />
+      <module name="sample07_DB3_MySQL_MyBatis2_Mapper인터페이스.test" options="-parameters" />
+      <module name="sample08_h2_MySql_Profile실습_prod_dev" options="-parameters" />
+      <module name="sample08_h2_MySql_Profile실습_prod_dev.main" options="-parameters" />
+      <module name="sample08_h2_MySql_Profile실습_prod_dev.test" options="-parameters" />
+      <module name="sample09_MVC1_요청처리1_RequestMapping" options="-parameters" />
+      <module name="sample09_MVC1_요청처리1_RequestMapping.main" options="-parameters" />
+      <module name="sample09_MVC1_요청처리1_RequestMapping.test" options="-parameters" />
+      <module name="sample09_MVC1_요청처리2_사용자입력처리" options="-parameters" />
+      <module name="sample09_MVC1_요청처리2_사용자입력처리.main" options="-parameters" />
+      <module name="sample09_MVC1_요청처리2_사용자입력처리.test" options="-parameters" />
+      <module name="sample09_MVC1_요청처리3_header값얻기" options="-parameters" />
+      <module name="sample09_MVC1_요청처리3_header값얻기.main" options="-parameters" />
+      <module name="sample09_MVC1_요청처리3_header값얻기.test" options="-parameters" />
+      <module name="sample09_MVC1_요청처리4_Cookie값얻기" options="-parameters" />
+      <module name="sample09_MVC1_요청처리4_Cookie값얻기.main" options="-parameters" />
+      <module name="sample09_MVC1_요청처리4_Cookie값얻기.test" options="-parameters" />
+      <module name="sample09_MVC1_요청처리5_사용자입력처리_멀티" options="-parameters" />
+      <module name="sample09_MVC1_요청처리5_사용자입력처리_멀티.main" options="-parameters" />
+      <module name="sample09_MVC1_요청처리5_사용자입력처리_멀티.test" options="-parameters" />
+      <module name="sample09_MVC2_요청처리_Model생성및html보여주기" options="-parameters" />
+      <module name="sample09_MVC2_요청처리_Model생성및html보여주기.main" options="-parameters" />
+      <module name="sample09_MVC2_요청처리_Model생성및html보여주기.test" options="-parameters" />
+      <module name="sample09_MVC3_Controller_리턴타입" options="-parameters" />
+      <module name="sample09_MVC3_Controller_리턴타입.main" options="-parameters" />
+      <module name="sample09_MVC3_Controller_리턴타입.test" options="-parameters" />
+      <module name="sample09_MVC4_JSON통신" options="-parameters" />
+      <module name="sample09_MVC4_JSON통신.main" options="-parameters" />
+      <module name="sample09_MVC4_JSON통신.test" options="-parameters" />
+      <module name="sample09_MVC4_JSON통신_RequestBody_ResponseBody" options="-parameters" />
+      <module name="sample09_MVC4_JSON통신_RequestBody_ResponseBody.main" options="-parameters" />
+      <module name="sample09_MVC4_JSON통신_RequestBody_ResponseBody.test" options="-parameters" />
+      <module name="sample09_MVC5_redirect_forward" options="-parameters" />
+      <module name="sample09_MVC5_redirect_forward.main" options="-parameters" />
+      <module name="sample09_MVC5_redirect_forward.test" options="-parameters" />
+      <module name="sample09_MVC6_Filter" options="-parameters" />
+      <module name="sample09_MVC6_Filter.main" options="-parameters" />
+      <module name="sample09_MVC6_Filter.test" options="-parameters" />
+      <module name="sample09_MVC7_Interceptor" options="-parameters" />
+      <module name="sample09_MVC7_Interceptor.main" options="-parameters" />
+      <module name="sample09_MVC7_Interceptor.test" options="-parameters" />
+      <module name="sample10_사용자입력검증1_Valid_BindResult" options="-parameters" />
+      <module name="sample10_사용자입력검증1_Valid_BindResult.main" options="-parameters" />
+      <module name="sample10_사용자입력검증1_Valid_BindResult.test" options="-parameters" />
+      <module name="sample10_사용자입력검증2_Validated_ControllerAdvice" options="-parameters" />
+      <module name="sample10_사용자입력검증2_Validated_ControllerAdvice.main" options="-parameters" />
+      <module name="sample10_사용자입력검증2_Validated_ControllerAdvice.test" options="-parameters" />
+      <module name="sample10_예외처리1_로컬처리_ExceptionHandler" options="-parameters" />
+      <module name="sample10_예외처리1_로컬처리_ExceptionHandler.main" options="-parameters" />
+      <module name="sample10_예외처리1_로컬처리_ExceptionHandler.test" options="-parameters" />
+      <module name="sample10_예외처리2_전역처리_ExceptionHandler_ControllerAdvice" options="-parameters" />
+      <module name="sample10_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.main" options="-parameters" />
+      <module name="sample10_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.test" options="-parameters" />
+      <module name="sample11_Thymeleaf" options="-parameters" />
+      <module name="sample11_Thymeleaf.main" options="-parameters" />
+      <module name="sample11_Thymeleaf.test" options="-parameters" />
+      <module name="sample12_TodoAPP" options="-parameters" />
+      <module name="sample12_TodoAPP.main" options="-parameters" />
+      <module name="sample12_TodoAPP.test" options="-parameters" />
+      <module name="sample12_TodoAPP2_SpringSecurity" options="-parameters" />
+      <module name="sample12_TodoAPP2_SpringSecurity.main" options="-parameters" />
+      <module name="sample12_TodoAPP2_SpringSecurity.test" options="-parameters" />
+      <module name="sample12_TodoAPP_test" options="-parameters" />
+      <module name="sample12_TodoAPP_test.main" options="-parameters" />
+      <module name="sample12_TodoAPP_test.test" options="-parameters" />
+      <module name="sample13_REST" options="-parameters" />
+      <module name="sample13_REST.main" options="-parameters" />
+      <module name="sample13_REST.test" options="-parameters" />
+      <module name="sample13_REST2" options="-parameters" />
+      <module name="sample13_REST2.main" options="-parameters" />
+      <module name="sample13_REST2.test" options="-parameters" />
+      <module name="sample13_REST2_ApiResponse" options="-parameters" />
+      <module name="sample13_REST2_ApiResponse.main" options="-parameters" />
+      <module name="sample13_REST2_ApiResponse.test" options="-parameters" />
+      <module name="sample13_REST3_ResponseEntity_ApiResponse" options="-parameters" />
+      <module name="sample13_REST3_ResponseEntity_ApiResponse.main" options="-parameters" />
+      <module name="sample13_REST3_ResponseEntity_ApiResponse.test" options="-parameters" />
+      <module name="sample13_REST4_예외처리" options="-parameters" />
+      <module name="sample13_REST4_예외처리.main" options="-parameters" />
+      <module name="sample13_REST4_예외처리.test" options="-parameters" />
+      <module name="sample9_예외처리1_로컬처리_ExceptionHandler" options="-parameters" />
+      <module name="sample9_예외처리1_로컬처리_ExceptionHandler.main" options="-parameters" />
+      <module name="sample9_예외처리1_로컬처리_ExceptionHandler.test" options="-parameters" />
+      <module name="sample9_예외처리2_전역처리_ExceptionHandler_ControllerAdvice" options="-parameters" />
+      <module name="sample9_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.main" options="-parameters" />
+      <module name="sample9_예외처리2_전역처리_ExceptionHandler_ControllerAdvice.test" options="-parameters" />
     </option>
   </component>
 </project>

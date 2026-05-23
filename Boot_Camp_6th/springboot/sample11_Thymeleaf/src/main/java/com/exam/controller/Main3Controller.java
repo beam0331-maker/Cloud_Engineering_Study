@@ -2,37 +2,37 @@ package com.exam.controller;
 
 import com.exam.dto.LoginDTO;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.apache.juli.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
 
 @Controller
 @SessionAttributes(value = {"session2", "xxx"})
-public class MainController {
+public class Main3Controller {
 
-    // 1. scope에 저장하고 html에서 보여주기
+    // 3. scpoe에 개체 저장하고 html에서 보여주기
+    // ( 제어문 처리: if, switch, 3항 연산자, 반복문)
     @Autowired
     ServletContext servletContext;
 
-    @GetMapping("/m")
+    @GetMapping("/m3")
     public String m(Model model) {
 
-        model.addAttribute("request","홍길동");
-        model.addAttribute("request2","<h1>홍길동</h1>");
+        model.addAttribute("login",new LoginDTO("testID1", "testPassword1"));
+        model.addAttribute("login2",new LoginDTO(null, "testPassword1") );
 
-        model.addAttribute("session2","홍길동2");
-        model.addAttribute("xxx","홍길동3");
-
-        servletContext.setAttribute("application2","홍길동4");
-        return "main";
+        List<LoginDTO> list = Arrays.asList(new LoginDTO("testID1", "testPassword1"),
+                                            new LoginDTO("testID2", "testPassword1"),
+                                            new LoginDTO("testID3", "testPassword1"));
+        model.addAttribute("mylist",list);
+        return "main3";
     }
 
 }
