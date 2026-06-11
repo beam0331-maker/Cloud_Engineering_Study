@@ -13,7 +13,7 @@
 			
 			step1 : @SpringBootApplication을 가진 빈의 패키지와 같거나 서브패키지로 만들면 자동으로 빈으로 등록
 			step2 : 자동으로 생성할 빈을 지정
-					ex.- @Component 		( 번용적 )
+					ex.- @Component 		( 범용적 )
 						- @Service			( 서비스 레이어 )
 						- @Repository		( DAO 레이어 )
 						- @Controller		( 서블릿 역할 )
@@ -78,8 +78,8 @@
 		
 		- @Qualifier 어노테이션 (@Primary 사용가능 )
 		
-											DeptService
-										@Service						   CommonDAO(인터페이스)
+										DeptService
+										@Service					   CommonDAO(인터페이스)
 		DeptApplication ---->	DeptServiceImpl	----> DeptDAO	EmpDAO
 										
 										CommonDAO dao ;
@@ -181,6 +181,7 @@ https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html
 				profiles:
 					activ: dev|prod
 																
+	
 	3) 외부에 설정된 환경변수(설정값)를 bean에서 사용하는 방법
 		
 		가. @Value
@@ -188,5 +189,31 @@ https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html
 			
 		나. @ConfigurationProperties
 			- 멀티값 조회 적당하고 클래스단위로 관리 가능함
+
+			- 구현 방법
+				A. 스캔 활성화
+				ex.
+					@ConfigurationPropertiesScan
+					@SpringBootApplication
+					public class DemoApplication{}
+						
+				B. 프로퍼티 클래스 정의
+				ex.
+					@ConfigurationProperties (prefix="app")
+					public record AppProps{}
+					
+				C.주입 및 사용
+				ex.
+					@Autowired
+					AppProps appProps;
+					
+					
+	4) @ConfigurationProperties + 유효성체크(Validation)
+https://docs.spring.io/spring-boot/3.5/reference/features/external-config.html#features.external-config.typesafe-configuration-properties.validation
+
+		가. 의존성 설정
+			implementation 'org.springframework.boot:spring-boot-starter-validation'
+			
+		나. 프러퍼티 클래스에 @Validated 및 유효성 어노테이션 추가
 		
-		
+/////////////////////////////////////////////////

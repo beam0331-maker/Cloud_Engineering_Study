@@ -1,0 +1,399 @@
+-------------------------------------------------
+2026.05.18
+
+1. Controller의 리턴타입 종류
+
+	1) 개요
+		:	Controller의 리턴타입은 메서드의 파라미터가 다양하게 설정할 수 있는 것처럼 동일하게 다양한 타입을 사용할 수 있다.
+	
+	2) String 타입
+		- 뷰 정보를 의미
+		- 모델은 파라미터로 설정.
+		
+	3) ModelAndView 타입
+		- 뷰정보와 모델정보를 ModelAndView에 한번에 설정
+		
+		    // 1. String 타입
+			 // 뷰정보만 있고 모델 정보는 없다.
+			 // 화면만 보여주는 경우
+			 @GetMapping("/m")
+			 public String main() {
+
+				  return "main";
+			 }
+
+			 // 2. ModelAndView 타입
+			 // 뷰정보, 모델 정보 다 있음.
+			 @GetMapping("/m2")
+			 public ModelAndView main2() {
+				  ModelAndView mv = new ModelAndView();
+				  mv.setViewName("main"); // view 설정
+				  mv.addObject("userid","정범석");
+				  return mv;
+			 }
+
+			 // 3. DTO 타입
+			 // 뷰 정보 없고, 모델 정보있음
+			 // 뷰정보는 요청매핑값으로 유추된다
+			 // ==> 요청매핑값을 html의 이름과 맞춰야 한다.
+			 // model의 키값을 변경 가능하다.
+			 @GetMapping("/m3")
+			 public @ModelAttribute("dto") LoginDTO main3() {
+				  LoginDTO dto = new LoginDTO("정범석","1234");
+				  return dto;
+			 }
+
+
+			 // 4. ArrayList 타입
+			 // 뷰 정보 없고, 모델 정보있음
+			 // 뷰정보는 요청매핑값으로 유추된다
+			 // ==> 요청매핑값을 html의 이름과 맞춰야 한다.
+			 // model의 키값을 변경 가능하다.
+			 @GetMapping("/m4")
+			 public @ModelAttribute("nameList") ArrayList<String> main4() {
+				  ArrayList<String> list = new ArrayList<>();
+				  list.add("Hello");
+				  list.add("World");
+				  list.add("123");
+				  return list;
+			 }
+
+			 // 5. void 타입
+			 // 뷰정보 없고, 모델 정보 없다.
+			 // 뷰정보는 요청매핑값으로 유추된다
+			 // ==> 요청매핑값을 html의 이름과 맞춰야 한다.
+			 @GetMapping("/m5")
+			 public void main5() {
+
+			 }
+			 
+/////////////////////////////////////////////////			 
+2. JSON 통신
+
+	1) 이전 방식
+						요청:
+						ex. http://localhost:8080/app/login?key=value
+		웹브라우저 -----------------------------------------------> 서버
+					  <-----------------------------------------------
+						응답: html
+						
+	2) JSON 통신	
+						
+						요청: JSON
+						{
+							"userid":"홍길동"
+							"password":"1234"
+						}
+						@RequestBody + POST(*****) + Content-Type:application/json(****)
+		클라이언트 -----------------------------------------------> 서버
+(ex. 웹브라우저) <-----------------------------------------------
+						응답: JSON( xml, html, 일반 텍스트 도 가능)
+						@ResponseBody
+						
+		
+		# 클라이언트 역할의 도구: 
+			- curl ( cmd에서 요청 )
+			- postman ( GUI 기반 )
+			- Talend Test API ( 크롬 브라우저 플러그인 )
+			
+/////////////////////////////////////////////////			
+3. redirect와 forward 및 flash scope( flash attribute )
+
+	1) 이전 서블릿
+	
+		가. 포워드(forward)
+			- 문법: request.GetRequestDispatcher("list.html").forward(request, response);				
+			- 특징:
+				내부적으로 list.html에 요청이 되기 때문에 URL이 변경되지 않음
+				request scope에 저장된 데이터를 list.html에서 참조 가능.
+			
+		나. 리다이렉트(redirect)
+			- 문법: response.sendRedirect("*.html");
+			- 특징:
+				내부적으로 웹브라우저에 응답했다가, 웹브라우저에서 새롭게 list.html 에 요청이 되기 때문 URL이 변경됨				
+				request scope에 저장된 데이터를 list.html에서 참조 불가능.
+				
+				
+	2) spring
+	
+		가. 포워드(forward)
+			- 문법:		
+			 
+			 @GetMapping("/list")			 
+			 public String aaa() {
+				  return "list";
+			 }
+			 
+			 @GetMapping("/aaa")			 
+			 public String aaa() {
+				  return "forward:list";
+			 }
+
+			
+		나. 리다이렉트(redirect와)
+			- 문법:
+			
+			 @GetMapping("/list")			 
+			 public String aaa() {
+				  return "list";
+			 }
+			 
+			 @GetMapping("/aaa")			 
+			 public String aaa() {
+				  return "list";
+			 }
+			 
+			 
+	3) redirect + request scope에 저장된 데이터를 참조 가능. ( flash scope라고 부름 )
+		https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/flash-attributes.html		
+		
+		scope 라이프 사이클 
+		request scope < flash scope < session scope < application scope
+		
+		문법:
+			 @GetMapping("/flash")
+			 public String flash(RedirectAttributes model){
+				  model.addFlashAttribute("userid","홍길동3");
+				  System.out.println("flash");
+				  return "redirect:main";
+			 }
+			 
+/////////////////////////////////////////////////			 
+4. PRG( Post-Redirect-GET ) pattern
+
+	1) 개념
+		Post 요청에 대해서 GET 요청으로 다시 redirect 처리하는 패턴
+		=> POST로 시작해서 GET으로 끝나게 하는 방식(멱등성을 보장하기 위해 사용)
+		
+		멱등성: 여러번 실행해도 결과가 동일함을 의미함.
+		
+								GET
+		브라우저 ------------------------> 
+			
+			- 조회할때 사용 (Select 작업)			
+			- 새로고침을 여러번 해도 서버에 영향이 없음.
+			- 멱등성을 가진다.
+		
+								POST
+		브라우저 ------------------------> 
+			
+			- 생성/수정/삭제 시 사용 (insert/update/delete 작업)
+			- 새로고침을 여러번 하면 서버에 영향이 있기 때문에 항상 경고창으로 재요청 확인이 필요하다.
+			- 멱등성이 없음.
+		
+	2) POST로 최종 종료되었을때의 문제	
+	
+		- 새로고침하면 동일한 요청이 계속 보내지는 멱등성 이유 발생
+		- URL 복사해서 다른 브라우저에서 요청하면 연결이 안되는 이슈 발생
+		
+			@GetMapping("/main")
+			 public String  hello4(){
+			  return "main";
+			 }
+
+			// 그냥 post로 끝난 경우
+			 @PostMapping("/write")
+			 public String  write(){
+			  return "write";
+			 }
+
+	 
+			// PRG 패턴
+			 @PostMapping("/write")
+			 public String  write(){
+			  return "redirect:success";
+			 }
+
+			  @GetMapping("/success")
+			 public String  hello4(){
+			  return "main";
+			 } 
+			 
+/////////////////////////////////////////////////			 
+5. Filter
+	
+	1) 이전 서블릿
+		
+		- implements Filter
+			doFilter(ServletRequest request, ServletResponse reponse, FilterChian chain) 메서드 재정의
+		- web.xml에 필터 등록
+	 
+	2) Spring
+		- implements
+			doFilter(ServletRequest request, ServletResponse reponse, FilterChian chain) 메서드 재정의
+		- web.xml 대신에 @Configuration + @Bean
+		
+		예시:
+		
+		# Filter 자바 파일
+		
+		 public class MyFilter implements Filter {
+			 @Override
+			 public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+				  System.out.println("Request Filter");
+				  filterChain.doFilter(servletRequest,servletResponse);
+				  System.out.println("Response Filter");
+			 }
+		}
+		
+		# Filter config 자바 파일
+		
+		@Configuration	// 클래스 빈등록
+		public class FilterWebConfig implements WebMvcConfigurer {
+			 @Bean	// 메서드 빈등록
+			 public FilterRegistrationBean<MyFilter> filterRegistrationBean(){
+				  FilterRegistrationBean<MyFilter> filterRegistrationBean = new FilterRegistrationBean(new MyFilter());
+				  filterRegistrationBean.addUrlPatterns("/*");    // 모든 요청에서 filter가 적용된다
+				  return filterRegistrationBean;
+			 }
+		}
+		
+/////////////////////////////////////////////////		
+6. Interceptor ( 요청을 3군데에서 가로채기 가능 )
+
+	1. 아키텍쳐
+				
+						filter								 	preHandle()																	
+	웹브라우저 ------||------> Dispatcher Servlet ------||------> Controller -------> Service -------> DAO
+																 <-----||-------				 <-------			<-------
+												|					postHandle()
+												|
+												|
+				  <------||------	main.html
+				   afterCompletion()
+					
+		- preHandle(): return true 일때 Controller로 넘어간다.
+		
+		
+	2. 구현
+	
+		# Interceptor 자바 파일
+		
+		@Component
+		public class MyInterceptor implements HandlerInterceptor {
+
+			 @Override
+			 public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+				  System.out.println("preHandle");
+				  // 조건체크
+				  boolean result = true;
+				  if(result){
+						return true;
+				  } else {
+						response.sendRedirect("/main2");
+						return false;
+				  }
+			 }
+
+			 @Override
+			 public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+
+				  System.out.println("postHandle");
+
+				  // View 정보  변경가능
+				  // 조건체크
+				  boolean result = true;
+				  if(result){
+						modelAndView.addObject("userid","홍길동");
+						modelAndView.setViewName("success");
+				  }
+			 }
+
+			 @Override
+			 public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+				  System.out.println("afterCompletion");
+			 }
+		}
+		
+		
+		# interceptor config 파일
+		
+		@Configuration
+		public class InterceptorWebConfig implements WebMvcConfigurer {
+
+			 // Interceptor를 등록하는 메서드가 제공되어 재정의 하면된다.
+			 @Autowired
+			 MyInterceptor myInterceptor;
+
+			 @Override
+			 public void addInterceptors(InterceptorRegistry registry) {
+
+				  // Interceptor 자바파일이 bean으로 등록되지 않았을경우
+				  // registry.addInterceptor(new MyInterceptor());
+				  registry.addInterceptor(myInterceptor).addPathPatterns("/main","/aaa/*","/bbb*");
+			 }
+		}
+		
+/////////////////////////////////////////////////	
+7. 예외처리 
+	
+	1) 개념 
+	 - 스프링에서 발생되는 예외는 항상 RuntimeException 계열임.(*****)
+		=> try-catch 및 throws 하지 않음
+	 - RuntimeException 계열의 예외는 항상 호출한곳으로 예외가 전달된다.
+		=> DAO에서 발생되거나, Service에서 발생되거나 항상 Controller로 모인다. 
+		 
+		==> Controller에서 예외처리를 해야 된다(***) // [추가사항] : 런타임, 비런타임 구분해서 정리
+	
+	 - Controller에서는 try-catch가 아닌 에노테이션 이용(선언적 예외처리)
+		: @ExceptionHandler 이용
+	
+	웹브라우저 ------------> Dispatcher Servlet ------------> Controller -------> Service -------> DAO
+															  <------------		 	 	<-------			  <-------
+												|				
+												|
+												|
+				  <------------	main.html
+	
+	2) 예외처리 2가지 방법
+	
+		가. 로컬
+			- 특징: Controller내에서 발생된 예외만 처리 가능
+			
+			- 구현:
+			
+				@GetMapping("/main")
+				public String main(){
+					 System.out.println("main");
+
+					 // 예외발생
+					 if(true) throw new IllegalArgumentException("IllegalArgumentException 예외 발생");
+
+					 return "main";
+				}
+				 @GetMapping("/main2")
+				 public String main2(){
+
+					  // 예외발생
+					  if(true) throw new NullPointerException("NullPointerException 예외 발생");
+					  System.out.println("main2");
+					  return "main";
+					 }
+					 
+					 // 로컬
+					 // 특정 Controller 내에서 처리
+					 // 2가지 기능: View + Model
+					 // @ExceptionHandler  => 모든 오류 예외처리
+					 // value를 통해 특정 오류만 예외처리 가능
+					 @ExceptionHandler(value = {IllegalArgumentException.class, NullPointerException.class})
+					 // public ModelAndView handleException(Exception ex, HttpServletRequest request){}
+					 public String handleException(Exception e, Model model){
+						 model.addAttribute("message",e.getMessage());
+						 return "error/error";    // error 폴더 안에 있는 파일임을 명시 해야 된다.
+					 }
+					 
+		나. 전역
+			
+			- 구현:
+			
+				@ControllerAdvice
+				public class GlobalExceptionHandler {
+					 @ExceptionHandler(value= {IllegalArgumentException.class, NullPointerException.class, ArithmeticException.class})
+					 public String handleException(Exception e, Model model) {
+						  model.addAttribute("message",e.getMessage());
+						  return "error/error";
+					 }
+				}
+				
+/////////////////////////////////////////////////
+		 

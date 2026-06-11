@@ -1,0 +1,535 @@
+-------------------------------------------------
+2026.05.28
+
+	12) 파일생성.
+	
+		-	문법:
+			touch 파일명
+			vi 파일명
+			
+		- 특징 : 파일이 없으면 생성하고, 있으면ㄷ 생성시간이 변경됨.
+	
+		ex. touch report.txt 	
+			 touch logs				# 리눅스는 확장자가 중요하지 않음.
+			 
+		
+		실습1:
+			touch report.txt
+			stat report.txt	# 통계정보. 타임스탬프 확인 가능
+			touch report.txt	# 시간이 변경됨
+	
+	13) 디렉터리 생성
+		
+		- 문법: mkdir [옵션] 
+		
+		- 옵션: 
+			- p: 계층적인 디렉터리 생성 가능
+			- v: verbose, 특정 명령을 실행시 더 자세하게 과정을 보여주는 옵션
+			
+			ex. mkdir main sub 
+				 mkdir -p first/second/third
+				 
+			실습1:
+				$ mkdir logs 오류발생
+				$ mkdir -v log2
+				mkdir: created directory 'log2'
+				$ mkdir -p first/second/third
+				
+				
+	14) 파일 및 디렉터리 복사
+		
+		가. 문법: cp [옵션] 원본 대상(target)
+		
+		나. 특징
+			원본 및 대상파일: 파일이거나 디렉터리가 될 수 있음
+			원본: 여러개 지정가능
+			ex.
+				cp 원본파일 타겟파일
+				cp 원본파일1 원본파일2 ... 타겟 디렉터리
+				cp 디렉터리 원본파일1 원본파일2 ... 타겟 디렉터리
+				
+				
+		다. 옵션
+			- i : interactive 기능, 덮어쓰기 유무를 묻는다
+			- p : 원본파일이 속성(mode, 소유자, 시간)까지 유지되어 복사됨.
+			- r : recursive, 원본에 디렉터리가 있는 경우 같이 복사
+			
+			
+		실습1: 
+			$ cp /etc/passwd ./users.txt
+			$ cp /etc/passwd ./log1/users.txt	# 타겟에 복사될 디렉터리 포함가능.
+		
+			$ cp -i /etc/passwd users.txt			# 덮어쓰기 전에 물어봄
+			cp: overwrite 'users.txt'? yes
+			
+			cp hello.txt users.txt first/  		# 있으면 복사되고 없으면 오류출력됨
+			
+			cp log2 users.txt first/				
+			cp: -r not specified; omitting directory 'log2'		# -r 옵션을 붙이라는 경고문이 가이드가 뜬다
+			
+		실습2: -p		
+			
+			- users.txt의 소유자 확인:			
+				ls -l | grep users.txt
+				-rw-r--r-- 1 user1 user1 2907 May 28 10:04 users.txt
+				==> 소유자: user1
+				
+			- 관리자 권한으로 복사:				
+				sudo cp users.txt adminCopy.txt
+				ls -l | grep adminCopy.txt
+				-rw-r--r-- 1 root  root  2907 May 28 10:12 adminCopy.txt	# 
+				==> 소유자: root
+				
+			- p옵션으로 복사:				
+				sudo cp -p users.txt adminCopy2.txt
+				ls -l | grep adminCopy2.txt
+				-rw-r--r-- 1 user1 user1 2907 May 28 10:04 adminCopy2.txt
+				==> 소유자, 생성시간이 원본과 동일
+				
+-------------------------------------------------
+	15) 파일 및 디렉터리 이동 및 이름 변경
+		
+		가. 문법: mv [웁션] 원본  대상(타겟)
+			ex. 
+				mv 원본파일 타겟파일		# 이름변경
+				mv 원본파일1 원본파일2 ... 타겟 디렉터리
+				mv 디렉터리 원본파일1 원본파일2 ...  타겟 디렉터리
+				
+		나. 옵션
+		
+			- i : interactive 기능, 이동 여부를 묻는다
+			- v : verbose, 특정 명령을 실행시 더 자세하게 과정을 보여주는 옵션
+			- n : no overwrite, 기존파일이 있으면 덮어쓰지 않음
+			- u : 원본 파일이 대상 경로의 파일보다 최신일 때(또는 대상 파일이 없을 때)만 이동
+
+		실습1:
+			$ mkdir -p dir1/dir2
+			$ touch dir1/a.txt dir1/dir2/b.txt c.txt
+			$ tree dir1
+			dir1
+			├── a.txt
+			└── dir2
+				 └── b.txt
+				 
+			# b.txt를 dir1 디렉토리로 이동
+			$ mv dir1/dir2/b.txt dir1/
+			$ tree dir1/
+			dir1/
+			├── a.txt
+			├── b.txt
+			└── dir2
+			
+		실습2: 와일드 카드(*) 사용가능
+		
+			# a.txt와 b.txt를 dir2로 이동			
+			$ mv dir1/*.txt dir1/dir2				
+			$ tree dir1/
+			dir1/
+			└── dir2
+				 ├── a.txt
+				 └── b.txt
+				 
+		실습3: 디렉터리 이동
+		
+			$ mkdir -p dir1/dir2/dir3
+			
+			# dir3/ 를 dir1/ 으로 이동
+			$ mv dir1/dir2/dir3/ dir1/
+			$ tree dir1/
+			dir1/
+			├── dir2
+			│   ├── a.txt
+			│   └── b.txt
+			└── dir3		
+		
+		실습4: 존재하는 파일이 있는 경우( -n 옵션 )
+
+			$ touch dir1/dir3 a.txt
+			$ echo "dir1/dir2/a.txt" >> dir1/dir2/a.txt
+			$ cat dir1/dir2/a.txt
+
+			dir1/dir2/a.txt
+			$ echo "dir1/dir3/a.txt" >> dir1/dir3/a.txt
+			$ cat dir1/dir3/a.txt
+			dir1/dir3/a.txt
+			
+			# 그냥 mv	==>	덮어쓰기
+			$ mv dir1/dir2/a.txt dir1/dir3/a.txt
+			$ cat dir1/dir3/a.txt
+			dir1/dir2/a.txt
+
+			# -n 옵션을 주는 경우 
+			$ touch dir1/dir2/a.txt
+			user1@ubuntu:~/Documents/test$ mv -n  dir1/dir2/a.txt dir1/dir3/a.txt
+			$ cat dir1/dir3/a.txt
+			dir1/dir3/a.txt
+		
+		실습5: 원본이 타겟보다 더 최신인 경우에만 이동
+			$ mkdir dir1/dir4
+			$ touch dir1/dir4/a.txt
+			$ tree dir1/
+			dir1/
+			├── dir2
+			│   ├── a.txt
+			│   └── b.txt
+			├── dir3
+			│   └── a.txt
+			└── dir4 		
+				 └── a.txt # 가장 최신
+				 
+			mv dir1/dir2/a.txt dir1/dir4
+			mv -u dir1/dir2/a.txt dir1/dir4	
+			
+		실습6: 파일이름 변경
+			
+			$ mv dir1/dir3/a.txt dir1/dir3/aaa.txt
+			
+			dir1/
+			├── dir2
+			│   ├── a.txt
+			│   └── b.txt
+			├── dir3
+			│   └── a.txt   --> aaa.txt
+			└── dir4
+				 └── a.txt
+				 
+	16) 파일 및 디렉터리 삭제
+		
+		가. 문법: rm [옵션] 경로/파일1 경로/파일2 ...
+		
+		나. 옵션
+			- i : interactive, 삭제 여부를 묻는다
+			- f : force (강제)
+			- r : recursive,  중첩 디렉터리까지 포함.
+			
+			
+		실습1:		
+			dir1/
+			├── dir2
+			│   └── a.txt
+			├── dir3
+			│   └── aaa.txt
+			└── dir4
+				 ├── a.txt
+				 └── b.txt
+			
+				 
+			rm dir1/dir3/aaa.txt
+			rm -i dir1/dir4/a.txt
+			
+			rm dir1/dir1 dir1/dir4/b.txt	 	# 오류발생. dir1/dir2 중첩형태 
+			rm -ri dir1/dir1 dir1/dir4/b.txt	# 오류발생. dir1/dir2 중첩형태
+			
+			rm -rf dir1/
+			
+-------------------------------------------------
+	17) 파일 찾기
+		
+		가. 문법: find 경로 [옵션] 대상(타겟)
+		
+		나. 옵션:			
+						
+			- name : 이름검색 ( 대소문자 구분 ) 			
+			- iname : 이름검색 ( 대소문자 무시 ) 			
+			- type f : 파일			
+			- type d : 디렉터리			
+			- size 크기 : 파일크기 기준			
+			- user 사용자 : 사용자 기준			
+			- exec 명령어 : 명령어 실행			
+			- delete : 삭제			
+			- ls : find 후에 ls 실행			
+			- maxdepth n : 깊이 제한
+			
+			
+		# 실습1:
+			
+			mkdir projects
+			touch projects/report.txt
+			touch projects/todo.txt
+			touch projects/todo2.txt
+			touch projects/error.log
+			touch projects/alert.log
+			
+			echo	"todo" >> projects/todo.txt
+			echo	"error" >> projects/error.log
+			echo	"alert" >> projects/alert.log
+			
+			$ find projects -name todo.txt	
+			projects/todo.txt
+			$ find projects -name Todo.txt	# 대소문자 구별됨
+			$ find projects -iname Todo.txt	# 대소문자 무시됨
+			
+			$ find projects -name to*.txt		# 와일드카드 가능
+			projects/todo.txt
+
+			$ find projects -name todo2.txt -delete	# 찾아서 삭제			
+			
+			# 권한 설정 가능, 하위 디렉토리도 검색해서 보여준다, 키워드(ls) 중첩 가능
+			$ sudo find /etc -name passwd -ls 
+			395649      4 -rw-r--r--   1 root     root           92 Feb 22  2024 /etc/pam.d/passwd
+			426028      4 -rw-r--r--   1 root     root         2907 May 26 14:29 /etc/passwd
+
+		# 실습2 : -type
+		
+			find /etc -type d 	# 디렉터리만 찾기
+			find /etc -type f 	# 파일만 찾기
+			
+		# 실습3 : -exec
+			
+			$ find projects -name '*.log' -exec 명령어  \;			# `\`, `;` 필수
+			$ find projects -name '*.log' -exec cat {} \;		# {}는 find된 파일이 치환되는 영역
+			$ find projects -name '*.log' -exec rm {} \;
+			
+		# 실습3 : -maxdepth 
+			
+			# maxdepth 는 항상 옵션 중에 가장 먼저 선언되어야 한다.
+			# maxdepth 뒤에는 깊이를 명시하면 항상 양수만 가능
+			$ sudo find /etc/ -maxdepth 1 -name passwd -ls
+			426028      4 -rw-r--r--   1 root     root         2907 May 26 14:29 /etc/passwd
+			
+	18) 파일 내용 검색	(*************)
+	
+		가. 문법: grep [옵션] 검색패턴 파일명
+		
+		나. 옵션
+			
+			- n : 줄번호			
+			- c : 개수			
+			- r : 재귀 검색, 중첩 디렉토리 검샘
+			- v : 반대 검색 (inverse), ex $ grep -vi error app.log ==> error를 제외하고 grep
+			- E : 확장정규식, 검색어 여러개 지정 
+			- i : 대소문자 무시
+		
+		실습:
+			# 파일생성 + 한줄 데이터 자장
+				echo 문자열 >> 파일명
+				ex. echo "todo" >> projects/todo.txt
+				
+			# 파일 생성 + 여러 라인에 데이터 저장 ( Here Documents라고 부름 )
+				cat << EOF > 파일명
+				문자열
+				문자열 
+				...
+				EOF
+				
+		실습:
+		 cat << EOF > app.log
+			INFO: server started
+			INFO: user login
+			ERROR: database connection failed
+			WARN: memory usage high
+			INFO: request completed
+			ERROR: timeout occurred
+			DEBUG: internal value
+			INFO: user logout
+			EOF 
+			
+			grep ERROR app.log
+			grep "ERROR" app.log
+			grep "error" app.log
+			grep -i "error" app.log
+			grep -n "error" app.log
+			grep -c "error" app.log		
+			grep -vn "error" app.log
+			
+		# 현재 디렉터리 구조
+			./projects/
+			├── dir1
+			│   └── todo.txt
+			├── report.txt
+			└── todo.txt
+			
+			$ grep "todo" ./projects	# 재귀옵션(-r)을 사용하지 않아 projects 안의 내용을 볼수 없어 오류발생
+			$ grep -r "todo" ./projects
+			./projects/dir1/todo.txt:todo
+			./projects/todo.txt:todo
+
+		# 확장정규식( -E, 반드시 대문자 )
+			
+			$ grep -Ei "error|info" app.log
+			INFO: server started
+			INFO: user login
+			ERROR: database connection failed
+			INFO: request completed
+			ERROR: timeout occurred
+			INFO: user logout
+			
+-------------------------------------------------------------------------------						
+
+	19) 하드링크 (hard link)
+		가. 개념: 같은 inode 값을 갖는 다른 파일 
+			////////////////////////////////
+				inode란
+				- 리눅스가 관리하는 자원(파일, 디렉터리, 장치,...)의 실제 저장되는 주소값 의미
+			////////////////////////////////
+			
+		나. 문법: ln 원본 대상(타겟)
+		
+		다. 특징:
+			- 디렉터리 지정 불가 ( 디렉터리는 동일한 주소값을 가질 수 없기 때문)
+			- inode가 같으면 데이터도 동일
+			- 한쪽이 수정되면 다른쪽도 영향을 받는다( like 자바 깊은복사 )
+			- 한쪽이 삭제 되어도 다른쪽에는 영향이 없다
+			  ( 삭제: inode 참조하는 링크를 삭제하는 것 )
+			- inode를 삭제하면 링크된 파일 전체가 삭제된다.
+		
+		라. 목적
+			- 백업용도: 하나를 삭제해도 나머지는 유지
+			- 보안이슈: 중요한 파일명을 노출하지 않을 수 있음
+			
+		실습:
+			echo "hello" >> main.txt		# 원본파일
+			ln main.txt main_copy.txt		# 하드링크 파일
+			$ ls -il | grep main
+			787438 -rw-rw-r-- 2 user1 user1    6 May 28 14:24 main_copy.txt
+			787438 -rw-rw-r-- 2 user1 user1    6 May 28 14:24 main.txt
+			==> inode가 동일하다, inode 링크 갯수: 2
+			
+			$ cat main.txt main_copy.txt	# 내용이 같은지 확인
+			$ echo "world" >> main.txt		# 원본 파일 수정
+			$ cat main_copy.txt
+			hello
+			world
+			
+			$ rm main.txt						# 원본 삭제
+			$ ls -il | grep main
+			787438 -rw-rw-r-- 1 user1 user1   12 May 28 14:27 main_copy.txt
+			==> inode는 유지되며, inode 링크 갯수가 줄어든다.
+			
+	20) 소프트링크 (soft link)
+		가. 개념: 바로가기 기능 ( 윈도우에서 바로가기 기능: 원본이 삭제되면 바로라기 아이콘이 깨짐)
+		
+		나. 문법
+			ln -s 원본 대상(타겟)
+			
+		다. 특징
+			- 디렉터리 가능
+			- inode가 다름
+			- 원본 수정하면 영향을 받는다.
+			- 원본을 삭제하면 대상의 링크가 깨진다. ( ls 입력시 빨간색으로 출력됨, 해결: rm 소프트링크 )
+		
+		라. 목적: 경로단축
+		
+		# 실습
+			$ echo "hello" > m2.txt
+			$ ln -s m2.txt m2_soft.txt
+			$ ls -il | grep m2		# inode가 서로 다름 
+			787440 lrwxrwxrwx 1 user1 user1    6 May 28 14:45 m2_soft.txt -> m2.txt		
+			787439 -rw-rw-r-- 1 user1 user1    6 May 28 14:44 m2.txt
+			==> inode 다름, 링크 갯수는 각 1개, ` -> ` 표시는 softlink를 의미한다
+			
+			$ echo "m2.txt update" >> m2.txt		# 원본수정
+			$ cat m2_soft.txt							# 소프트링크 파일도 원본의 영향을 받는다
+			hello
+			m2.txt update
+			
+			$ rm m2.txt	# 원본삭제
+			$  ls -il
+			787440 lrwxrwxrwx 1 user1 user1    6 May 28 14:45 m2_soft.txt -> m2.txt
+																			  ---------------------
+																				터미널에서 이부분이 빨간색
+																				==> 링크가 깨진 상태이다.
+			
+			$ rm m2_soft.txt 		# 원본과 링크가 깨졌으므 삭제해야 한다.
+			
+		# 실습: 디렉토리에 소프트링크 지정
+			$ mkdir temp
+			$ touch temp/test.txt
+			$ ln -s temp temp_soft
+			
+			$ ls temp_soft
+			test.txt
+			
+			$ ls -il | grep temp
+			787439 drwxrwxr-x 2 user1 user1 4096 May 28 15:07 temp
+			787442 lrwxrwxrwx 1 user1 user1    4 May 28 15:07 temp_soft -> temp
+			
+-------------------------------------------------------------------------------			
+	21) 파일묶음과 압축하기 
+		가. 파일묶음
+			- 목적: 여러 파일들을 묶어줌 ( 압축 X, 크기변경 X )
+			- 문법:
+			
+				# 묶는 방법
+				tar -cvf 묶음.tar 파일명1, 파일명2, ....
+				 	c: creat,
+					v: 자세하게,
+					f: file 지정
+					
+				# 해제 방법
+				tar -xvf 묵음.tar				# 옵션 알아보기
+		
+		나. 압축하기
+			- 목적: 파일 압축 ( 크기 변경됨 )
+			- 문법:
+			
+				# 압축하기
+				gzip 파일명 ==> 파일명.gz		
+				
+				# 압축해제
+				gzip -d 파일명.gz
+		
+		다. 파일묶음 + 압축하기 (*****)
+			- 여러파일은 묶고 파일압축
+			
+			- 문법: 
+					# 묶고  압축하기
+					tar -czvf 파일명.tar.gz 폴더
+					
+					# 해제 하기 
+					tar -xzvf 파일명.tar.gz ==>  기본적으로 현재 디렉터리에 풀림
+					tar -xzvf 파일명.tar.gz -C 폴더 ==> 지정된 폴더에 압축해제
+		
+			#실습
+			
+				$ tar -czvf project.tar.gz projects
+				$ rm -rf projects
+				$ tar -xzvf project.tar.gz project
+				
+				$ ls -l | grep project
+				drwxrwxr-x 3 user1 user1 4096 May 28 13:46 projects		
+				-rw-rw-r-- 1 user1 user1  225 May 28 15:21 project.tar.gz
+				# 압축파일명이 아니라 원본 디렉터리 명으로 해제된다
+				
+				$ tar -xzvf project.tar.gz -C temp				
+				$ ls temp
+				projects  test.txt		
+
+/////////////////////////////////////////////////
+5장. 파이프와 리다이렉션			
+/////////////////////////////////////////////////		
+
+1.파이프( Pipes )	
+	
+	가. 문법: 
+		명령어1 | 명령어2
+		
+	나. 동작 :  명령어1의 출력결과를 명령어2의 입력으로 전달함
+	
+		ex. 
+		# 현재 실행중인 프로세스중에 java가 있는가
+			ps -ef | grep java		
+			
+		# ls -lhs을 위에서 20개만
+			ls -lhs /etc | head n 20
+			
+		# auth.log이 바이너리 파일, grep은 ascii text 파일만 읽을 수 있기때문에 -a를 옵션이 필요하다.
+			cat -n /var/log/auth.log | grep -a "authentication failure"
+			cat -n /var/log/auth.log | grep -a "authentication failure" | wc -l
+		
+			
+			////////////////////////////
+			 # word count
+			 wc -l : 라인수
+			 wc -w : 단어수
+			 wc -m : 문자수
+			 wc -c : 바이트수
+			 
+			 ex.  wc -l /etc/passwd			
+			////////////////////////////			
+
+2. 리다이렉션( redirection )
+				
+
+			
+			

@@ -1,0 +1,235 @@
+-------------------------------------------------
+2026.06.02
+
+Docker 강좌 정리
+
+////////////////////////
+1장. Docker
+////////////////////////
+
+1. 서버운영의 역사 
+	
+	1) 물리서버시대(Bare Metal)		
+		- 운영체제에 하나의 서버만 설치 ( 하나의 서비스만 지원 )
+		- 서버자원이 남아도 활용불가
+		- 문제점 : 서버비용 증가
+					  확장성이 떨어짐
+					  장애발생시 복구 어려움
+	
+	2) 가상서버시대(Virtual Machine)		
+		- 하나의 운영체제(host OS)에 여러 개의 가상 OS(guset OS)	설치됨.
+		- 서버자원 활용가능 및 서비스 분리가능
+		- 문제점 : 개별적으로 OS 포함 ( OS가 공유안됨 *** )
+					  무겁다, 부팅이 느리다
+					  디스크 / 메모리 사용량이 크다
+
+		- VM = OS + 라이브러리 ( ex. JDK, JRE ) + 앱(ex.SpringBoot)
+		- 여러개의 가상 OS를 설치할 수 있으나 서로 공유가 안됨.
+		
+	3) 컨테이너 시대(Docker)			
+	: 하나의 OS위에 다양한 OS를 돌린다. VM을 거치지 않기 때문에 host의 자원을 공유할 수 있다.
+		- 핵심: OS가 공유 가능. 앱만 분리
+		- 가볍고 빠름.
+		- 동일한 환경으로 실행보장 (****)
+		( Any OS, Any Language, Any App, Any Where)
+		
+-------------------------------------------------
+2. Container 관련 내용
+
+	1) OCI ( Open Container Initiative )
+		- 컨테이너 표준을 만드는 협회
+		
+	2) containerd (*)
+		- 컨테이너 실행 환경 중 하나임
+		- Docker에서 사용하는 실행환경임.
+		
+	3) CRI-O
+		- 컨테이너 관리하는 오케스트레이션 중 하나임.
+		- K8s(Kubernetes)에서 사용하는 실행환경이다
+		
+-------------------------------------------------		
+3. Docker
+	1) 개념
+		- 컨테이너를 만들고 관리하기 위한 오픈소스 S/W
+		- 한번 만들면 어떤ㄷ 환경에서든 동일한 환경 구축 가능.
+		
+	2) 장점
+		- 환경 불일치 해결 ( 어디서 실행해도 동일한 결과 보장 )
+		- 배포 표준화 및 자동화
+		- 빠른 배포 및 롤백 
+		- 마이크로서비스 어플리케이션(MSA) 개발에 최적화
+			-> 기존의 서비스를 한번의 배포하는 아닌, 시스템의 기능을 개별로 분리하여 배포하는 방식
+				ex. 게시판의 회원가입, 게시글, 작성,... 기능을 개별로 어플리케이션으로 만들어 배포
+				
+	3) Docker 기본 흐름
+		
+		////////////////////////////////////
+			registry ----------------> image ----------------> container
+		ex. vsc 홈페이지				   vsc 프로그램			  vsc 실행 ( vsc 프로세스 )
+			 intellij홈페이지				intellij IDE			  intellij 실행 ( intellij 프로세스 )
+		////////////////////////////////////
+		
+		가. 개념
+			Registry ( image 저장소  )
+				|			ex.  Docker hub: 공식적인 저장소( https://hub.docker.com/ ) 
+				|				  AWS ECR
+			image		( OS + 실행환경 + 라이브러리 + app 관련 정보들이 저장됨)
+				|			틀역할 담당.
+				|		만드는 방법 2가지: Dockerfile, docker-compose.yml(yaml)
+				|		
+			container ( image를 실제 실행 했을때)
+			
+		나. Registry
+			- image 저장소
+				ex. Docker hub(공식적인 저장소), AWS ECR
+			
+			- 역할 : 이미지 다운로드.	ex. docker pull 이미지명:tag
+						이지미 업로드.		ex. docker push 이미지명:tag 
+		
+		다. image
+			- 컨테이너를 만들기 위한 틀 역할 담당
+			- 구성요소: 
+				OS	(base 이미지 ex. ubuntu ...)
+				실행환경
+				라이브러리
+				설정파일
+				app	
+				==> 위 구성요소들이 포함 될 수 있다. ( 필수는 아니다 )	
+				
+			- 특징
+				: Read-Only(***)		==>	수정 불가능, 필요 시 이미지를 다시 만들어야 한다.
+				: 실행되지 않sms 정적파일(static)
+				: 레이어 아키텍쳐(Layer Architecture)로 구성됨. 즉 여러 layer로 구성됨.(*****)
+					==> 변경 시, 필요한 layer만 교체되고 나머지 layer 재사용( 캐시 )
+				
+			- 종류:
+				a. 빌드된 이미지 (pre-buil image) : docker hub 제공
+				b. 커스텀 이미지 : 개발자가 직접 만든 이미지
+				
+		라. container
+		
+			- 정적인 이미지를 실행한 프로세스
+			- 특징
+				: Read-Write(****)
+				: 하나의 이미지에서 여러개 생성 가능
+				: private 구조 ( 격리된 환경 ). 따라서 직접 접근이 불가 (***)
+				: 휘발성 ( 컨테이너에서 수정된 변경사항이 일시적임) (***)
+					==> 영속성을 가지기 위해서 볼륨( Volume, host에 임의 파일이용 )사용	# host에 수정 내용을 저장한다
+					
+-------------------------------------------------					
+4. Docker 환경구축
+
+	1) 원도우용 Docker Desktop 서치 
+	
+			https://www.docker.com/
+			
+			https://docs.docker.com/reference/cli/docker/
+			https://docs.docker.com/reference/compose-file/
+			https://docs.docker.com/reference/dockerfile/
+			
+	 2) Docker Desktop 언인스톨
+	 
+		가. 제어판 > Docker 언인스털 
+		나. C:\Users\User\.docker 삭제 
+		다. C:\ProgramDate\DockerDesktop 삭제
+		라. C:\Users\User\AppData\Roaming\Docker 삭제
+		마. C:\Users\User\AppData\Local\Docker 삭제
+	
+	3) 설치 확인 
+		docker version
+		
+		
+	4) Docker Desktop 실행	( docker daemon 실행 )	
+	
+	5) VSC IDE 툴
+		- 위치 		: 임의의 폴더 ( 강의 중에는 도커 학습폴더 사용 )
+		- 새 터미널 : 터미널만 사용한다
+		
+-------------------------------------------------
+5. hello-world 이미지 실행
+			
+	1) docker run hello-world 실행
+	
+		- 내부 동작순서
+			가. 로컬에서 hello-world  이미지를 찾음
+				 (있다면 실행(container 생성),
+				 없아면 docker hub에서 다운로드 된다)
+				 
+			나. 없으므로 docker hub에서 다운로드된다.
+			다. 다운로드 된 이미지 이용해서 컨테이너 생성.
+			라. 실행하고 이미지 출력 후 종료.
+		
+		- 로컬 이미지 정보 확인
+			
+			docker images
+			
+			IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+			hello-world:latest   0e760fdfbc48       25.9kB         9.49kB    U 
+			
+			- IMAGE 		: hello-world
+			- tag			: latest, 지정하지 않으면 자동으로 latest가 붙음. 
+							  latest라고 해서 가장 최신버전이라고 생각하면 안된다.
+								==> 명시적으로 버전 지정을 권한한다 ( ex. :latest:v3)
+			- ID			: 로컬에 있는 이밎 id값, 식별자용이다	( ex. Digest: sha256:0e760fdfbc48)
+
+			- DISK USAGE	: 실제 이미 크기
+			- CONTENT SIZE	: 이미지를 관리하기위한 디스크 크기
+			- EXTRA			: 이미지 사용여부
+			
+		- 컨테이너 정보 확인
+		
+			docker ps	 : 실행중인 컨테이너 정보 출력
+			docker ps -a : 실행중 + 종료된 컨테이너 정보를 출력
+			
+			CONTAINER ID   IMAGE         COMMAND    CREATED         STATUS                     PORTS     NAMES
+			9297a2364a87   hello-world   "/hello"   7 minutes ago   Exited (0) 7 minutes ago             practical_engelb
+			
+			- CONTAINER ID	: 실행중 container를 구분하기 위한 식별자
+			- IMAGE			: 컨테이너를 만든 템플릿 IMAGE
+			- COMMAND		: 명령어
+			- CREATED		: container 생성시점.
+			- STATUS			: container 상태를 알려준다. ( ex. Created, Running, Exited, Stop, ... )
+			- PORTS			: 외부에서 접근을 위해 할당한 포트번호.
+			- NAMES			: container 이름. 명시적으로 지정하지 않으면 랜덤하게 작성된다 ( container 식별자 )
+			
+			# 식별자			: container를 핸들링 하는데 사용. ( ex. CONTAINER ID, NAMES ) 
+						
+-------------------------------------------------
+6. nginx 웹서버 실행
+	1) docker run nginx 실행 ( foreground로 실행 )
+	
+		- 내부 동작순서
+		
+			가. 로컬에서 nginx 이미지를 찾음
+				 (있다면 실행(container 생성),
+				 없아면 docker hub에서 다운로드 된다)
+				 
+			나. 없으므로 docker hub에서 다운로드된다.
+				 ==> 명시적으로 tag를 지정하지 않으면 자동으로 latest가 다운로드됨.
+				 
+			다. 다운로드 된 이미지 이용해서 컨테이너 생성.
+			라. 실행하고 이미지 출력 후 종료.
+			
+	2) docker run -d nginx:1.30-alpine 실행 ( background 실행 )
+	
+		- 내부 동작순서
+		
+			가. 로컬에서 nginx:1.30-alpine 이미지를 찾음
+				 (있다면 실행(container 생성),
+				 없아면 docker hub에서 다운로드 된다)
+				 
+			나. 없으므로 docker hub에서 다운로드된다.
+				 ==> 명시적으로 tag를 지정. nginx:1.30-alpine가 다운로드됨.
+				 
+			다. 다운로드 된 이미지 이용해서 컨테이너 생성.
+			라. 실행하고 이미지 출력 후 종료.	
+			
+			
+	2) docker run -d -p 1234:80 nginx		
+	
+	  # 포트 포워딩(port forwarding): 
+       개념: 컨테이너는 private 환경이기 때문에 외부에서 직접 접근이 불가함.
+				 따라서 외부에서 접속할 수 있는 port를 open해야 됨.
+				 이것이 포트 포워딩(포트매핑) 임.
+	   문법:
+	        -p host에서요청포트:docker내부포트  ex. -p 1234:80,  -p3306:3306

@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    #    implementation("com.mysql:mysql-connector-j:8.3.0")  mysql 버전 반드시 확인할 것.
+#    url: jdbc:mysql://localhost:3306/testdb
+    url: jdbc:mysql://host.docker.internal:3306/testdb
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: app-hikari
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 600000 # 10분
+      max-lifetime: 1800000 # 30분
+      connection-timeout: 30000 # 30초
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create # none 운영 권장: 스키마 자동 변경 금지
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true # SQL 포맷팅
+        # 필요 시 추가(권장)
+        # jdbc.time_zone: Asia/Seoul
+        # jdbc.batch_size: 50
+        # order_inserts: true
+        # order_updates: true
+        # default_batch_fetch_size: 100
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always # 애플리케이션 시작 시 schema.sql, data.sql 실행
+
+logging:
+  level:
+    root: info
+    org.springframework.web: debug
+    org.hibernate.SQL: trace # 실행되는 SQL
+    org.hibernate.orm.jdbc.bind: trace # 바인딩 파라미터
+    org.hibernate.orm.jdbc.extract: trace # 결과 매핑/추출

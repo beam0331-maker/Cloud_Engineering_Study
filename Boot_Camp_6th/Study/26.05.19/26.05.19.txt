@@ -1,0 +1,382 @@
+#################################################
+2026.05.19
+
+8. 사용자 입력 데이터 유효성 검증1 :  @Valid + BindigResult // 화면이 있을때 주로 사용하는 방법
+																				// BindigResult가 오류를 체크한다
+	1) 개념:
+		- 사용자 입력태그의 값을 검증하는 작업
+			ex. 글자길이, 필수사항, 이메일, 값의 범위(1~10) etc...
+			
+	2) 검증작업
+	
+		- 클라이언트
+		
+			a. HTML5에서 제공해주는 속성이용
+			ex.
+				<form action="login" method="get">
+					 아이디:<input type="text" name="userid" required><br>
+					 비밀번:<input type="text" name="password" required><br>
+					 email:<input type="email" name="email"><br>
+					 나이:<input type="number" name="age" max="10"><br>
+					 <input type="submit" value="로그인">
+				</form> 
+				
+			b. Javacript 이용
+			
+		2) 검증작업2
+		
+			가. 의존성 설정			
+				implementation 'org.springframework.boot:spring-boot-starter-validation'
+				
+				==> 검증할 때 사용할 수 있는 애노테이션 사용 가능
+				ex. @NotNull, @NotBlank, @Size, @Min, @Max, @Email
+					 [ @Future, @Past ]( 날짜를 현재보다 미래/과거로 설정해야 유효 ), [ @Postive, @Negativ ]( 숫자의 양수/음수를 체크 )
+			
+			나. DTO 작성: TodoDTO
+				
+				 @NotBlank(message = "적어도 한글자 이상 입력하세요.")
+				 String userid;
+
+				 @Size(min = 5, message = "최소 5글자 이상 입력하시요")
+				 String description;
+
+				 @NotNull
+				 @FutureOrPresent(message = "현재 날짜 또는 미래 날짜 입력하시오")
+				 LocalDateTime targetDate;
+				 
+			다. Controller 작성.  ex. TodoController.java
+
+				- 중요한 핵심은 반드시 사용자 입력 화면을 보여주는 @GetMapping, 사용자 입력을 처리하는 @PostMapping 필요함.
+				- 또한 @GetMapping 과 @PostMapping에서 TodoDTO 모델을 공유해야됨.
+				// write.html에 처음부터 Post에서 전달되는 key를 입력받기 때문에 get에서 같은 key의 DTO를 전달하지 않으면 500 오류가 발생한다.
+ 
+				//사용자 입력 화면 보기
+				 @GetMapping("/add-todo")
+				 public String showTodoPage(Model model) {
+
+				// @PostMapping의 @ModelAttribute("xxx") 값과 반드시 일치해야됨.
+				model.addAttribute("xxx", new TodoDTO());
+				return "write";  // write.html
+				 }
+
+				 //사용자 입력 처리 하기
+				 @PostMapping("/add-todo")
+				 public String addTodo(@Valid @ModelAttribute("xxx")  TodoDTO todoDTO,
+						  BindingResult bindingResult, Model model) {
+				//검증실패
+				if(bindingResult.hasErrors()){
+					 return "write";
+				}
+				//검증성공
+				return "redirect:main";  //PRG 패턴
+				 }
+
+			라. write.html
+			
+				<form th:object="${xxx}" th:action="@{/add-todo}" method="post">
+					아이디:<input type="text" th:field="*{userid}" ><br>
+					<p th:if="${#fields.hasErrors('userid')}" th:errors="*{userid}"></p>
+					 할일:<input type="text" th:field="*{description}"><br>
+					 <p th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+					 목표날짜:<input type="date" th:field="*{targetDate}"><br>
+					 <p th:if="${#fields.hasErrors('targetDate')}" th:errors="*{targetDate}"></p>
+					<input type="submit" value="할일 저장">
+				</form>
+			 
+			 # 다음과 같이 자동으로 변경됨. 
+				 <form th:object="${xxx}">
+					<input type="text" th:field="*{userid}" >
+					==> <input type="text" name="userid" id="userid" value="" >
+					
+-------------------------------------------------					
+8. 사용자 입력 데이터 유효성 검증2 :  @Validated + @ControllerAdvice
+
+	가. 의존성 설정			
+		implementation 'org.springframework.boot:spring-boot-starter-validation'
+	
+	나. DTO 작성: TodoDTO
+	
+		 String userid;		 
+		 String description;		 
+		 LocalDateTime targetDate;
+		 
+		 ==> @Validated는 @Valid와 다르게 검증 어노테이션(@NotNull)을 DTO가 아닌 Controller의 메서드 파라미터에 사용이 가능함.
+		 
+	다. Controller 작성: @Valiated + @NotNull
+	
+		@Controller
+		@Validated
+		public class TodoController {
+		
+			 // 사용자 입력 화면 보기
+			 @GetMapping("/add-todo")
+			 public String showTodoPage() {
+				  return "write"; //write.html
+			 }
+
+			 // 사용자 입력 처리
+			 @PostMapping("/add-todo")
+			 public String addTodo(@NotBlank(message = "적어도 한글자 이상 입력.")
+										  String userid,
+										  @Size(min = 5, message = "최소 5글자 이상 입력.")
+										  String description,
+										  @NotNull @FutureOrPresent(message = "현재 날짜 또는 미래 날짜를 입력.")
+										  LocalDate targetDate){
+				  // 검증실패: 예외가 발생 =============> @ControllerAdvice
+				  // 검증성공
+				  System.out.println(userid);
+				  System.out.println(description);
+				  System.out.println(targetDate);
+				  return "redirect:main"; // PRG패턴
+			 }
+
+			 // 성공했을때 보여줄 화면
+			 @GetMapping("/main")
+			 public String main(){
+				  return "main"; //main.html
+			 }
+		}
+	
+	
+	라. 전역 예외 처리 @ControllerAdvice
+	
+		@ControllerAdvice
+		public class GlobalExceptionHandler {
+			 @ExceptionHandler(value = ConstraintViolationException.class)
+		//  public String handleException(Exception e, Model model) {
+			 public String handleException(Exception e, RedirectAttributes redirectAttributes, Model model) {
+				  redirectAttributes.addFlashAttribute("errorMessage", "유효성 검증 실패");
+				  return "redirect:add-todo"; // PRG 패턴
+				}
+			}
+			
+	마. HTML 작성	
+		<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+		<form  th:action = "@{/add-todo}" method="post">
+			 아이디: <input type="text" name = "userid"><br>
+			 할일: <input type="text" name="description"><br>
+			 목표날짜: <input type="date" name="targetDate" ><br>
+			 <input type="submit" value="할일 저장">
+		</form>
+	
+/////////////////////////////////////////////////
+
+9. Thymeleaf 정리
+	https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html
+	
+	1) 의존성
+		implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+		
+	2) 기본 HTML 설정	
+	 
+		- html xmlns:th="http://www.thymeleaf.org" 필수
+		
+		ex.
+			<!DOCTYPE html>
+			<html xmlns:th="http://www.thymeleaf.org" lang="en">
+			<head>
+				 <meta charset="UTF-8">
+				 <title>Main</title>
+			</head>
+			<body>
+			<h1>Main</h1>
+			</body>
+			</html>
+			
+	3) 구현
+
+	  가. 1. scope에 저장하고 html에 보여주기
+	  
+		  <!DOCTYPE html>
+			<html xmlns:th="http://www.thymeleaf.org" lang="en">
+			<head>
+					 <meta charset="UTF-8">
+				 <title>Title</title>
+			</head>
+			<body>
+			<h1>1. scope에 저장하고 html에 보여주기</h1>
+			리터럴 : <p th:text="123+1"></p>
+			리터럴 : <p th:text="'hello'"></p>
+			request : <p th:text="${request}"></p>
+			request2 : <p th:utext="${request2}"></p>
+			session : <p th:text="${session.session2}"></p>
+			session : <p th:text="${session.xxx}"></p>
+			application : <p th:text="${application.application2}"></p>
+			</body>
+			</html>
+
+
+	 나. scope에 객체 저장하고 html에 보여주기
+
+		<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		</head>
+		<body>
+		<h1>2. scope에 객체 저장하고 html에 보여주기</h1>
+		
+		<h2>가. 중첩형태로 접근</h2>
+		login객체:<p th:text="${login}"></p>
+		login객체:<p th:text="${login.toString()}"></p>
+		userid:<p th:text="${login.userid}"></p>
+		password:<p th:text="${login.password}"></p>
+		
+		<h2>나. 객체 속성형태로 접근</h2>
+		<div th:object="${login}">
+			 아이디:<p th:text="*{userid}"></p>
+			 비번:<p th:text="*{password}"></p>
+		</div>
+		</body>
+		</html>
+
+	  다. 제어문 처리: if, swtich, 3항연산자, 반복문
+
+		<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+			 <style>
+			 .xxx{
+			  color:red;
+			 }
+			 .yyy{
+				color:blue;
+			 }
+			 </style>
+		</head>
+		<body>
+		<h1>3.제어문 처리: if, swtich, 3항연산자, 반복문</h1>
+		
+		<h2>가. 조건문(단일 if)</h2>
+		<p th:if="${login.userid == 'inky4832'}">
+			 참1
+		</p>
+		<p th:if="${login2.userid == null }">
+			 참2
+		</p>
+		
+		<h2>나. 3항 연산자</h2>
+		<p th:text="${login.userid == 'inky4832'}?'참3':'거짓'"></p>
+		<p th:class="${login.userid == 'inky4832'}?'xxx':'yyy'">css 적용된 텍스트</p>
+
+		<h2>다. switch </h2>
+		 <div th:switch="${login.userid}">
+			<p th:case="inky4832">inky4832입니다.</p>
+			<p th:case="inky4833">inky4833입니다.</p>
+			<p th:case="*">default 입니다.</p>
+			<p></p>
+		 </div>
+		
+		<h2>라. 반복문 </h2>
+		<ul th:each="dto: ${myList}">
+			 <li th:text="${dto.userid} + '  ' + ${dto.password}"></li>
+		</ul>
+		<h2>라. 반복문2 - index, count, first,  last </h2>
+		<ul th:each="dto, yyy: ${myList}">
+			 <li th:text="${dto.userid} + '  ' + ${dto.password} + ' ' +${yyy.index} + '  ' + ${yyy.first} "></li>
+		</ul>
+
+		</body>
+		</html>
+
+		라. 경로(링크)
+
+			<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		<link rel="stylesheet" type="text/css" th:href="@{css/test.css}">
+		</head>
+		<body>
+		<h1>4. 경로(링크)</h1>
+		<p>Hello</p>
+		<img th:src="@{images/my.gif}" width="100" height="100" ><br>
+		<a th:href="@{http://google.com}">구글</a><br>
+		<a th:href="@{m4-1}">m4-1(상대)</a><br>
+		<a th:href="@{/m4-1(id='aaa',pw='1234')}">m4-1(절대)-컨텍스트명뒤의/이다.</a><br>
+		<a th:href="@{/m4-1(id=${userid},pw='1234')}">m4-1(절대)-컨텍스트명뒤의/이다.</a><br>
+
+
+		<form th:action="@{m4-2}" method="get">
+			 아이디:<input type="text" name="userid" required><br>
+			 비밀번:<input type="text" name="password" required><br>
+			 <input type="submit" value="로그인">
+		</form>
+
+
+		</body>
+		</html>
+
+		 마. 유틸리티
+			<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		<link rel="stylesheet" type="text/css" th:href="@{css/test.css}">
+		</head>
+		<body>
+		<h1>5. 유틸리티</h1>
+		<h2>가. 날짜 유틸티리</h2>
+		today:<p th:text="${#temporals.format(today, 'dd/MM/yyyy')}"></p>
+		<h2>나. 문자열 유틸티리</h2>
+		<p th:text="${#strings.toUpperCase(username)}"></p>
+		<p th:text="${#strings.length(username)}"></p>
+		<p th:text="${#strings.substring(username,0,4)}"></p>
+
+		<h2>다. 숫자 유틸티리</h2>
+		<p th:text="${#numbers.formatInteger(price,3,'POINT')}"></p>
+		<p th:text="${#numbers.formatInteger(price,3,'COMMA')}"></p>
+		<p th:text="${#numbers.formatCurrency(price)}"></p>
+
+		<h2>라. 리스트 유틸티리</h2>
+		size:<p th:text="${#lists.size(myList)}"></p>
+		값이 없냐?<p th:text="${#lists.isEmpty(myList)}"></p>
+		값이 포함되냐?<p th:text="${#lists.contains(myList, 'A')}"></p>
+
+
+
+		</body>
+		</html>
+
+		 사. 화면재사용
+
+		# include/top.html
+			  <!DOCTYPE html>
+			<html xmlns:th="http://www.thymeleaf.org" lang="en">
+			<head>
+				 <meta charset="UTF-8">
+				 <title>Title</title>
+			</head>
+			<body>
+			  <div th:fragment="copy">
+				 &copy; 2011 The Good Thymes Virtual Grocery
+			  </div>
+			  <div th:fragment="header">
+					로그인/회원가입
+			  </div>
+			</body>
+			</html>
+
+
+		# main6.html
+			  <!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		<link rel="stylesheet" type="text/css" th:href="@{css/test.css}">
+		</head>
+		<body>
+		<h1>6. 화면재사용</h1>
+		<div th:replace="~{ include/top :: header}"></div>
+		<p>안녕하세요</p>
+		<hr>
+		<div th:replace="~{ include/top :: copy}"></div>
+
+		</body>
+		</html>

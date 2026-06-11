@@ -1,0 +1,327 @@
+-------------------------------------------------
+2026.05.14
+
+1. H2와 MySQL 이용한 Profile 실습
+
+	1) 의존성 설정
+		
+		// sprint boot mybatis
+		implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+		
+		// myslq
+		implementation 'com.mysql:mysql-connector-j:8.3.0'
+		
+		// h2
+		runtimeOnly 'com.h2database:h2'		
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		
+		
+	2) prod 와 dev 프로파일 설저
+	
+		기본: application.yml # 공통 기능 설정
+		prod: applicaiton-prod.yml
+		dev: applicaiton-dev.yml
+	
+		활성화
+		spring:
+			profiles:
+				active: prod|dev
+				
+		# application.yml
+		spring:
+			profiles:
+				active: prod|dev
+		
+		mybatis:
+		  mapper-locations: com/exam/config/TodoMapper.xml		  
+		  type-aliases-package: com.exam.dto
+		  
+		  
+		# application-prod.yml
+		spring:
+			datasource:
+				url: jdbc:mysql://localhost:3306/testdb
+				driver-class-name: com.mysql.cj.jdbc.Driver
+				username: root
+				password: 123
+			sql:
+				init:
+					mode: always
+					
+		# applicaiton-dev.yml
+		
+			# h2 관리자 콘솔 활성화
+			spring:
+			  h2:
+				 console:
+					enabled: true
+
+			# h2 DB 연동
+			  datasource:
+				 url: jdbc:h2:mem:testdb
+				 driver-class-name: org.h2.Driver
+				 username: sa
+				 password:
+				 
+/////////////////////////////////////////////////
+6장. Spring MVC
+/////////////////////////////////////////////////
+
+1. 아키텍쳐
+	
+	1) 서블릿 / JSP 기반의 MVC 아키텍쳐
+	
+		웹브라우저  -----> 서블릿 <-----> 서비스 <-----> DAO <-----> MySQL
+								서블릿맵핑 ex. @Webservlet("/list")
+									|				@Webservlet("/write")
+									|	
+									|	응답처리 : 데이터 와 JSP 설정
+									|
+									|	포워드 및 리다이렉트 ex. response.sendRedirect("list");
+						<-----  jsp
+		
+		# 서블릿을 직접 생성했음.
+		  기능에 따라 여러개의 서블릿을 생성함
+		
+		# 서블릿을 선택하기 위한 요청?
+			http://서버IP:포트번호/컨텍스트명/서블릿맵핑
+			ex. http://localhos:8080/app/list
+				 http://localhos:8080/app/write
+	
+		# servlet이 JSP를 선택하는 방법
+		가. forward:	request.getRequsetDispatcher("list.jsp").forward(request, response);
+		나. redirect:	reponse:sendRedirect("list.jsp");
+		
+		# 사용자 입력데이터를 서블릿이 얻는 방법
+		String userid = request.getParameter("userid"); // <input name = "userid">
+		String[] hobbies = request.getParameterValue("hobby");	// <input name="hobby" type="checkbox">
+		
+	2) SPring 기반의 MVC 아키텍쳐(*)
+							
+									 ----------> HandlerMapping(요청매핑 등록, RequestMappingHandlerMapping)
+									|					key | value
+									|				  -----|-------
+									|					/a	 |	findAll()
+									|	            /b  | save()
+									V
+							DispatcherServlet
+		웹브라우저 -------> 서블릿 ----------------> Controller <-----> service <-----> Repository <-----> MySQL
+																	ex. 게시판
+																	
+																	request 작업
+																	---------------------
+																	// 요청 매핑값
+																	(request mapping)을 설정
+																	@RequestMapping("/a") )
+																	findAll(){}
+																	@RequestMapping("/b")
+																	save(){}
+																	@RequestMapping("/c")
+																	delete(){}
+																	@RequestMapping("/d")
+																	update(){}
+																	---------------------
+																	response 작업
+											모델과 뷰정보		: Model(데이터)과 View(thyleaf, jsp) 처리
+											<--------------	가. Model을 scope저장 (reqest, session, application)											
+																	나. View 정보를 지정( 이전 서블릿_JSP에서는 list.jsp 라고 전체 파일명을 알려줌)
+																		단, 파일명만 알려줌.( 즉, list 만 설정함 )
+																		파일명만 알려주는 이유: 다양한 뷰 컴포넌트를 활용하기 위함
+																		(jsp와 과련된 의존성을 설정하면 list.jsp 를 찾고 
+																			thymleaf 관련 의존성을 설정하면 list.html을 찾음)
+											뷰정보(ex.list)
+											--------------->	ViewResolber( 뷰관련 의존성 파악: Thymleaf)					
+											<---------------	
+												list.html	
+															
+															
+		# 서블릿은 제공된다 : DispatcherServlet
+		  서블릿은 DispatcherServlet 하나만 생성된다.
+		  서블릿맵핑( @Webservlet("/") )	=> http://localhos:8080/app/
+		  
+		# 실제 처리하는 작업은 다른 클래스에서 처리함. => Controller에서 처리함
+		
+		# Controller안에서 메서드를 선태하는 방법
+		  : http://서버IP:포트번호/컨텍스트명/서블릿맵핑/요청매핑값
+			ex. 
+				http://localhos:8080/app/a ==> findAll(){} 실행
+				http://localhos:8080/app/b ==> save(){} 실행
+			
+	# 각 역할 정리
+	- DispathcerServlet: 모든 요청을 처리 (Front Controller Pattern)
+	- HandlerMapping: 요청URL을 분석하여 요청처리를 담당하는 Controller 메서드 선택
+	- Controller: 서블릿/JSP 버전에서 서블릿 역할 담당.
+					ex. 사용자 입력데이터 처리, 음답처리(Model View 처리)				
+	
+	- Service: 로직과 트랙잭션처리
+	- Repository: DB연동
+	- ViewResolver: 논리적이름(ex. list)을 이용해서 
+						 실제처리되는 View완성(ex. list.html)
+						 
+/////////////////////////////////////////////////
+2. Spring MVC  구축
+
+	1) 의존성 추가
+		
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+		
+	2) thymeleaf 설정
+		https://www.thymeleaf.org/doc/tutorials/3.1/usingthymeleaf.html
+		
+		src/main/resource/
+		application.yml
+		static
+		|- 이미지 
+		|- css
+		|- js
+		templates
+		|- main.html(thyemleaf)
+		
+////////////////////////////////////////////////////////////////		
+		<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org" lang="en">
+		<head>
+			 <meta charset="UTF-8">
+			 <title>Title</title>
+		</head>
+		<body>
+		<h1>main</h1>
+		<p th:text="'hello'"></p>
+		</body>
+		</html>
+////////////////////////////////////////////////////////////////	
+
+	3) Controller 작성
+		- POJO 기반
+		- @Controller 지정 ( json 기반 RESTful 서비스: @RestController)
+		- 실제 구현해야되는 기능을 메서드로 정의함.
+			ex.
+				@RequestMapping("/요청매핑값")
+				public 리턴타입 hello(){
+				}
+			
+			리턴타입이 String인 경우는 뷰정보를 설정한 것이다.			
+			
+			요청하는 방법: http://서버ip:포트번호/컨텍스트명/서블릿매핑/요청매핑값
+			
+/////////////////////////////////////////////////
+3. @RequestMapping 저리
+
+	1) 용도
+		요청 URL( http://서버IP:포트번호/컨텍스트명/서블릿맵핑/요청매핑값 )에서
+		/ 요청매핑값을 추출해서 일치하는 Controller의 메서드를 선택하는 용도
+			
+	2) 다양한 패턴이 제공
+	
+		@RequestMapping("/hello") # 단일요청, 정확하게 일치해야됨
+		@RequestMapping(value = "/hello") # 단일요청, 정확하게 일치해야됨
+		
+		@RequestMapping(value = {"/hello2","/hello3"}) # 멀티요청, 정확하게 일치해야됨
+		@RequestMapping(value ="/yyy*") # 특정값으로 시작( ex. yyy33, yyy111 가능 ) 
+		@RequestMapping(value ="/zzz/*") # 특정경로 하나 ( ex. zzz/, zzz/ccc, /zzzz/ccc/ddd(404 오류))
+		@RequestMapping(value ="/xyz/**") # 특정경로 여러개 ( ex. xyz/, xyz/ccc, /xyz/ccc/ddd)
+		
+		@RequestMapping(value ="/aaa/*/bbb") # 중간에 특정경로 하나 ( ex. aaa/eee/bbb, aaa/ccc/bbb)
+		
+		@RequestMapping(value ="/ccc/**/ddd") # 중간에 특정경로 dufjro ( ex. ccc/x/d/ddd)
+		
+		# 요청뿐만 아니고 다음과 같이 mybatis  mapper 등록할때도 사용이 가능하다.
+		mybatis:
+			mapper-locations: com/exam/config/**/*.xml
+		
+		
+	
+		반드시 다음과 같이 설정해야 된다
+		'spring.mvc.pathmatch.matching-strategy=ant_path_matcher'
+		
+		  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+		
+		
+		
+		
+	3) 클래스 레벨의 @RequestMapping 용도
+		
+		ex.
+			@Controller
+			@RequestMapping("/xxx")
+			puiblic class HomeController(){
+				
+				// http://localhost:8080/xxx/hello		// 클래스 레벨의 요청매핑값도 포합되게 된다.
+				@RequestMapping("/hello") 
+				public String hello(){
+				}
+				
+				// http://localhost:8080/xxx/hello22
+				@RequestMapping("/hello22") 
+				public String hello22(){
+				}				
+			}
+			
+	4) GET(기본)/POST 구별해서 요청 처리 
+	
+		가. 이번 서블릿
+									GET
+			웹브라우저 --------------------> doGET 메서드
+									
+									POST
+			웹브라우저 --------------------> doPost 메서드
+			
+		나. Spring MVC			
+									GET
+			웹브라우저 --------------------> @RequestMapping( value="/매핑값", method=HttpMetho.GET)
+			
+									POST
+			웹브라우저 --------------------> @RequestMapping( value="/매핑값", method=HttpMetho.POST)
+	
+	//////////////////////////////////////////////////
+	실제 사용가능한 패턴은 다음과 같다. 
+	1. 화면 작성
+	<h2>2. POST 요청</h2>
+	<form action="member" method="post">
+		 id: <input type="text" name="userid"> <br>
+		 pw: <input type="text" name="passwd"> <br>
+		 <input type="submit" value="회원가입">
+	</form>
+	
+	2. Controller 작업
+	
+		가. 화면보는 요청 (GET 요청)
+		
+		  //1. GET 요청 처리하는 코드
+		 // @RequestMapping(value = "/memberForm")
+		 @RequestMapping(value = "/member", method = RequestMethod.GET) // GET 방식으로 요청
+		 public String memberGET(){
+			  System.out.println("memberGET");
+			  return "memberForm";
+		 }
+		
+		나. 실제 처리하는 요청 (POST 요청)
+		
+		@RequestMapping(value = "/member", method = RequestMethod.POST) // POST 방식으로 요청
+		 public String memberPOST(){
+			  System.out.println("memberPOST");
+			  return "memberForm";
+		 }
+		 
+		중요한 점은 GET과 POST의 요청매핑값이 /member로 동일함. method방식으로 구별됨.
+-----------------------------------------------------------------------------------------
+
+5. @Requestmappint(method = RequestMetho.GET)
+	@Requestmappint(method = RequestMetho.PSOT)를 대체하는 어노테이션 제공
+	
+	- @GetMappint("/member")
+	- @PostMappint("/member")
+	
+	- @RquestMapping --> 현재는 클래스레벨인 경우 사용됨.
+		ex. 
+			@Controller
+			@RequestMapping("/member")
+			puiblic class HomeController(){
+						
+				@GetMapping("/hello") ==> http://localhost:8080/xxx/hello
+				public String hello(){
+				}						
+			}

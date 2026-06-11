@@ -1,0 +1,451 @@
+-------------------------------------------------
+2026.06.08
+
+/////////////////////////////////////////////////
+3장. Docker 볼륨(Docker Volume)
+/////////////////////////////////////////////////
+
+1. Docker에서 사용하는 데이터 종류
+
+	가. 이미지에서 사용하는 데이터 
+		
+		1) 개념 : Docker 이미지에서 팔요한 정보를 포함하는 데이터
+		
+		2) 구성요소 :
+			- 운영체제 라이브러리
+			- JDK, JRE, js 런타임 실행환경 파일
+			- 어플리케이션 코드 (SpringBoot)
+			- 의존성 파일 (*.jar)
+			- 설정파일
+			
+		3) 특징 :
+			- Read-Only  ==> 변경불가: immutable
+			- 여러 컨테이너가 하나의 Docker 이미지 공유
+			
+			
+	나. 컨테이너에서 사용하는 데이터 
+		
+		1) 개념 : 실행중에 성되는 데이터를 의미
+		
+		2) 구성요소 :
+			- nginx 실행 중 생성한 test.txt 파일 등
+			- mysql 실행 중 생성한 TABLE, 데이터 등
+	
+		3) 특징 :
+			- read-write 가능
+			- 컨테이너마다 독립적 
+				==> 컨테이너의 데이터는 공유불가능
+			- 컨테이너가 삭제되면 데이터도 같이 삭제된다 (********)
+				==> 휘발설(Ephemeral)
+				
+				
+			////////////////////////////////////////////////////////////
+			# Docker 컨테이너가 휘발성인지 연습
+			
+				> docker run -d --name my-nginx2 -p 1234:80 nginx
+				호스트에서 요청: http://localhost:1234
+				
+				> docker cp index.html my-nginx2:usr/share/nginx/html/
+				호스트에서 요청: http://localhost:1234 	# 홈페이지 변경됨.
+				
+				> docker stop my-nginx2
+				> docker rm my-nginx2
+				> docker ps -a
+				
+				> docker run -d --name my-nginx2 -p 1234:80 nginx
+				호스트에서 요청: http://localhost:1234		# 변경사항 유지안됨( 휘발성 : Ephemeral )
+			////////////////////////////////////////////////////////////
+			
+	다. 볼륨 데이터
+		
+		1) 개념 : 컨테이너가 삭제되어도 계속 유지되어야 하는 데이터
+		
+		2) 구성요소
+			- 영속성(Persistent)
+			- 여러 container에서 공유 가능
+			- 컨테이너에서 수정하지만 실제로는 host의 임의저장소(볼륨)에 반영된다
+		3) 구조:
+			
+						Container ( 수정 )							
+							|
+						Volume	(매핑 역할)
+							|
+						Host의 저장소
+						
+-------------------------------------------------
+2. Docker에서 데이터를 영속성으로 관리하는 방법 2가지.
+	
+	- 2가지 방법 모두 데이터를 영구적으로 보존이 가능함.
+	- 차이점은 관리주체와 사용목적이 다르다
+	
+	1) 볼륨(Volume) 이용
+		- 관리주체: Docker가 관리
+		- 생성방법: docker volume create 볼륨명
+						ex. docker volume create my-volume
+
+		- 실제사용경로: -v my-volume:/user/lib
+							# docker가 관리하므로 사용경로를 명시적으로 지정할 필요없다 
+		
+		- 이식성(다른곳에서 사용): Docker가 관리하기 때문에 이식성이 우수
+		- 성능: Docker가 관리하기 때문에 안정적
+		- 목적: DB 데이터 (***)  ex. mysql
+	
+	2) 바인드마운트(Bind Mount)이용
+		- 관리주체: 사용자(개발자)가 직접관리.
+						직접 host가 폴더 생성하고 경로 관리해야된다.
+						
+		- 생성방법: host에 실제 물리적인 디렉터리 생성
+						윈도우 =>  C:\cloud_engineering\Boot_Camp_6th\인프라 강의\02_Docker
+						Linux  =>  /home/user1/temp
+						
+		- 실제사용경로:		 # 사용자가 관리하므로 사용경로를 명시적으로 지정해야 한다
+						-v C:\cloud_engineering\Boot_Camp_6th\인프라 강의\02_Docker:/usr/lib
+						-v /home/user1/temp:/usr/lib
+						
+		- 이식성: 사용자마다 환경과 디렉터리 구조가 다르기 때문에 이식성이 떨어진다
+		- 성능 : host파일을 직접 접근하기 때문에 I/O 발생됨.
+					==> 성능이 떨어진다
+					
+		- 목적 : 개발코드	(***)
+					코드 수정시 바로 적용된다.
+		
+-------------------------------------------------
+3. Docker Volume 사용
+
+	1) volume 생성
+		- 문법 : docker volume create [OPTIONS] [VOLUME]
+			ex. 
+				docker volume create hello
+				docker run -d -v hello:/world busybox ls /world	
+		
+	2)	volume 목록확인
+	
+		- 문법 : docker volume ls [OPTIONS]
+					docker volume list
+				
+		- 옵션
+			-f, --filter	: ex. docker volume ls -f key=value
+			
+	3)	volume 상세 정보 확인
+		
+		- 문법 : docker volume inspect [OPTIONS] VOLUME [VOLUME...]
+					docker volume inspect myvolume
+					 
+	4)	volume 삭제
+	
+		- 문법 : docker volume rm [OPTIONS] VOLUME [VOLUME...]
+					docker volume remove
+			ex. 
+				docker volume rm hello		
+			
+		- 옵션: 
+			-f, --force	: 강제삭제
+	
+	5)	미사용 volume 모두삭제
+		
+		- 문법 : docker volume prune [OPTIONS]
+		- 옵션 
+			-f, --force	: 강제삭제
+			--filter		: 필터
+
+//////////////////////////////////////////////////////////////////////////////////////////
+	# 실습 1. nginx 와 volume
+		
+		# volume 사용전
+		
+			> docker run -d --name my-nginx2 -p 1234:80 nginx
+			호스트에서 요청: http://localhost:1234
+			
+			> docker cp index.html my-nginx2:usr/share/nginx/html/
+			호스트에서 요청: http://localhost:1234 	# 홈페이지 변경됨.
+			
+			> docker stop my-nginx2
+			> docker rm my-nginx2
+			> docker ps -a
+			
+			> docker run -d --name my-nginx2 -p 1234:80 nginx
+			호스트에서 요청: http://localhost:1234		# 변경사항 유지안됨( 휘발성 : Ephemeral )
+	
+		# volume 사용후
+			
+			1) volume 생성 및 확인
+				
+				> docker volume create web-data
+				> docker volume ls
+				> docker volume inspect web-data
+				
+			2) nginx 생성 + 볼륨 지정
+				> docker run -d --name my-nginx -p 1234:80 -v web-data:/usr/share/nginx/html/ nginx
+				호스트에서 요청: http://localhost:1234		# Welcom to nginx! 출력
+				
+			3) 홈페이지 변경
+				> docker cp index.html my-nginx2:usr/share/nginx/html/
+				호스트에서 요청: http://localhost:1234		# hello world 출력
+				
+			4) 컨테이너 종료 및 삭제 
+				> docker stop my-nginx
+				> docker rm my-nginx
+				> docker ps -a
+				
+			5) 다시 시작
+				> docker run -d --name my-nginx -p 1234:80 -v web-data:/usr/share/nginx/html/ nginx
+				호스트에서 요청: http://localhost:1234		# hello world 출력
+				
+			6) 소스코드 수정 후 cp 해야 됨.
+				
+//////////////////////////////////////////////////////////////////////////////////////////
+	# 실습2. nginx와 bind mount
+		
+		1) 개발자가 직접 host에 디렉토리  생성
+			C:\cloud_engineering\Boot_Camp_6th\인프라_강의\02_Docker\tempDir
+
+		2) nginx 생성 + Bind Mount 지정
+			> docker run -d --name my-nginx -p 1234:80 -v C:\cloud_engineering\Boot_Camp_6th\인프라_강의\02_Docker\tempDir:/usr/share/nginx/html/ nginx
+			
+			호스트에서 요청: http://localhost:1234		# Welcom to nginx! 출력
+		
+		3) 변경파일 저장
+			C:\cloud_engineering\Boot_Camp_6th\인프라 강의\02_Docker\tempDir\index.html
+			호스트에서 요청: http://localhost:1234		# hello world.2 출력
+			
+		4) 컨테이너 종료 및 삭제 
+			
+			> docker stop my-nginx
+			> docker rm my-nginx
+			> docker	ps -a
+			
+		5) 다시 시작
+			> docker run -d --name my-nginx -p 1234:80 -v 		C:\cloud_engineering\Boot_Camp_6th\인프라_강의\02_Docker\tempDir:/usr/share/nginx/html/ nginx
+			호스트에서 요청: http://localhost:1234		# hello world 출력
+			
+		6) 변경된 소스 코드 수정 후 바로 반영된다.
+			C:\cloud_engineering\Boot_Camp_6th\인프라_강의\02_Docker\tempDir\index.html 수정
+			# 수정하면 즉시 적용된다.
+			
+/////////////////////////////////////////////////
+4장. Docker 환경변수
+/////////////////////////////////////////////////
+			
+	1. 개념: 컨테이너 실행 시 외부에서 값을 주입해서 컨테이너의 어플리케이션에서 사용하는 방법
+				( SpringBoot에서의 external configurateion 개념과 동일하다 )
+					
+	2. 컨테이너 내에서 환경변수 확인 하는 방법
+		- 현재 쉘 환경변수 보기: env, printenv
+		- 특정 변수 보기 : 
+			echo $key값 ( ex. echo $SHELL, 
+									echo $HOME ) 
+									
+	3. 외부에서 환경변수 주입 방법
+		가. -e, --env
+		
+			- 값 하나씩 설정
+			- 실행 시 동작으로 환경 변수 주입 가능.
+			- 우선순위가 가장 높다.
+			
+			ex. 
+				docker run -e key=value  -e key=value 이미지명
+			
+		나. --env-file 
+		
+			- 파일에 저한 후 한번에 적용			
+			- 실행 시 동작으로 환경 변수 주입 가능
+			- 일반적으로 .env 파일로 만든
+		
+			ex. 
+				docker run --env-file=.env 이미지명
+				
+		다. 우선순위
+			
+			1순위: -e
+			2순위: --env-file
+			3순위: Dockerfile
+			4순위: 프로그램 내의 기본값
+			
+//////////////////////////////////////////////////////////////////////////////////////////
+	# 실습1. 단일(멀티) 환경변수( -e )
+		
+		# 실행
+			> docker run -d --name my-nginx -p 1234:80 -e MY_NAME=BEAM0331 nginx          
+		
+		
+		# 접속해서 환경변수 출력
+			> docker exec -it my-nginx bash -c env 
+			
+			> docker exec -it my-nginx bash -c 'echo $DB_USER'
+			beam	
+			
+	-----------------------------------------------------------		
+	# 실습2. .env 파일 이용
+		
+		# .env 파일작성
+			> docker run -d --name my-nginx2 -p 1235:80 --env-file .env nginx 
+			> docker exec -it my-nginx2 bash -c env 
+	
+	-----------------------------------------------------------		
+	# 실습3. -e와 -v 모두 사용.( mysql 연동 실습)
+	
+		가. volume 생성
+			> docker volume create mysql-data
+			> docker volume ls			
+		
+		나. 생성
+			# 참조 : https://hub.docker.com/_/mysql#where-to-store-data	
+		
+			> docker run -d --name test-mysql -v mysql-data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=testdb mysql:8.3
+			
+		다. test-mysql bash 접속
+			> docker exec -it test-mysql bash
+			bash-4.4# mysql -u root -p
+			Enter password: 1234
+			
+			# mysql > create databases testdb;
+			
+			mysql> show databases;
+			mysql> use testdb;
+			mysql> create table mytest(name char, age ing);
+			mysql> insert into mytest(name age) values ('a',20);
+		
+		라. 컨테이너 삭제 및 종료
+			> docker stop test-mysql
+			> docker rm test-mysql
+			> docker ps -a
+			
+		마. 다시 실행
+			 > docker run -d --name test-mysql -v mysql-data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=testdb mysql:8.3
+			
+		바. mysql 접속
+		
+			> docker exec -it test-mysql bash
+			bash-4.4# mysql -u root -p
+			Enter password: 1234		
+			
+			mysql> show databases;
+			mysql> use testdb;
+			mysql> show tables;
+			mysql> select * from mytest;
+			
+/////////////////////////////////////////////////
+5장. Docker 이미지 직접 생성
+/////////////////////////////////////////////////
+
+1. IaC( Infrastructure as Code )
+	- 개념 : 사용자의 개입없이 코드 실행만으로 인프라를 구축하는 방법
+	- 종류
+		docker 기반	: Dockerfile, docker-compoise.yml
+		k8 기반		: Deployment, Service, Pod, .... 모두 yaml 파일로 구축함
+		AWS 기반		: terraform 이용해서 EC2, RDS, VPC 인프라 구축함
+	
+	- 특징 : 동일한 환경을 언제든지 재현 가능.
+				Git으로 버전관리 가능
+				자동화/표준화 쉽게 적용 가능
+				
+2. DockerFIle 
+https://docs.docker.com/reference/dockerfile/
+	
+	1) 개념 : 
+		- Docker image를 생성하기 위한 템플릿
+		
+	2) 동작 프로세스 
+		
+		Dockerfile 
+			|
+		docker build 명령어 실행 
+			|
+		docker 이미지 생성 ( 커스텀 이미지, base 이미지 필요함 *** )
+			|
+		docker run 명령어 실행 
+			|
+		Container 실행
+	
+3. 기본 구조
+	
+	- FROM		: base 이미지 ( ex. node:14-alpine, eclipse-temurin:21-jre ) 
+
+	- WORKDIR	: 작업디렉터리지정, 작업들의 기준이 되는 경로 (ex. /app)
+					  
+	- COPY		: host의 파일을 컨테이너에 복사 
+				  ( ex. package.json  . 
+					==> package.json 을 .(현재 디렉토리)에 복사 ) 
+					
+		# package.json은 스프링 부트의 의존성 파일과 유사한 작업을 한다.
+			
+			"dependencies": {
+				"express": "^4.17.1"
+			}
+
+	- RUN 		: 실행되는 명령어 
+	( ex. npm install ==> 의존성 파일이 설치된다. node_modules 폴더에 의존성이 저장된다. )
+
+	- COPY		: host의 파일을 컨테이너에 복사 
+	( ex.  . .  ==> host 디렉토리의 모든 파일을 복사 )
+
+	- EXPOSE 	: 포트지정(문서화). 실제 Port 사용불가, 실제 포트는 -p 1234:80을 지정해야 된다.
+	( ex. 80 )
+
+	- CMD		: 실행되는 명령어  ( ex. ["node", "app.js"]   ==>  node app.js 와 동일)
+
+4. 주요 명령어 정리 
+
+	1) FROM
+		- 문법: 
+			FROM [--platform=<platform>] <image>				 [AS <name>]
+			FROM [--platform=<platform>] <image>[:<tag>]		 [AS <name>]
+			FROM [--platform=<platform>] <image>[@<digest>]	 [AS <name>]
+			# AS <name> :  별칭. 멀티-스테이징-빌드 패턴시 참조해서 사용한다.
+			# https://docs.docker.com/build/building/best-practices/
+			# https://docs.docker.com/build/building/multi-stage/
+			
+		- 용도: base image 지정
+		- 특징 : 필수, 가장 우선 만들어진다.
+					여러번 사용 가능.
+
+
+
+------------------------------------------------------------------
+	
+	# 실습1.  dockerfile_exam.zip ( 프런트엔드 기술. 현재는 JS임. 나중에 vue.js로 대체 )
+	# 80포트를 사용중이라 40으로 임의 변경함
+	
+		# step1: Docker 없이 진행
+		
+			1) 의존성 설정
+				npm install 
+				실행결과는 node_modules 폴더가 생성되고 여기에 의존성 파일이 저장됨.
+				이 폴더 때문에 용량이 커짐.
+				
+			2) 실행
+				node app.js
+				
+			3) 웹브라우저에서 요청
+				http://localhost:40
+				
+			4) welcome..html 수정하고 새로고침하면 바로 반영이 됨.
+		
+		# step2: Docker로 실행
+			
+			1) Dockerfile 작성
+			
+					FROM node:14-alpine		# base 이미지
+
+					WORKDIR /app				# 작업디렉터리 지정. 임의로 지정가능. 없으면 자동생성
+
+					COPY package.json .		# /app에 package.json 복사
+
+					RUN npm install			# 위에서 복사한 pagkage.json 기반으로 의존성 설치된다
+													  실행결과는 /app에 node_modules폴더가 생성되고 여기에 의존성 파일이 저장된다.	
+					COPY . .						# 나머지 파일 복사. ex. welcome.html, app.js 등
+
+					EXPOSE 40					# 문서화
+
+					CMD ["node", "app.js"]	# 컨터이너에서 node app.js 실행
+				
+			2) image 생성
+				
+				> docker build -t my-front-app:v1 .
+				> docker images
+				
+			3) 컨테이너 생성
+				> docker run -d --name my-app -p 8080:40 my-front-app:v1
+			
+			4) welcome.html 수정
+				반드시 새로운 이미지를 만들어서 컨테이너를 다시 생성해야 된다 (*******)

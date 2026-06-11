@@ -30,6 +30,7 @@ tmp/
 *.zip
 *.pdf
 
+
 # Eclipse 프로그램 자체 (프로젝트 폴더 내 설치 방지)
 **/eclipse/
 **/eclipse-ee/
@@ -58,3 +59,8 @@ tmp/
 # 소스 코드가 아니지만 추적하고 싶은 특정 텍스트 파일이 있다면 여기에 작성
 # !**/알고리즘 공부용 프롬프트.txt
 # !Velog_Backup/프롬프터/
+
+*.jar
+*.zip
+*.iso
+*.tar

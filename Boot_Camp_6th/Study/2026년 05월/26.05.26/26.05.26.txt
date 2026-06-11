@@ -1,0 +1,271 @@
+/////////////////////////////////////////////////
+2026.05.26
+
+1. 리눅스(Linux)
+	
+	1) 개요
+		- 핀란드의 헬싱키 대학교의 리누스 베네딕트 토바즈( Linus Benedict Torvals)가 처음 개발.
+		- 1991년 8월 26일 리눅스 (Linux) 배포
+	2) 발전과정
+	
+		- 커널(kernel) : 프로세스 관리, 파일 시스템관리, 메모리 관리 등 (**)
+		- 최초 공개된 리눅스 커널:  버전 0.0.1
+		- 리눅스 재단:  2007년 설립(  삼성전자, 메타, 애플, ... )
+		- 현재 버전(2025년 기준): ubuntu 24.04.1 LTS / Debian 13
+			* 리눅스 배포판( 커널 + 으용프로그램 ( 메모장, 웹브라우저 등 )) 
+				http://namu.wiki/w/Linux/배포판
+	
+	3) GNU 프로젝트
+		
+		가.  개념
+			- GNU is Not Unix ( GNU는 유닉스가 인다 ) - 그누라고 읽음.
+			- 리처드 스톨만이 시작한 자유 소프트웨어 운동이이다.
+			-  FSF(Free Software Foundation) 협회를 만들어서 자유 소프트웨어 보급 추진. 
+			- GNU선언문과 GPL(General Public License)를 발표함.
+		
+		나. 목표
+			- 누구나 자유롭게 프로그램을 사용/복사/수정/배포 가능함.
+			- S/W 소스코드는 반드시 공개향됨 ( ***)
+				ex. Linux, MySQL, Apache 등 ...
+			
+		다. 오픈소스
+			- 1988년 이후에 오픈 소스라는 용어가 등장함.
+	
+	4)  리눅스 배포판
+		http://namu.wiki/w/Linux/배포판
+		가. 개념
+			- 커널 + 응용프로그램으로 구성
+			- 레드햇 계열, 데비안 게열, 슬랙웨어 계열,...
+			
+		나. Debian( 데비안 ) 계열
+			- ubuntu, Kali Linux
+			- 설치와 설정이 매우 쉽다.
+			- 사용자 친화적임
+			- 패키지 관리자: apt install 패키지명 ( 일반 사용자 사용불가. root 권한으로 실행)
+			- 패키지 형식: *.deb
+			
+		다. 레드햇 계열
+			- Centos, Rocky Linux
+			- 안정적인 OS
+				s/w를 레드햇 저장소에서만 다운로드가 가능.
+				s/w를 검증하기 때뭉네 안정적임.
+			  
+			- 패키지 관리자: dnf install / yum install 패키지명
+			- 패키지 형식: *.rpm
+			
+	5) 리눅스 구조
+		
+		 응용프로그램 ( 메모장, 웹브라우저 등 )
+		--------------------------------------------------------
+		 쉘( Shell )	( 사용자 인터페이스. 기능: 명령해석, 프로그래밍 기능포함, bash(배시쉘))
+		--------------------------------------------------------
+		 리눅스 커널 ( 프로세스/ 파일세스템/ 메모리 관리 )
+		-------------
+			 H / W
+			 
+/////////////////////////////////////////////////
+2 장. 환경설정
+/////////////////////////////////////////////////
+
+	1) 가상머신
+		
+		가.	개념 
+		
+				Ubuntu 리눅스
+			--------------------------------
+				가상머신( VirtualBox, VMWare Workstation Pro) ( 현재는 무료 )
+			--------------------------------	
+				윈도우(window 11)	- 호스트 PC
+			--------------------------------	
+				H / W
+		
+		나. VMWare Workstation Pro 다운로드
+		
+		https://support.broadcom.com/c/portal/login?redirect=%2Fgroup%2Fecx%2Ffree-downloads&refererPlid=33902&p_l_id=33047
+		
+			# 삭제 
+			- VMWare unistall
+			- C:\ProgramDatat\VMWare 명시적으로 삭제.
+			- 사용자\User\AppData\Roaming\VMWare 명시적으로 삭제.
+		
+		다. 실행시 반드시 관리자 권한으로 실행
+		
+		라. VMWare에서 사용하는 IP를 고정하자
+	
+			Vmnet8 NAT				:		 172.16.8.0		255.255.255.0  <==		CIDR 표기법: 172.16.8.0/24
+			Vmnet1 host-only		:		 172.16.1.0		255.255.255.0  <==		CIDR 표기법: 172.16.8.0/24
+		
+			a. NAT 용도	( Network Address Translation )
+				- ubuntu에서 사용하는 사설 IP를 인터넷이 가능한 공유 IP로 변경한다. 
+					
+					ex. 
+						ubuntu ( 사설 IP: 172.16.8.10 )
+							|
+						VMWare NAT
+							|
+						윈도우 PC ( 호스트 )
+							|
+						공유기 ( 인터넷 )
+						
+			b. host-only 용도
+				- ubuntu와 host인 윈도우 PC통신용
+				
+				ex. 
+						ubuntu ( 사설 IP: 172.16.1.10 )
+							|
+						VMWare host-only
+							|
+						윈도우 PC ( 호스트 )
+			
+			c. 전체 아키텍처 ( 반드시 알고 있어야 됨 )
+				
+				호스트 ( 윈도우 pc )	----------------------
+				|
+				|	VMWare	---------------------------------
+				|	|
+				|	|		Linux -----			Linux----
+				|	|		|						|
+				|	|		|	eth(NIC)		|	eth(NIC: Network Interface Card)
+				|	|		|----------			|----------
+				|	|
+				|	|		Vmnet8			Vmnet1
+				|	|--------| |--------------| |---------------
+				|	      172.16.8.0		  172.16.1.0
+				|-----------------------------------------------
+				
+				# VMWare 작동하는 모든 Linux는  Vmnet8을 통해 외부 인터넷에 접근한다.
+				# VMWare 작동하는 모든 Linux는  Vmnet1을 통해 호스트PC와 통신한다.
+				
+		마. VMWare에 Linux ( Ubuntu 24 설치 )
+			- Ubuntu 24 해당하는 이미지 다운로드
+			https://ubuntu.com/download/desktop
+			
+			- Ubuntu Server: GUI 없음. CMD창에서 명령어만 사용 가능.
+			- Ubuntu Desktop: GUI 지원. 초보자에게 추천
+			
+		바. Ubuntu에 고정 IP 설정하기.
+		
+		Address : 172.16.8.10
+		Netmask : 24			# 255.255.255.0 와 동일하다		
+		Gateway : 172.16.8.2	# 일반적으로 Gateway는 1로 끝나지만, VMWare에서는 2로 끝난다 (**)
+		DNS		: 8.8.8.8 		# Google DNS 
+		
+		
+		
+		# Netmask(서브넷 마스크): 사용중인 네트워크가 동일한 네트워크인지 확인하는 용도이다.
+		  CIDR 표기법: 	172.16.8.10/24  ==> 172.16.8: 네트워크주소 / 10: 호스트 주소
+						전체 ip 주소 범위 :  172.16.8.1 - 172.16.8.254 (254 개의 주소 사용 가능)
+						사용불가 ip:	172.16.8.0	 	( 네트워크 자체 주소 )	
+										172.16.8.255	( 브로드 캐스트 주소:  같은 네트워크에 속한 모든 장치에 전달용 )
+						
+						172.16.8.10/16  ==> 172.16: 네트워크 주소 / 8.10 : 호스트 주소
+						전체 ip 주소 범위 :  172.16.0.1 - 172.16.255.254 (2^16 - 2 개의 주소 사용 가능)
+						사용불가 ip:	172.16.0.0		( 트워크 자체 주소 )	
+										172.16.255.255	( 브로드 캐스트 주소:  같은 네트워크에 속한 모든 장치에 전달용 )
+		
+		ex.
+				서브넷1 (ubuntu) 									서브넷2 (Rocky Linux)
+		  ip	172.16.8.10											172.16.9.100
+	 Netmask	255.255.2555.0										255.255.255.0	
+				10101100.00010000.00001000.00001010 				10101100.00010000.00001001.01100100 
+				11111111.11111111.11111111.00000000					11111111.11111111.11111111.00000000
+	 and연산	---------------------------------------------------------------------------------------
+				10101100.00010000.00001000.00000000 				10101100.00010000.00001001.00000000
+네트워크주소	172.16.8.0											172.16.9.0
+
+	사. 모든 응용프로그램 업데이트
+		- 관리자권한으로 실행 해야 된다
+		- 관리자로 명령어를 실행하는 방법: sudo 키워드
+		sudo apt update
+		sudo apt full-upgrade ( apt upgrade	: 기존 패키지에 그냥 덮어 씀. 
+								full-upgrade: 기존 패키지가 삭제가능성 있음)
+		
+	아. 터미널 설치
+	
+		sudo apt install terminator
+		
+	자. 윈도우에서 원격으로 ubuntu에 접속(SSH)
+		
+		- SSH(Secure Shell) 프로그램이 필요함.
+		
+			sudo apt install openssh-server
+			sudo systemctl status ssh		# server 상태 확인
+			sudo systemctl start ssh		# server 시작
+			sudo systemctl enable ssh		# 재부팅시 자동 실행
+			
+		- 윈도우 Powershell로 접속			
+		  윈도우 환경에서 copy / paste가 가능해서 편의성이 높다.
+		  ping 172.16.8.10					# 접속여부 확인하다.
+		  ssh user1@172.16.8.10				# 계정명@IP로 ssh에 접속한다
+		  .../
+		  (yes / no / fingerprint)? yes		# ubuntu에 .ssh 폴더가 자동 생성된다.
+											# 한번 fingerprint가 window에 등록되면 다음 접속 요청때는 바로 비밀번호 입력이 뜬다
+		  user1@ubuntu~$
+		  cd		# 홈 디렉토리로 가기
+		  ls -al	# 자세하게 목록보기  ( 숨김폴더 포함 )
+					.ssh 숨길 폴더 생성되고
+					그 안에 authorized_keys 파일이 생서됨.
+					현재는 비어있다.
+		  cd .ssh
+		  cat authorized_keys	# 파일내용 보기
+		  
+		  # 윈도우에서 ubuntu 재접속
+		  PS C:\WINDOWS\System32> ssh user1@172.16.8.10
+		  user1@172.16.8.10's password:		# window에서 원격지 정보가 저장되어 있어 바로 pw 입력으로 넘어간다.
+											  C:\Users\USER\.ssh\know_host 파일에 원격지 정보가 저장되어있다.
+											  필요시 삭제 가능
+	
+	차. 윈도우에서 원격으로 ubuntu에 접속(MobaXterm GUI를 이용)
+	
+		MobaXterm > Session > SSH >
+		Remote host: 172.16.8.10
+		User name:	user1
+		port: 22
+		
+		OK 클릭하여 연결.
+		
+		==> 로그인할때 마다 항상 비밀번호를 입력해야 된다.
+		
+////////////////////////////////////////////////////////////////////////
+
+	카. pem( Privacy Enhanced Mail) 파일 이용.
+	- password 입력없이 로그인 가능.
+	- 비대칭키를 활용하는 방법.
+	- 전체 아키택처
+	
+		서버(ubuntu) <------------------------------------------------------- 클라이언트( window )	
+		
+		a. 서버에서 공개키(public key)와 개인키(private key)를 생성
+		b. 서버에 공개키(public key)를 저장
+		   클라이언트에는 개인키(private key) 저장
+		c. 클라이언트가 서버에 접속할 때 비밀번호 대신에 개인키를 이용해서 접속
+		d. 서버에서는 클라이언트가 제공한 개인키와 공개키를 이용해 key pair 검증
+		   맞으면 로그인, 틀리면 로그인 실패
+	
+	# ubuntu 작업
+		
+		1) 공개키와 개인키 생성.
+		   ssh-keygen -q -N "" -f ubuntu_user1_key.pem
+		   ==> ubuntu에 다음과 같은 2개의 파일이 생성됨.
+			   ubuntu_user1_key.pem 		: 개인키, 클라이언트인 윈도우에 저장
+			   ubuntu_user1_key.pem.pub		: 공캐키, 서버에 저장
+			   
+		2) 공개키를 지정된 파일에 덮어쓰기
+		cat ubuntu_user1_key.pem.pub >> ~/.ssh/authorized_keys
+		cat .ssh/authorized_keys
+		ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFbYGoLjwtIl81Cpr9PQYeojQ1uVcyv8Lo3uNHDvFFwk user1@ubuntu
+		
+		3) 공개키 파일의 권한 낮추기
+		chmod 600 ~/.ssh/authorized_keys
+		
+		4) 클라이언트에 개인키 저장하기
+		ubuntu_user1_key.pem 
+		MobaXterm에서 파일 선택 > 좌클릭 > download 선택해서 윈도우에 다운로드	
+		
+	# window 작업
+		MobaXterm > Session > SSH >
+		Remote host: 172.16.8.10
+		User name:	user1
+		port: 22
+		
+		Addvanced SSH Setting > Use Private Key에서 다운받은 ubuntu_user1_key.pem 선택

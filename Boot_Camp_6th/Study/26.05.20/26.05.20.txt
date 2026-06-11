@@ -1,0 +1,240 @@
+#################################################
+2026.05.20
+
+1. Todo 웹 어플리케이션 구축하기
+
+	1) 의존성 설정
+		 implementation 'org.springframework.boot:spring-boot-starter-web'
+		 implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+		 implementation 'org.springframework.boot:spring-boot-starter-validation'
+		 implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+		 implementation 'com.mysql:mysql-connector-j:8.3.0'
+		 
+	2) schema.sql과 data.sql
+		
+		# src/main/resources/schema.sql
+	
+		# schema.sql
+		
+		creat table todo
+		( id int auto_increment,
+		  userid varchar(255) not null,
+		  description varchar(255) not null,
+		  target_date date not null,		  
+		  # 자바는 카멜표기법 주로 사용하고, SQL은 스네이크표기법을 많이 사용한다
+		  # targetDate <-------> target_date 자동으로 언더바 표기법의 컬럼을 카멜 표기법의 자바변수로 자동 매핑하도로 지원됨
+		  done boolean,
+		  primary key(id)
+		);		  
+		  
+		CREATE TABLE member
+		( userid VARCHAR(255),
+		password VARCHAR(255) not null,
+		username varchar(255) not null,
+		role VARCHAR(255) DEFAULT 'USER' not null,
+		PRIMARY KEY(userid)
+		); 
+		  
+		# src/main/resources/data.sql
+		
+		insert into todo( id, userid, description, done)
+		values( 1000, 'hong4832', 'Learn Java', DATE_ADD(NOW(), Interval 1 YEAR), false);
+		
+		insert into todo( id, userid, description, done)
+		values( 1001, 'KIM4832', 'Learn SQL', DATE_ADD(NOW(), Interval 1 MONTH), false);		
+		insert into todo( id, userid, description, done)
+		values( 1002, 'KIM4832', 'Learn SpringBoot', DATE_ADD(NOW(), Interval 10 DAY), false);
+		
+		insert into member (userid, password, username, role)
+		valuse( 'hong4832',)
+		  
+	3) src/main/resources/application.yml 설정
+	
+		- mysql 정보 설정
+		- mybatis (mapper/alias)
+		
+		spring:
+		  application:
+			 name: demo
+
+		  datasource:
+			 url: jdbc:mysql://localhost:3306/testdb
+			 driver-class-name: com.mysql.cj.jdbc.Driver
+			 username: root
+			 password: 1234
+
+		  sql:
+			 init:
+				mode: always
+
+		  mvc:
+			 pathmatch:
+				matching-strategy: ant_path_matcher
+
+		mybatis:
+		  mapper-locations: com/exam/config/*.xml
+		  type-aliases-package: com.exam.dto
+
+		  configuration:
+			 map-underscore-to-camel-case: true
+
+		# 개발단계에서 SQL 확인
+
+		logging:
+		  level:
+			 mapper패지키명: DEBUG
+			 
+			 
+	4) DTO 작성
+	
+		가. src/main/exam/dto/TodoDTO
+		
+			@Alias("TodoDTO")
+			public class TodoDTO{
+				int id;
+				String userid;
+				String description;
+				LocalDate targetDate; 	// 실제 컬럼명은 target_date
+				boolean done;
+				
+			}
+			
+		나. src/main/exam/dto/MemberDTO.java
+		
+			@Alias("MemberDTO")
+			public class MemberDTO{
+				String userid;
+				String password;
+				String username;
+				String role;
+			}
+	
+	5) src/main/resources/com/exam/mapper/MemberMapper.xml
+		src/main/java/com/exam/mapper/MembetMapper.java
+		
+		
+		# MemberMapper.xml
+		<?xml version="1.0" encoding="UTF-8" ?>
+		<!DOCTYPE mapper
+				  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		<mapper namespace="com.exam.config.MemberMapper">
+			
+			// 회원가입
+			 <insert id="signup" parameterType="MemberDTO">
+				  insert into member( userid, password, username)
+				  values( #{userid}, #{password}, #{username})
+			 </insert>
+			
+			// 로그인
+			 <select id="authenticate" parameterType="map" resultType="MemberDTO">
+				  select userid, password, username, role
+				  from member
+				  where userid = #{userid} and password = #{password}
+			 </select>
+		</mapper>
+		
+		# MembetMapper.java
+		@Mapper
+		public interface MemberMapper {
+
+			 int signup(MemberDTO memberDTO);
+			 MemberDTO authenticate(Map<String,String> map);
+		}
+		
+	6) src/main/resources/com/exam/mapper/TodoMapper.xml
+		src/main/java/com/exam/mapper/TodoMapper.java
+		
+		# TodoMapper.xml
+		<?xml version="1.0" encoding="UTF-8" ?>
+		<!DOCTYPE mapper
+				  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		<mapper namespace="com.exam.config.TodoMapper">
+
+			 <select id="findAll" resultType="TodoDTO" parameterType="string">
+				  select id, userid, description, target_date, done
+				  from todo
+				  where userid = #{userid}
+			 </select>
+
+			 <select id="findById" resultType="TodoDTO" parameterType="int">
+				  select id, userid, description, target_date, done
+				  from todo
+				  where id = #{id}
+			 </select>
+
+			 <insert id="save" parameterType="TodoDTO">
+				  insert into todo(userid, description, target_date, done)
+				  values ( #{userid}, #{description}, #{target_date}, false)
+			 </insert>
+
+			 <update id="updateById" parameterType="TodoDTO">
+				  update todo
+				  set description = #{description},
+						target_date = #{target_date},
+						done = #{done}
+				  where id = #{id}
+			 </update>
+
+			 <delete id="deleteById" parameterType="int">
+				  delete from todo
+				  where id = #{id}
+			 </delete>
+
+		</mapper>
+		
+		# TodoMapper.java
+		@Mapper
+		public interface TodoMapper {
+
+			 List<TodoDTO> findAll(String userid);
+			 TodoDTO findById(int id);
+			 int save(TodoDTO todoDTO);
+			 int updateById(TodoDTO todoDTO);
+			 int deleteById(int id);
+		}
+		
+		
+	7) Service 작성
+	
+		가. 로그인 서비스
+			- com.exam.servic.AuthenticationService
+			  Acom.exam.servic.uthenticationServiceImpl
+		  
+		나. 회원가입 서비스
+			- com.exam.servic.MemberService
+			  com.exam.servic.MemberServiceImpl
+			
+		다. Todo 서비스
+			- com.exam.servic.TodoService
+			  com.exam.servic.TodoServiceImpl
+			  
+	8) Controller 작성
+	
+	1) com.exam.controller.HomeController.java
+		- 메인 홈페이지 보기
+		
+	2) com.exam.controller.MemberController.java
+		- 회원가입 유효성 검증
+		
+		가. 의존성 설정
+			implementation 'org.springframework.boot:spring-boot-starter-validation'
+		
+		나. DTO에 의존성 어노테이션 설정
+			 @NotBlank(message = "최소 한글자 이상 입력하세요")
+			 String userid;
+			 @NotBlank(message = "최소 한글자 이상 입력하세요")
+			 String password;
+			 @NotBlank(message = "최소 한글자 이상 입력하세요")
+			 String username;
+			 String role;
+			 
+		다. Controlkler에서 @GetMapping과  @PostMapping 구현 (MemberDTO를 모델로 공유해야됨 (***))
+			- 추가로 memberForm.html의 <form>과 공유해야됨.
+	
+	3) com.exam.controller.LoginController.java
+		
+		- 추가로 로그인검증 구현해보기
+	
+	4) com.exam.controller.TodoController.java

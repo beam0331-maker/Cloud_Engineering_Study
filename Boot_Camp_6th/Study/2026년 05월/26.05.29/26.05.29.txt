@@ -1,0 +1,359 @@
+-------------------------------------------------
+2026.05.29
+
+2. 리다이렉션( redirection )
+
+	- 동작: 명령어의 입출력의 방향을 바꾸는 방법.
+			  일반적으로 콘솔의 출력되는 방향을 파일로 출력되도록 방향을 바꿈
+			  파일이 없으면 자동으로 파일을 만들어준다
+			  
+	- 문법:	명령어 > 	(>, >>, 2>, <)
+	
+	#	표준입력 : < 
+	
+		표준출력(정상출력)
+				 > : 덮어쓰기
+				 >>: 추가	( appaned )
+				 
+		표준에러 : 2> 		( 비정상, 오류출력)			
+	
+	#	표준 입력/표준 출력/표준 에러
+	
+	$ file /dev/stdin		# 0번 자바의 System.in 동일
+	$ file /dev/stdout	# 1번 자바의 System.out.println 동일
+	$ file /dev/stderr	# 2번 자바의 System.err.println 동일
+
+	#ex.
+		ls > file.txt								# 덮어쓰기
+		ifconfig >> ifconfig.txt				# 추가(append)
+		ifconfig | grep ether > MAC.txt 		
+		wc -l < file.txt							# 입력 리다이렉션
+		ls text.txt wrong.txt 2> error.txt	# ls 실행했을 때 출력되는 오류를 저장.
+		ls text.txt wrong.txt > success.txt 2> error.txt	# ls 실행했을때 출력되는 정상출려과
+																			  오류 출력을 분리해서 저장.
+  
+	# 실습 
+		ls > file.txt 		# 덮어쓰기. 파일 없으면 생성
+		ls >> file.txt 	# 추가(append)
+		
+		ifconfig | grep ether > MAC.txt		
+		wc -l < file.txt	# file.txt 읽어서 라인수 출력
+		
+		# 정상출려과 에러출력 분리하기			
+			# 1. 정상출력만 있는 경우
+				ls file.txt > out.txt
+			
+			# 2. 비정상출력				
+				ls wrong.txt > errort.txt		# 오류가 발생, 표준출력(정상출력) > 으로 리다이렉션 불가
+				ls: cannot access 'wrong.txt': No such file or directory
+
+				ls wrong.txt 2> error.txt		# 오류용 2> 사용했기 때문에 정상적으로 리다이렉션
+			
+		# 정상출력과 비정상출력 모두 있는 경우
+			==> 동작박식은 정상출력값은 out2.txt에 정사적으로 리다이렉션이 되고
+				 오류출력값은 그냥 콘솔에 출력됨.
+				 
+				ls file.txt wrong.txt > out2.txt
+				ls: cannot access 'wrong.txt': No succh file or directory
+			
+			==> 동작장식은 오류출력값은 error2.txt에 정상적으로 리다이렉션이 되고 
+				 정상출력값은 그냥 콘솔에 출력됨.
+				 
+				ls file.text wrong.txt 2> error2.txt
+				file.txt
+				
+			==> 동작장식은 오류출력값은 error3.txt에 정상적으로 리다이렉션이 되고 
+				 정상출력값은 out3.txt에 정상적으로 리다이렉션이 된다
+				 
+				 ls file.txt wrong.txt 2> error3.txt > out3.txt
+					 
+/////////////////////////////////////////////////
+6장. vi 편집기
+/////////////////////////////////////////////////
+
+1. vi 편집기
+		
+	가. 개념: 
+		 윈도우의 메모장 기능의 편집기 리눅스에서 자동으로 설치됨( 기능이 별로 없다)
+		 vi기반의 기능의 추가된 vim 패키지 설치해서 사용한다. ( update, upgrade 필요)
+		 
+		 sudo apt update && sudo apt full-upgrade -y
+		 sudo apt install vim -y
+			  
+	나. 문법: vim 파일명
+		ex. vi test.txt
+		vimtutor 	# vim에서 제공하는 샘플도구 ( 저장해도 리셋됨 )
+		
+	다. vi 편집기의 모드 3가지
+		
+		- normal 모드: esc키
+		- 입력(삽입)모드: i, a (i: 커서 기준으로 입력, a: 커서 뒤로 입력)
+		- 명령(command)모드: normal 모드 -> :
+			# 명령 종류
+				:w		- 저장
+				:wq 	- 저장하고 종료
+				:q 	- 편집기 종료(변경사항 없을때)
+				:q! 	- 저장하지 않고 강제종료
+				:set nu/nonu - 줄넘버 활성화/비활성화
+			
+	라. vi 단축키 ( normal 모드 )
+		- gg : 첫줄로 이동
+		- G  : 마지막줄로 이동
+		- M  : 중간으로 이동
+		- $  : 현재 줄의 맨앞으로 이동
+		- -  : 현재 줄의 맨뒤로 이동 
+		
+		# 삭제 
+		- x  : 커서 위치 삭제
+		- dd : 한줄 삭제
+		- 2dd: 2줄 삭제 ( 숫자 변경 가능 )
+		
+		# 복사 			
+		- y : 복사
+		- p : 붙여넣기
+		- v : 화살표 이용해서 블럭가능 ( 블럭복사, 붙여넣기 가능 )
+		
+		# 검색: /검색어	ex. /lesson
+		- 일치하는 검색어 첫글자 블럭처리
+		- n/N : 다음 단어 / 이전 단어
+		
+	마. vi 단축키 ( command 모드 )
+		
+		- 외부파일 읽어서 현재 커서에 삽입하기
+		  :r 불러올 파일이름
+		
+		- 하나의 쉘 명령어 실행하기
+		  :! 명령어	(ex. :! ls-al)
+		  
+		- 여러 쉘 명령어 실행하기
+		  :sh		( 탈출은 쉘 에서 exit )
+			  
+/////////////////////////////////////////////////
+7장. 사용자 관리
+/////////////////////////////////////////////////
+
+1. 사용자 종류
+	- 일반 사용자
+		: root 사용자를 제외한 나머지
+		: 권한이 없기 때문에 특정 디렉터리인 홈디렉터리에서만 작업이 가능.				
+			ex. /home/user1
+	
+	- 관리자(root 사용자)
+		: 모든 경로, 명령어 작업이 가능
+		: 일반 사용자와 분리해서 관리하가 위해서 /home 디렉터리가 아닌 /root가 홈디렉터로 관리됨
+		: 관리자만 할 수 있는 역할
+			- 사용자생성/삭제
+			- 패키지설치/삭제
+			...
+		
+2. 사용자 정보 관리 파일
+
+	- 사용자 정보 파일
+		: /etc/passwd
+		
+		ex. 
+		 root:x:0:0:root:/root:/bin/bash
+		 user1:x:1000:1000:user1:/home/user1:/bin/bash
+
+		구성요소
+		user1		: 계정명
+		x			: 암호화된 비번, x ==> 외부파일(/etc/shadow)에 저장되어 있다.
+		1000		: 계정 ID ( UiD, UserID )
+		1000		: 그룹 ID ( GID, GroupID)
+		user1		: 커맨트  ( 임의의 값 )
+		/home/user1	: 홈디렉터
+		/bin/bash	: shell
+		
+	- 사용자 비번 파일
+		: /etc/shadow
+		
+		구성요소
+		user1:$6$l20e37U9exJg9tGz$iwUk4JKOqBOgps9pQQzxhhgZfiHoVySiAwHC74QzTIhqh0/vN.wM5DlEm6jaHU0s 
+		
+		
+3. 사용자 그룹
+	- 개념: 여러 사용자들을 묶어서 관리하기 위해
+	- 그룹정보:
+		/etc/group
+		
+		ex.
+			cat /etc/group
+			user1:x:1000:
+			
+			user1	: 그룹명
+			x		: 암호화된 비번
+			1000	: GID( GroupID )
+			
+	- 그룹종류
+		a. Primary Group: 사용자 기본그룹
+
+			- 명령어: id 사용자	( ex. id user1 )
+
+			$ id user1							 
+			uid=1000(user1) gid=1000(user1) 		# 기본그룹
+			groups=1000(user1),4(adm),24(cdrom),27(sudo),30(dip),46(plugdev),100(users),114(lpadmin)	# 추가그룹
+		
+		b. Secondary Group: 사용자의 추가그룹
+		
+			- 명령어: groups 시용자명
+
+			$ groups user1
+			user1 : user1 adm cdrom sudo dip plugdev users lpadmin
+			
+4. 사용자 생성 / pw 설정
+	
+	a. 문법: 
+		sudo useradd [옵션] 사용자명 	# 사용자 생성
+		sudo passwd 사용자명 			# pw 설정
+		
+		sudo userdel -r 사용자명		# 사용자 삭제 
+		
+	b. 옵션
+		- m : 홈디렉터리 생성, 지정하지 않으면 홈디렉터리 생성되지 않음
+			  기본적으고 /home/사용자명 으로 생성됨.
+			  
+		- d : 명시적으로 홈디렉터리 설정
+		- s : 사용하고자 하는 쉘 지정. ( 기본은 /bin/sh )
+		- G : 추가 그룹 지정
+		- g : 기본 그룹 지정
+		
+	ex.
+		sudo useradd -m user2			# 홈 디렉터리 생성.	/home/user2
+		sudo passwd user2
+		$ sudo tail -n 5 /etc/shadow	# pw 확인
+						
+		sudo useradd -m -d /home/project/user3 user3	 # 홈 디렉터리 생성 (/home/project/user3)
+		
+		# 먼저 dev 그룹 생성
+		sudo group
+		sudo useradd -m -g dev user4  # 홈디렉터리 생선. Primary Group을 dev로 지정
+		
+		sudo useradd -m -G sudo,users user5	# 홈디렉터리 생성. Secondary Group을 sudo, users 지정
+		$ id user5
+		uid=1004(user5) gid=1004(user5) groups=1004(user5),27(sudo),100(users)
+
+		sudo useradd -m -s /bin/bash user6	# 홈디렉터리 생성. shell 지정
+		user6:x:1005:1005::/home/user6:/bin/bash
+
+		# 사용자 변경
+		su 사용자명
+		exit로 돌아감
+		
+		# 사용자 삭제 
+		- sudo userdel -r 사용자명
+
+/////////////////////////////////////////////////
+7장. 파일 접근 권한
+/////////////////////////////////////////////////		
+	
+1. 개념
+	- 파일(디렉터리 포함)에 무단으로접근하는 것을 방지하기 위한 방법.
+	- 3가지 권한으로 관리 가능( 읽기/쓰기/실행. rwx )
+	
+2. 3가지 권한	
+	- 읽기권한	: r(read) 	
+	- 쓰기권한	: w(write) 
+	- 읽기권한	: x(execute)
+	- 권한없음  : -
+
+	ex. 
+		$ ls -al
+		rw-rw-r--
+		-------------------
+		rw-	: 소유자권한
+		rw-	: 그룹권한
+		r--	: Other 권한
+		-------------------
+
+3. 파일접근권한 변경1 _ 기호모드
+	-------------------------------------------------
+	구분						| 문자/기호 |				
+	-------------------------------------------------
+	사용자 카테고리 문자	| u			| 파일소유자 의미
+	(권한을 부여/취소할	| g			| 소유자가 속한 그룹
+	대상을 정할때 사용)	| o			| 기타사용자
+								| a			| 모든사용자
+	--------------------------------------------------
+	연산기호					| +			| 권한부여
+	( 권한을 부여/취소)	| -			| 권한제거
+								| =			| 접근 권한 설정
+	--------------------------------------------------
+	접근권한문자			| r			| 읽기권한
+								| w			| 쓰기권한
+								| x			| 실행권한
+	--------------------------------------------------
+	
+	가. 문법: chmod 권한지정 파일
+	
+	ex. chmod
+		u+x	: 파일소유자에게 쓰기 권한 부여.
+		u+rwx	: 파일소유자에게 읽기, 쓰기, 실행 권한 부여
+		
+		g-w	: 소유자그룹에서 쓰기 권한 삭제
+		o+r	: 기타사용자에게 읽기권한 부여
+		u+x, o+rwx	:	소유자에게 실행 권한, 기타 사용자에게 모든권한 부여
+		a+x	: 모든 사용자에게 실행권한 부여
+		u=rwx, o-w	: 소유자에게 모든권한 부여, 기타사용자 쓰기 권한 삭제
+		ug=rwx: 소유자, 소유자 그룹에 모든 권한 부여
+		o=		:	기타 사용자에게 아무 권한도 부여하지 않음
+
+	#	실습
+		touch exam.txx				# 실습 파일 생성
+	
+		chmod 000 exam.txt		# 권한 초기화
+		chmod u+w exam.txt		# 소유자 쓰기 권한부여
+		chmod u+rwx exam.txt		# 소유자 모든권한부여
+		chmod o+r exam.txt		# 기타사용자 읽기권한 부여
+		chmod ug=rwx exam.txt	# 소유자, 소유자그룹 모든권한 부여
+		chmod g=,o=rw exam.txt	# 소유자그룹 모든권한 삭제, 기타사용자 읽기,쓰기권한 부여
+	
+3. 파일접근권한 변경1 _ 숫자이용(****)
+	- 개념: 권한이 있으면 1, 없으면 0으로 표기 후 10진수로 표기.
+	ex.
+		chmod 745 text.txt 		
+		---------------
+		rwx : 111 --> 7
+		r-- : 100 --> 4
+		r-x : 101 --> 5
+		==> rwxr--r-x
+		
+		chmod 641 text.txt => rw-r----x
+		chmod 600 text.txt => rw-------
+			
+/////////////////////////////////////////////////	
+8. 프로세스
+/////////////////////////////////////////////////
+
+1. 개념: 실행중인 프로그램을 의미
+
+2. 특징: 
+	- 부모/자식 관계로 구성됨 (계층적으로 구성됨)
+	- 부모가 자식 프로세스를 생성하고, 자식프로세스가 실행된다
+	  자식프로세스가 종료되면 부모프로세스에게 결과를 돌려줌
+	- 모든 프로세스는 식별자를 가짐. (PID: 프로세스 아이디)
+	- PID가 작을수록 중요한 프로세스이다.
+	
+3. 프로세스 정보보기 
+	문법: 
+		ps			# 현재 터미널에서 실행한 프로세스 정보만 출력.
+		ps -ef	# 모든 프로세스 정보 출력
+		___________________________________________________________
+		UID          PID    PPID  C STIME TTY          TIME CMD
+		user1     291512  148440  0 15:43 pts/0    00:00:00 ps -ef
+		___________________________________________________________
+		# 구성요소
+		user1		: UID		(프로세스를 실행한 사용자)
+		291512	: PID		(프로세스 아이디)
+		148440	: PPID	(부모프로세스 아이디)
+		0			: CPU 사용률
+		15:43		: 시작시작
+		pts/0		: 터미널
+		00:00:00	: 사용시간
+		ps -ef	: 실행 명령어
+		
+		ps -ef | grep 검색어 	# 현재 프로세스 중에 검색어만 출력
+			
+			
+			
+		
+		

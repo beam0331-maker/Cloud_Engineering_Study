@@ -1,8 +1,0 @@
-package p1;
-
-public class DeptDTO {
-	int empno;
-	String dname;
-	String loc;
-
-}

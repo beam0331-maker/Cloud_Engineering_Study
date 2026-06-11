@@ -1,0 +1,12 @@
+# 멀티 스테이지 패턴 적용 전 코드임
+FROM gradle:8.10.2-jdk21
+
+WORKDIR /app
+
+COPY . .
+
+RUN gradle clean bootJar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","build/libs/boot_Dockerfile4_Multi_stage-0.0.1-SNAPSHOT.jar"]

@@ -1,0 +1,352 @@
+-------------------------------------------------
+2026.06.05
+
+	2) 컨테이너 시작 ( start )	
+	
+		- 개념 : Stopped, Created 상태인 컨테이너를 실행하는 명령어.
+					기본은 백그라운드로 실행한다
+		
+		- 문법 : docker container start [OPTIONS] CONTAINER [CONTAINER...]
+					docker start
+		
+		- 옵션
+			-a, --attach	: 포그라운드로 실행
+		
+		# 실습. start
+			> docker start 49947fb80b50				# 컨테이너 ID
+			> docker ps
+
+			> docker start my-nginx2 some-mysql		# 한번에 여러개 지정가능
+			my-nginx2
+			some-mysql
+			> docker ps
+			
+			> docker create --name my-ubuntu -it ubuntu bash		# 나중에 start하면 bash로 접속
+			> docker start -ai my-ubuntu	# -ai : [a, 포그라운드], [i, STDIN, 컨테이너 표준입력 활성화]
+			root@1d568c6e585c:/# 			# 우분투 bash로 접속, exit로 탈출
+			
+			
+	3) 컨테이너 중지( stop )
+			
+		- 개념 : running 상태인 컨테이너를 정상종료(Graceful Shoutdown)		# 비정상 종료 = kill
+					
+		
+		- 문법 : docker container stop [OPTIONS] CONTAINER [CONTAINER...]
+					docker stop
+		
+		- 옵션
+			-s, --signal	: 컨테이너에게 보내는 신호. 실제 종료하기 전 준비작업을 위한 용도
+			-t, --timeout	: 컨테이너 실제 종료되기 전 wait 시간 ( 단위: seconds )
+								  Linux - 10초, Window - 30초
+								  
+		- 종료 내부 동작 
+			1단계: 종료신호(SIGTERM)전달 <== DB 연동, 파일연동 중 작업이 손상되지 않도록 하기 위함.
+			2단게: 어플리케이션 정리 작업 수행
+			3단계: 일정시간 대기 (timeout 시간)
+			4단계: 종료안되면 SIGKILL 전달
+			5단계: 종료
+	
+		# 실습. 
+			> docker stop 49947fb80b50		# id로 stop
+			49947fb80b50
+			
+			> docker stop some-mysql my-nginx2		# 여러개 지정 가능
+			some-mysql
+			my-nginx2
+			
+			> docker stop -t 20 my-nginx				# 20초 뒤 종료
+			
+			# 모든 컨테이너 종료
+			> docker ps -q		# 컨테이너 id만 조회
+			> docker stpo $(docker ps -q)
+			
+			> docker start 49947fb80b50				# 중지된 컨테이너 다시 시작
+			docker start 49947fb80b50
+	
+	//////////////////////////////////////////////
+		start vs restart
+		- docker start 	: Created 또는 Stopped 된 컨테이너를 Running
+		- docker restart	: Running 중인 컨테이너를 종료하고 다시 시작 (stop --> strat)
+	//////////////////////////////////////////////		
+			
+-------------------------------------------------
+	4) 컨테이너 일시 정지 및 재개
+	
+		- 개념 : Running 중인 컨테이너를 일시적으로 정지 하는 명령어
+		
+		- 문법 :	docker container pause CONTAINER [CONTAINER...]
+					docker pause
+					
+					docker container unpause CONTAINER [CONTAINER...]
+					docker unpause
+		
+		# 실습.
+			> docker ps
+			> docker pause 49947fb80b50
+			> docker ps
+CONTAINER ID   IMAGE  COMMAND                  CREATED        STATUS                  PORTS       NAMES
+49947fb80b50   nginx  "/docker-entrypoint.…"   19 hours ago   Up 4 minutes (Paused)   80/tcp      my-nginx
+			> docker pause some-mysql my-nginx2
+			
+			> docker unpause 49947fb80b50 some-mysql my-nginx2
+			
+		- 용도 : CPU 중지해야 될 정도의 작업 처리 ( ex. 대용량 처리, AI 작업, 배치 작업 등 )
+	
+	//////////////////////////////////////////////
+		stop  vs pause
+		- docker stop	: 프로세스 종료. docker ps 출력 안됨
+		- docker pause	: 프로세스 중지. docker ps 출력됨 (status값에 (Paused) 출력됨)
+	//////////////////////////////////////////////
+	
+-------------------------------------------------					
+	5) 컨테이너 run
+	
+		- 개념 : 이미지를 기반으로 컨테이너를 생성하고 실행, 기본은 포그라운드
+					이미지가 없다면 이미지도 다운로드
+					( run = pull + create + run)
+		
+		- 문법 : docker container run [OPTIONS] IMAGE [COMMAND] [ARG...]
+					docker run
+		
+		- 옵션		# create 명령어와 옵션이 비슷
+			-a, --attach	: Attach to STDIN, STDOUT or STDERR
+			--name			: container 이름 ( 지정하지 않으면 랜덤 )
+			-d, --detach	: 백그라운드로 실행
+			-p, --publish	: 포트매핑
+			-e, --env		: 환경변수 설정 ( key=value로 하나씩 설정 )	
+			--env-file		: 환경변수 설정 ( 환경변수 파일 읽어오기 )
+			-v, --volume	: 볼륨연결 ( host의 임의파일과 연결 )
+			--network		: 동일한 네트워크(Docker 내부의 네트워크)로 묶기 위해서 (****)
+								  => 컨테이너는 기본적으론 독립적이지만 같은 네트워크로 묶어 서로 접근가능
+			--rm				: 컨테이너 종료시 자동삭제됨
+			
+			
+			-t, --tty		: 모니터
+			-i, --interactive	: STDIN( 표준 입력 - 키보드 )
+			==> -it	:  컨테이너에 접속시 사용하는 옵션			
+		
+		# 실습. 
+			컨테이너와 이미지 모두 삭제 
+			> docker run hello-world		# run 이므로 pull, create, start 가 한번에 진행된다
+			
+			> docker run --name my-ubuntu -it ubuntu bash		# 바로 bash로 접근하게 된다
+			root@3eb14261d867:/#
+			
+			> docker run --name my-nginx -p 1234:80 nginx		# 포그라운드, http://localhost:1234
+			> docker run -d --name my-nginx2 -p 2345:80 nginx		# 백그라운드, http://localhost:2345
+			
+			> docker run -d --name my-nginx3 -p 1236:80 -e MY_HOST=myapp -e MY_NAME=beam nginx
+			> docker exec -it my-nginx3 sh -c "echo $MY_HOST && echo $MY_NAME"		# sh 쉘로 명령어 전달(-c)			
+			> docker exec -it my-nginx3 bash 		# bash로 접근하기
+			
+		# > docker exec -it my-nginx3 sh -c 'echo $MY_HOST && echo $MY_NAME' 
+		'' 작음 따옴표는 텍스트를 그대로 sh로 전달하기 때문에 현재 터미널에서 값을 찾는게 아니라 
+		sh에서 텍스트를 분석해 결과를 전달한다.  ==> " "으로 진행하면 현재(Window) 터미널에서 값을 찾게 된다.
+			
+			> docker network ls
+			
+			# full-stack 네트워크가 없다면 생성
+			> docker network create full-stack		
+			
+			> docker network ls               
+			NETWORK ID     NAME         DRIVER    SCOPE
+			499c5c493b68   bridge       bridge    local		# 기본 network
+			df295ebadb60   full-stack   bridge    local
+			15b04e576775   host         host      local
+			7c9a5522b91c   none         null      local
+			
+			# mysql은 MYSQL_ROOT_PASSWORD 환경변수가 필수
+			> docker run -d --name my-mysql -e MYSQL_ROOT_PASSWORD=1234 --network full-stack mysql:8.3
+			
+			> docker run -d --name my-nginx4 -p 1237:80 --rm nginx 		# -rm: 중지하면 삭제까지 진행된다
+			> docker stop my-nginx4
+			> docker ps -a 				# -rm 으로 삭제되었음을 확인 할 수 있다.
+
+-------------------------------------------------			
+	6) 컨테이너 목록보기
+	
+		- 개념 : 현재 running 중인 컨테이너 모곩을 조호하는 명령어
+		
+		- 문법 : docker container ls [OPTIONS]
+					docker container list
+					docker container ps
+					docker ps		
+		- 옵션
+			-a, --all	: 모든 컨테이너 조회 ( 실행중,  종료된(stopped), 생성된(created) )
+			-q, --quiet	: 컨테이너 ID만 조회
+			-l, --latest: 가장 최근에 생성된 컨테이너
+			-n, --last	: 마지막으로 생성된 컨테이너를 지정된 갯수만큼 보여줌( 기본값 1 )
+							  create 기준이므로 현재 stoppe된 컨테이너도 포함이다
+			--no-trunc	: 전체 값 상세하게 출력
+			-f, --filter: 조건검색으로 필터링함
+				https://docs.docker.com/reference/cli/docker/container/ls/#filter
+				
+				//////////////////////////////////////////////
+					filter
+					- status		: created | restarting | running | removing | paused | exited | dead
+						ex. docker ps -f status=running
+
+					- ancestor	: image | image:tag | image:tag@digest | short-id | full-id
+						실행중인 컨테이너만 보여준다
+						ex. docker ps -f ancestor=ubuntu:24.04
+						ex. docker ps -f ancestor=9131			# short-id : id초반 4자리
+					
+					- befor		: 지정 컨테이너 이전에 생성된 컨테이너 리스트
+					- since		: 지정 컨테이너 이후에 생성된 컨테이너 리스트
+					- volume		: ex. docker ps --filter volume=/data	
+					- network	: ex. docker ps --filter network=net1
+					- publish	: ex. docker ps --filter publish=80
+					- docker ps --filter "name=컨테이너 이름"					
+				//////////////////////////////////////////////
+				
+			-- format	: 출력 형식 지정
+				https://docs.docker.com/reference/cli/docker/container/ls/#format
+			
+				///////////////////////////////////////////////////////////////////////////
+					다음과 같은 속성 사용 가능.
+					Placeholder			Description
+					-----------------------------
+					.ID					Container ID
+					.Image				Image ID
+					.Tag					Container tag					
+					.CreatedAt			Time when the Container was created
+					.RunningFor			경과 시간
+					.Ports				Exposed ports.( 노출된 포트 )
+					.State				Container status (for example; "created", "running", "exited").
+					.Status				서비스 상태 ( 서비스 가능여부)
+					.Size					Container disk size
+					.Names				Container names
+					.Networks			Names of the networks attached to this container
+					ex. docker ps --format "table {{.ID}}\t{{.Image}}\t{{.State}}\t{{Status}}\t{{Names}}"
+					//////////////////////////////////////////////////////////////////////////		
+			
+		# 실습.
+			
+			> docker ps
+			> docker ps -a
+			
+			> docker stop $(docker ps -q)		# docker ps -q(ID만 리턴) 결과를 stop
+			
+			> docker ps -l	
+			> docker ps -n 2
+			
+			> docker ps -f status=exited
+			> docker pause my-nginx2   
+			> docker ps -f status=paused
+			
+			> docker ps -f ancestor=nginx			# image명이 nginx인 실행중인 컨테이너만 보여준다
+			> docker ps -a -f ancestor=nginx		# image명이 nginx인 모든 컨테이너를 보여준다
+			> docker ps --format "table {{.ID}}\t{{.Image}}\t{{.State}}\t{{.Status}}\t{{.Names}}"
+
+-------------------------------------------------	
+	7) 컨테이너에 추가명령 설정하기
+	
+		- 개념 : 실행중인 컨테이너 내부에서 명령을 추가
+		
+		- 문법 : docker container exec [OPTIONS] CONTAINER COMMAND [ARG...]
+					docker exec
+		
+		- 옵션
+			-d, --detach		: 백그라운드 동작
+			-e, --env			: 환경변수 설정
+			--env-file			: 환경변수 파일 불러오기
+			-i, --interactive	: 표준입력 활성화
+			-t, --tty			: 모니터 할당
+			-w, --workdi		| 명령어가 실행되는 작업 디렉토리	
+		
+		# 실습.
+			> docker run -d --name my-nginx -p 1234:80 nginx
+			> docker run -d --name my-ubuntu ubuntu:24.04 sleep infinity		# sleep infinity 로 종료지연
+			> docker run -d --name my-mysql -e MYSQL_ROOT_PASSWORD=1234 mysql:8.3
+			> docker run -d --name my-redis redis
+			
+			> docker exec my-nginx ls 		# nginx 파일 목록 조회
+			> docker exec my-nginx ps -ef 		# nginx 파일 목록 조회, nginx는 ps를 따로 설치해 줘야 한다
+			> docker exec my-nginx pwd 		# nginx 파일 목록 조회
+			
+			> docker exec my-ubuntu ls
+			> docker exec my-ubuntu ps -ef
+			
+		# 실습2. 명시적으로 접속해해서 명령어 실행
+			> docker exec -it my-nginx bash
+			
+			> docker exec -it  my-ubuntu bash
+			
+			> docker exec -it my-mysql bash
+			bash-4.4# mysql -u root -p     
+			Enter password: 1234
+			mysql> show databases;			
+
+-------------------------------------------------				
+	8) 컨테이너와 호스트간 파일 복사
+	
+		- 개념 : 컨테이너와 호스트간 파일 및 디텍터리 복사하는 명령어
+		
+		- 문법 : 
+			# 컨테이너 ----->  HOST
+			docker container cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH
+			
+			# HOST ----->  컨테이너
+			docker cp [OPTIONS] SRC_PATH CONTAINER:DEST_PATH
+			docker cp
+		
+		- 옵션
+			-a, --archive		: 원본 파일/디렉토리 정보(권한, gid, uid 등)가 계승됨
+			-L, --follow-link	: Always follow symlinks in SRC_PATH
+									  심볼릭 링크를 복사할때, 원본이 복사된다.
+			-q, --quiet			: 
+		
+		# 실습. HOST   ---------->  CONTAINER
+			> docker cp test.txt my-ubuntu:/home
+			> docker exec my-ubuntu ls | grep test.txt
+					
+		# 실습. CONTAINER   ---------->  HOST	
+			
+			> docker exec my-ubuntu touch xyz.txt
+			> docker cp my-ubuntu:/xyz.txt .
+			> dir
+			
+		# 실습. nginx의 홈페이지 변경
+			
+			임의의 index.html 만들기
+			> docker cp index.html my-nginx:usr/share/nginx/html/
+			
+-------------------------------------------------			
+	9) 컨테이너 상세정보
+	
+		- 개념 : 컨테이너의 상세정보를 조회하는 명령어
+		
+		- 문법 : docker container inspect [OPTIONS] CONTAINER [CONTAINER...]
+		
+		- 옵션
+			-f, --format	: 특정정보만 출력
+			-s, --size		: 전체 사이즈 출력
+		
+		# 실습.	
+			> docker container inspect my-nginx
+			> docker container inspect my-ubuntu my-mysql
+			> docker container inspect -f '{{.Mounts}}' my-ubuntu
+-------------------------------------------------			
+	10) 컨테이너 삭제
+	
+		- 개념 : 종료된 컨테이너 삭제 ( Running 중 삭제 불가)
+		
+		- 문법 : docker container rm [OPTIONS] CONTAINER [CONTAINER...]
+					docker container remove
+					docker rm
+		
+		- 옵션
+			-f, --force		: running 상태의 컨테이너를 강제삭제
+			-l, --link		: Remove the specified link
+			-v, --volumes	: 볼륨을 같이 삭제	
+		
+		# 실습.	
+		
+			> docker rm my_nginx 
+			
+		# 모든 실행 중인 컨테이너 종료 후 삭제
+		
+			> docker stop $(docker ps -q)
+			> docker rm $(docker ps -aq)	
+			# 이어서 사용해도 된다 			ex . docker stop $(docker ps -q) | docker rm $(docker ps -aq) dld
+		

@@ -1,6 +1,6 @@
 MAX_RECENT_WORKSPACES=10
-RECENT_WORKSPACES=C\:\\cloud_engineering\\Boot_Camp_6th\\eclipse\\workshop\nC\:\\cloud_engineering\\Boot_Camp_6th\\eclipse\\workspace
+RECENT_WORKSPACES=C\:\\cloud_engineering\\Boot_Camp_6th\\eclipse\\workspace
 RECENT_WORKSPACES_PROTOCOL=3
-SHOW_RECENT_WORKSPACES=true
+SHOW_RECENT_WORKSPACES=false
 SHOW_WORKSPACE_SELECTION_DIALOG=true
 eclipse.preferences.version=1

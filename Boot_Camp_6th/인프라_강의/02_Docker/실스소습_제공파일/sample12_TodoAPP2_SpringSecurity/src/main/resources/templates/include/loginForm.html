@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LoginForm</title>
+</head>
+<body>
+<!-- errorPage 보여주기 -->
+<div th:fragment="content">
+    <p th:if="${errorMsg}" th:text="${errorMsg}"></p>
+    <p th:if="${param.error}">
+        Login Fail
+    </p>
+    <form th:action="@{/auth}" method="post">
+        ID: <input type="text" name="userid"><br>
+        PW: <input type="text" name="password" ><br>
+        <input type="submit" value="로그인">
+    </form>
+</div>
+
+
+</body>
+</html>

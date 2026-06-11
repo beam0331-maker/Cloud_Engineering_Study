@@ -1,0 +1,422 @@
+-------------------------------------------------
+2026.06.09
+
+4. 주요 명령어 정리 
+
+	1) FROM
+		- 문법: 
+			FROM [--platform=<platform>] <image>				 [AS <name>]
+			FROM [--platform=<platform>] <image>[:<tag>]		 [AS <name>]
+			FROM [--platform=<platform>] <image>[@<digest>]	 [AS <name>]
+			# AS <name> :  별칭. 멀티-스테이징-빌드 패턴시 참조해서 사용한다.
+			# https://docs.docker.com/build/building/best-practices/
+			# https://docs.docker.com/build/building/multi-stage/
+			
+		- 용도: base image 지정
+		- 특징 : 필수, 가장 우선 만들어진다.
+					여러번 사용 가능.
+	2) WORKDIR
+		
+		- 문법 : WORKDIR /path/to/workdir
+		
+		- 용도 : 내부 작업 디렉터리 지정( 지정된 디렉터리가 없으면 자동생성)
+					이후에 사용하는 RUN, CMD, ENTRYPOINT 등의 기준으로 사용됨.
+					
+		
+	3) COPY
+	
+		- 문법 : COPY [OPTIONS] <src> ... <dest>
+					COPY [OPTIONS] ["<src>", ... "<dest>"]
+					 
+					COPY [--from=<image|stage|context>] <src> ... <dest>  # multi-stage  패턴에서 사용됨
+					
+		- 용도 : 호스트 파일을 컨테이너 이미지에 복사
+		
+	4) RUN
+	
+		- 문법 : # Shell form
+					RUN [OPTIONS] <command> ...
+					
+					# Exec form
+					RUN [OPTIONS] [ "<command>", ... ]
+					
+		- 용도 : 이미지가 만들어지는 동안 ( docker build ) 실행됨. 
+					한번만 실행되고 실행된 결과가 이미지 Layer에 저장된다. 
+					
+			ex. RUN apt update && apt full-upgrade -y				 
+				 RUN npm install
+				 
+	5) CMD
+		
+		- 문법 : CMD ["executable","param1","param2"] (exec form)
+					CMD ["param1","param2"] (exec form, as default parameters to ENTRYPOINT)
+					
+					CMD command param1 param2 (shell form)
+					
+			 ex : CMD ["node", "app.js"]
+					CMD ["java", "-jar","app.jar"]
+					
+		- 용도 : 컨테이너가 실행될 때 실행된다(*******)
+					docker run 할 때 CMD 명령어를 덮어쓰기 가능함
+					
+					ex. docker run -d --name my-app -p 8080:40 app2.js		# app.js가 app2.js로 동적으로 변경된다.
+					
+	6) ENTRYPOINT ( 고정 명령어 )
+		
+		- 문법 : ENTRYPOINT ["executable", "param1", "param2"] (exec form)
+				
+					ENTRYPOINT command param1 param2 (shell form)
+		
+		- 용도 : 컨테이너가 실행될 때 실행된다
+					docker run할 때 명령어를 덮어쓰기 힘듬
+					
+					CMD ["java", "-jar","app.jar"]
+				
+				=>	ENTRYPOINT ["java", "-jar"]		# 고정되는 실행
+					CMD ["app.jar"]						# 변경가능한 실행
+	
+	7) EXPOSE
+	
+		- 문법 : EXPOSE <port> [<port>/<protocol>...]
+		
+		- 용도 : 컨테이너가 사용하는 포트가 뭔지 알려주는 용도로 사용됨 (문서화)
+					실제 port를 사용할 수 있게 open(public) 하지 않음.
+					실제 사용하기 위해서는 명시적으로 Port-Fowading (ex. -p 1234:80)지정해 줘야 한다.
+					
+	8) ENV
+	
+		- 문법 : ENV <key>=<value> [<key>=<value>...]
+		- 용도 : 환경변수 설정
+					docker run 할때 ENV값 덮어쓰기 가능한. ( ex. -e MYSQL_DATABASE=testdb)
+					
+	9) VOLUME
+	
+		- 문법 : VOLUME ["/data"]
+				
+		- 용도 : 컨테이너의 변경사항을 유지하는 목적임
+			ex.
+					FROM ubuntu
+					RUN mkdir /myvol
+					RUN echo "hello world" > /myvol/greeting
+					VOLUME /myvol
+
+-------------------------------------------------
+5. docker build 명령어 정리		
+
+	1) 개념
+		- Dockerfile 파일을 이용해서 이미지를 생성(빌드)하는 명령어		
+		
+	2) 문법: docker buildx build [OPTIONS] PATH | URL | -
+				
+				docker build
+				docker builder build
+				docker image build				
+	
+	3) 옵션
+		-t, --tag	: 이미지이름과 tag 지정
+		-f, --file	: dockerfile의 파일명이나 위차가 다를때 명시적으로 찾아서 실행한다
+						  ex. docker build -t my-front-app:v1 .	# 기본적으로 현재 디렉터리의 Dockerfile을 찾는다
+								docker build -t my-front-app:v1 -f My_Dockerfile .		# 명시된 dockerfile을 찾아서 사용한다.
+		
+		--no-cache	: 캐시를 사용하지 않고 새로 빌드함
+		
+		
+		
+-------------------------------------------------		
+	# 실습2.  boot_Dockerfile.zip 이용
+		
+		# step1: Docker 없이 실행
+			
+			# 방법 1: 빌드없이 실행 (jar 없이 실행)
+				- intellj에서 DemoApplication 실행하고 요청
+				- 웹브라우저 : http://localhost:8080
+			
+			# 방법 2: 빌드 이용 (.jar로 실행)
+				- ./gradlew clean build 			(기존빌드 지우고 clean build)
+				- build/libs/boot_Dockerfile-0.0.1-SNAPSHOT.jar  생성됨
+				- 실행 : java -jar boot_Dockerfile-0.0.1-SNAPSHOT.jar
+				- 웹브라우저 : http://localhost:8080
+			
+		# step2: Docker로 실행
+			1). Dockerfile 작성
+			
+				FROM eclipse-temurin:21-jre		# base 이미지
+
+				WORKDIR /app							# 작업 디렉터리
+
+				COPY build/libs/*.jar app.jar
+
+				EXPOSE 8080
+
+				ENTRYPOINT ["java", "-jar", "app.jar"]
+				
+			2). *.jar 생성
+				가. cmd에서 jar 생성 : - ./gradlew clean build 		( 오류시 -x test )
+				나. build/libs/boot_Dockerfile-0.0.1-SNAPSHOT.jar  생성됨
+				
+			3) Dockerfile 빌드
+				docker build -t springboot21 .
+				
+			4) 컨테이너 실행 
+				docker run -d --name springboot21 -p 8080:8080 springboot21
+				
+			5) 요청
+				http://localhost:8080
+				
+--------------------------------------------------------------------------------		
+	# 실습3. boot_Dockerfile2_volume.zip 이용( 파일 업로드 실습)
+		
+		# step 1: Docker 없이 실행
+		
+			파일 업로드 요청 : POST http://localhost:8080/files/upload
+			파일 목록 조회 : GET http://localhost:8080/files
+			파일 다운로드 요청 : GET http://localhost:8080/files/{filename}
+			
+			1) DemoApplication 실행 > c:\app\uplad 폴더 생성
+			2) Talen API Tester 이용해서 요청
+			# 파일 업로드에서 body ==> FROM 으로 변경 후, name을 file로 보낼것						
+			
+		# step2: Docker로 실행
+			
+			1) Dockerfile 작성 및 .dockerignore 작성
+				FROM eclipse-temurin:21-jre
+
+				WORKDIR /app
+
+				COPY build/libs/*.jar app.jar
+
+				# 업로드 파일이 저장될 디렉터리
+				RUN mkdir -p /app/upload
+
+				EXPOSE 8080
+
+				ENTRYPOINT ["java", "-jar", "app.jar"]
+				
+			2) *.jar 생성
+					가. cmd에서 jar 생성 : - ./gradlew clean build 		( 오류시 -x test )
+					나. build/libs/boot_Dockerfile-0.0.1-SNAPSHOT.jar  생성됨
+					
+			3) Dockerfile 빌드
+				docker build -t springboot21 .
+			
+			4) 볼륨 생성 ( 업로드한 파일 유지 )
+				docker volume ls
+				docker volume create spring-data
+				
+			5) 컨테이너 실행 
+				docker run -d --name springboot21 -p 8080:8080 -v spring-data:/app/upload springboot21
+				
+			6) 요청
+					
+				파일 업로드 요청 : POST http://localhost:8080/files/upload
+				파일 목록 조회 : GET http://localhost:8080/files
+				파일 다운로드 요청 : GET http://localhost:8080/files/{filename}
+				
+				1) DemoApplication 실행 > c:\app\uplad 폴더 생성
+				2) Talen API Tester 이용해서 요청
+				# 파일 업로드에서 body ==> FROM 으로 변경 후, name을 file로 보낼것
+			
+			7) 컨테이저 중지 및 삭제하기 
+				docker stop springboot21
+				docker rm springboot21
+				
+			8) 다시 컨테이너 실행, 업로드 파일 유지 확인
+				docker run -d --name springboot21 -p 8080:8080 -v spring-data:/app/upload springboot21
+			
+--------------------------------------------------------------------------------			
+	# 실습4. boot_Dockerfile3_ENV.zip 이용  ( 환경변수 실스 )
+	
+		# step 1: Docker 없이 실행
+		
+			# 방법1: 외부 주입 없는 경우
+			
+				1) DemoApplication 실행
+				2) Talen API Tester 이용해서 요청
+				요청 : GET http://localhost:8080/env
+				출력 :
+						{
+							"uploadDir": "/app/upload",
+							"activeProfiles":[
+							"local"
+							],
+							"message": "\"기본메시지\""
+						}
+						
+			# 방법1: 외부 주입
+				# ENV 설정
+				
+				program argument(CommandLine Property Source) 		: --server.prot=8070
+				VM option (Java System properties) 						: -Dserver.port=8070
+				Environment Variable ( OS environment variables))	: SERVER_PORT=8070
+				Config data(application.yml)								: server:port: 8070
+				
+				
+				1) edit configuration > program argument에서 env 설정						
+				--server.port=8070 --spring.profiles.active=prod --app.message=hello	--app.upload-dir=/app2
+				
+				# EDI가 아닌 실행: java -jar xxx.jar --server.port=8070 ...
+				
+				2) Talen API Tester 이용해서 요청
+				요청 : GET http://localhost:8070/env
+				출력:				
+						{
+							 "message": "hello",
+							 "activeProfiles": [
+								  "prod"
+							 ],
+							 "uploadDir": "/app2"
+						}									
+			
+		# step2: Docker로 실행
+			
+			1) FROM eclipse-temurin:21-jre
+
+				WORKDIR /app
+
+				COPY build/libs/*.jar app.jar
+
+				ENV SERVER_PORT=8080
+				ENV APP_NAME=spring-env-demo
+				ENV APP_MESSAGE="Dockerfile 기본 메시지"
+				ENV APP_UPLOAD_DIR=/app/upload
+				ENV SPRING_PROFILES_ACTIVE=prod
+
+				RUN mkdir -p /app/upload
+
+				EXPOSE 8080
+
+				ENTRYPOINT ["java", "-jar", "app.jar"]
+								
+			2) *.jar 생성
+					가. cmd에서 jar 생성 : - ./gradlew clean build 		( 오류시 -x test )
+					나. build/libs/boot_Dockerfile-0.0.1-SNAPSHOT.jar  생성됨
+					
+			3) Dockerfile 빌드
+				docker build -t springboot21 .
+				
+			4) 컨테이너 실행 
+				docker run -d --name springboot21 -p 8080:8080  springboot21
+				
+			5) 요청				
+				1) DemoApplication 실행 
+				2) Talen API Tester 이용해서 요청
+				요청 : GET http://localhost:8080/env
+				출력 : 
+						{
+							 "message": "Dockerfile 기본 메시지",
+							 "activeProfiles": [
+								  "prod"
+							 ],
+							 "uploadDir": "/app/upload"
+						}				
+			
+			6) 컨테이너 실행시 새로운 환경변수 값 설정해서 덮어쓰기
+				docker stop springboot21
+				docker rm springboot21
+				
+				docker run -d --name springboot21  -e SERVER_PORT=9090 -e SPRING_PROFILES_ACTIVE=test -e APP_MESSAGE=HelloWorld -p 1234:9090 springboot21	
+
+			7) 요청				
+						1) DemoApplication 실행 
+						2) Talen API Tester 이용해서 요청
+						요청 : GET http://localhost:1234/env
+						출력 : 
+								{
+									 "uploadDir": "/app/upload",
+									 "activeProfiles": [
+										  "test"
+									 ],
+									 "message": "HelloWorld"
+								}
+
+-------------------------------------------------								
+	# 실습5	boot_Dockerfile4_Multi_stage.zip 이용 (멀티 스테이지 패턴 실습) 
+					
+		https://docs.docker.com/build/building/best-practices/
+		https://docs.docker.com/build/building/multi-stage/
+
+		# step1: 멀티 스테이지 패턴 저용전
+			1) Dockerfile 작성
+				# 멀티 스테이지 패턴 적용 전 코드임
+					FROM gradle:8.10.2-jdk21
+
+					WORKDIR /app
+
+					COPY . .
+
+					RUN gradle clean bootJar		# jar 생성을 Docker 내에서 
+
+					EXPOSE 8080
+
+					ENTRYPOINT ["java","-jar","build/libs/boot_Dockerfile4_Multi_stage-0.0.1-SNAPSHOT.jar"]
+			
+			2) Dockerfile 빌드
+				> docker build -t springboot21:v1 .				
+				
+				> docker images
+				IMAGE             ID             DISK USAGE   CONTENT SIZE   EXTRA
+				springboot21:v1   955ee3168d4f       1.35GB          455MB    
+				
+			3) 컨테이너 실행 
+				docker run -d --name springboot21-v1 -p 8080:8080  springboot21:v1
+		
+			4) 요청								
+				Talen API Tester 이용해서 요청
+				요청 : GET http://localhost:8080
+				
+			5) 접속
+			> docker exec -it springboot21-v1 bash
+			root@7b82ede70fd2:/app# ls         
+			build  build.gradle  Dockerfile  Dockerfile_적용후  gradle  gradlew  gradlew.bat  settings.gradle  src
+			
+			# 프로젝트 전체가 복사 되어 있다.
+				
+		# step2: 멀티 스테이지 패턴 저용 후
+		
+			1) Dockerfile 작성
+				# 멀티 스테이지 패턴 적용 후 코드임
+				# ======================
+				# Build Stage
+				# ======================
+				FROM gradle:8.10.2-jdk21 AS xxx
+
+				WORKDIR /build
+
+				COPY . .
+
+				RUN gradle clean bootJar		# Build 단계 결과 ==> *.jar 
+
+				# ======================
+				# Runtime Stage
+				# ======================
+				FROM eclipse-temurin:21-jre
+
+				WORKDIR /app
+
+				COPY --from=xxx \
+					  /build/build/libs/*.jar \
+					  app.jar
+
+				EXPOSE 8080
+
+				ENTRYPOINT ["java","-jar","app.jar"]
+				
+			2) Dockerfile 빌드
+				> docker build -t springboot21:v2 .				
+				
+				> docker images
+				IMAGE             ID             DISK USAGE   CONTENT SIZE   EXTRA
+				springboot21:v1   955ee3168d4f       1.35GB          455MB    U   
+				springboot21:v2   e57ed1035be0        494MB          134MB 
+				
+			3) 컨테이너 실행 
+				docker run -d --name springboot21-v2 -p 8080:8080  springboot21:v2
+		
+			4) 요청								
+				Talen API Tester 이용해서 요청
+				요청 : GET http://localhost:8080
+				
+			5) 접속
+				> docker exec -it springboot21-v2 bash                          
+				root@32e254f7bfef:/app# ls         
+				app.jar
