@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1> Main6 </h1>
+<p th:text="${userid}"></p>
+dto.userid: <span th:text="${dto.userid}"></span>
+dto.password: <span th:text="${dto.password}"></span>
+<hr>
+<div th:each=" name, iterStat : ${list}">
+    <span th:text="|name${iterStat.count}:${name}|"></span><br>
+</div>
+<hr>
+<ul th:each=" dto : ${dtolist}">
+    <li th:text="${dto.userid}"></li>
+    <li th:text="${dto.password}"></li>
+</ul>
+</body>
+</html>

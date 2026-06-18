@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content">
+
+    <table >
+        <tr>
+            <th>id</th>
+            <th>userid</th>
+            <th>description</th>
+            <th>targetDate</th>
+            <th>done</th>
+        </tr>
+        <tr th:each=" dto : ${todoListFindAll}">
+            <td th:text="${dto.id}"></td>
+            <td th:text="${dto.userid}"></td>
+            <td th:text="${dto.description}"></td>
+            <td th:text="${dto.targetDate}"></td>
+            <td th:text="${dto.done}"></td>
+        </tr>
+    </table>
+    <a th:href="@{/todo-add}">작성</a>
+    <a th:href="@{/todo-update}">수정</a>
+    <a th:href="@{/todo-delete}">삭제</a>
+</div>
+</body>
+</html>

@@ -1516,45 +1516,843 @@
 		chmod 641 text.txt => rw-r----x
 		chmod 600 text.txt => rw-------
 			
+-------------------------------------------------
+2026.06.01
+
 /////////////////////////////////////////////////	
 8. 프로세스
 /////////////////////////////////////////////////
 
-1. 개념: 실행중인 프로그램을 의미
+1. 프로세스 관리
 
-2. 특징: 
-	- 부모/자식 관계로 구성됨 (계층적으로 구성됨)
-	- 부모가 자식 프로세스를 생성하고, 자식프로세스가 실행된다
-	  자식프로세스가 종료되면 부모프로세스에게 결과를 돌려줌
-	- 모든 프로세스는 식별자를 가짐. (PID: 프로세스 아이디)
-	- PID가 작을수록 중요한 프로세스이다.
+	1) 개념: 실행중인 프로그램을 의미
+
+	2) 특징: 
+		- 부모/자식 관계로 구성됨 (계층적으로 구성됨)
+		- 부모가 자식 프로세스를 생성하고, 자식프로세스가 실행된다
+		  자식프로세스가 종료되면 부모프로세스에게 결과를 돌려줌
+		- 모든 프로세스는 식별자를 가짐. (PID: 프로세스 아이디)
+		- PID가 작을수록 중요한 프로세스이다.
+		- 포그라운드(foreground) 및 백그라운드(background) 실행가능
+		
+	3) 프로세스 정보보기 			
+		문법: 
+			ps			# 현재 터미널에서 실행한 프로세스 정보만 출력.
+			ps -ef	# 모든 프로세스 정보 출력
+			___________________________________________________________
+			UID          PID    PPID  C STIME TTY          TIME CMD
+			user1     291512  148440  0 15:43 pts/0    00:00:00 ps -ef
+			___________________________________________________________
+			# 구성요소
+			user1		: UID		(프로세스를 실행한 사용자)
+			291512	: PID		(프로세스 아이디)
+			148440	: PPID	(부모프로세스 아이디)
+			0			: CPU 사용률
+			15:43		: 시작시작
+			pts/0		: 터미널
+			00:00:00	: 사용시간
+			ps -ef	: 실행 명령어
+			
+		#	ps -ef | grep 검색어 	# 현재 프로세스 중에 검색어만 출력ㅁ
+
+	4) 주요 명령어
+		
+		- top		: 현재 실행중인 프로세스에 대한 정보를 주기적으로 출력	
+		- fg 		: 백그라운드 작업을 다시 foreground 로 실행	
+		- bg 		: 멈춰놓은 작업을 다시 background 로 실행	
+		- &			: 백그라운드로 실행
+		- ctrl + z		: 프로세스 중지	
+		- ctrl + c		: 프로세스 종료	
+		- kill pid		: 프로세스에 종료신호 보냄	
+		- kill 9 pid	: 강제 종료
+		
+		
+		# 실습1
+			top		# 현재 실행 중인 프로세스
+			ps -ef | wc -l		# 실행중인 프로세스 갯수
+		
+		# 실습2: foreground로 실행( 일반적으로 실행 )
+			
+			sleep 10		# 끝날떄 까지 기다리거나 ctrl + c 로 프로레스를 종료할 수 있다
+
+		# 실습3: background 실행
+		
+			sleep 50 &		# background 실행
+			
+			jobs				# background 프로세스, 중지된 프로레세스 확인
+			[1]+  Stopped                 top
+			[2]-  Running                 sleep 50 &
+			
+			ps -ef | grep sleep
+			user1       4597    3625  0 09:41 pts/0    00:00:00 sleep 100
+			user1       4603    3625  0 09:42 pts/0    00:00:00 grep --color=auto sleep
+			
+			kill -9 4597	# PID 프로세서를 강제종료
+			
+		# 실습4: foreground --> background --> foreground
+			sleep 100 		# foreground
+			ctrl + z			# 프로세스 중지
+			jobs				# 백그라운드 프로세스 확인
+			
+			bg	%1				# [1]에 해당하는 프로세스를 백그라운드로 실행
+			jobs
+			
+			fg %1				#
+			ctrl + c 		# 프로세스 종료
+		
+2. 프로세스 스케줄러
 	
-3. 프로세스 정보보기 
-	문법: 
-		ps			# 현재 터미널에서 실행한 프로세스 정보만 출력.
-		ps -ef	# 모든 프로세스 정보 출력
-		___________________________________________________________
-		UID          PID    PPID  C STIME TTY          TIME CMD
-		user1     291512  148440  0 15:43 pts/0    00:00:00 ps -ef
-		___________________________________________________________
-		# 구성요소
-		user1		: UID		(프로세스를 실행한 사용자)
-		291512	: PID		(프로세스 아이디)
-		148440	: PPID	(부모프로세스 아이디)
-		0			: CPU 사용률
-		15:43		: 시작시작
-		pts/0		: 터미널
-		00:00:00	: 사용시간
-		ps -ef	: 실행 명령어
+	1) 개념
+		- 정해진 시간에 특정작업을 반복처리하는 명령어
 		
-		ps -ef | grep 검색어 	# 현재 프로세스 중에 검색어만 출력
-			
-			
-			
-		
-		
-				
+	2) 문법:	crontab [옵션]... <파일명>
 
+		- 옵션
+			-l	: 목록보기
+			-r	: 스케줄러 삭제
+			
+	3) crontab 파일 형식
+		
+		분		시		일		월		요일
+		
+		분 : 0~59
+		시 : 0~23
+		일	: 1~31
+		월	: 1~12
+		요일:  0~7	# 0/7 ==> 일요일
+		
+		ex.
+			* 	*  *  *  *	:  매 1 분마다 작업
+			0 	*  *  *  *	:  매 시간 0분마다
+			30 2  *  *  *	:	매일 2시 30분 마다 작업
+			0	0  1  1  *	:	매년 1월 1일 마다 작업
+			
+	# 실습
+	
+		# 1 . 파일 작성
+			vim mycron.txt
+			
+		# 2 . crontab 파일 형식
+			*/2 	*  *  *  *  echo "hello" >> hello.txt		#  매 1 분마다 작업
+			* 	*  *  *  *  date >> date.txt
+			
+		# 3 . 실행 
+			crontab mycron.txt
+			
+			man crontab 		# crontab 메뉴얼 확인
+			crontab  -l			# 현재 사용자의 cron 확인
+			crontab	-u user1 -1		# user1 사용자의 cron 확인
+			
+			crontab	-u user1 -r 	# user1 사용자의 cron 삭제
+			
+/////////////////////////////////////////////////	
+9. 네트워크
+/////////////////////////////////////////////////
+
+1. http 에서 파일 다운로드
+
+	1) wget 설치
+	
+		sudo apt update		# apt 설치 전에 최신 업데이트 목록 갱신
+		sudo apt install wget -y 		
+		
+	2) 명령어	
+
+		- wget -b URL 		: 백그라운드로 다운로드	
+		- wget -c URL		: 이어 받기 , c 는 continue	
+		- wget -r URL		: 링크를 따라가면 재귀적으로 다운로드	
+		- wget -P 디렉터리 URL		: 특정 디렉터리에 저장 대문자 P	
+		- wget -O 파일명 URL			: 다른 이름으로 저장	
+		- wget --show-progress URL	: 진행율 확인	
+		- wget --limit-rate=10K URL	: 속도 제한 , 초당 10k 로 제한	
+		- wget -I down.txt 			: URL 목록 파일로 지정 ( 여러 개 지정 가능 )
+	
+	# 실습1 . Kali 리눅스 (foreground)
+		wget --show-progress https://cdimage.kali.org/kali-2026.1/kali-linux-2026.1-installer-amd64.iso
+
+		ctrl + z		# 강제 중지
+		
+		# 이어받기
+		wget -c https://cdimage.kali.org/kali-2026.1/kali-linux-2026.1-installer-amd64.iso	
+		
+		# 다운로드 종료
+		ps ef | grep wget 		# PID 확인
+		user1       5724    3625  3 11:02 pts/0    00:00:02 wget -c https://cdimage.kali.org/kali-2026.1/kali-linux-2026.1-installer-amd64.iso
+
+		kill -9 5724		# PID로 프로세스 종료
+		kill -9 wget		# 프로세스명으로 종료
+		kill -9 %wg 		# 프로세스명의 일부분으로 종료
+		
+	# 실습2 . Kali 리눅스 ( background )
+		$ wget -c https://cdimage.kali.org/kali-2026.1/kali-linux-2026.1-installer-amd64.iso &
+		
+		# 백그라운드/중지된 프로세스 확인
+		$ jobs
+		[1]+  Running                 wget -c https://cdimage.kali.org/kali-2026.1/kali-linux-2026.1-installer-amd64.iso &
+		
+		# [1] 작업을 의미, 1번 프로세스를 삭제 
+		$ kill %1
+		$ jobs
+		[1]+  Terminated              wget -c https://cdimage.kali.org/kali-2026.1/kali-linux-2026.1-installer-amd64.iso
+
+/////////////////////////////////////////////////	
+10. init 프로세스(systemd)와 런레벨
+/////////////////////////////////////////////////		
+
+	# 실습 1 . 현재 런레벨 확인
+		~$ systemctl get-default 
+		graphical.target				# GUI 환경, init 5
+		
+	# 실습 2. 모드 변경1 _ 임시적으로 변경
+	
+		sudo init 3			# CUl 환경으로 재부팅
+		sudo init 5			# GUI 환경으로 재부팅
+		
+	# 실습 3. 모드 변경2 _ 영구적으로 변경
+		GUI 모드: systemctl set-default graphical.target
+		CUl 모드: systemctl set-default multi-user.target  
+		
+	# 실습 4. 종료 및 재부팅
+		sudo int 0 : 종료
+		sudo int 6 : 재부팅
+		
+/////////////////////////////////////////////////	
+11. 쉘 스크립트
+/////////////////////////////////////////////////
+
+1. 쉘(shell)
+
+	1)개념
+		- 사용자의 명령을 받아서 os의 커널에 전달해서 실행하도록 하는 프로그램.
+		
+		
+	2) 구조
+	
+		응용프로그램( vim, ....)
+		-----------
+		쉘(shell)	( 유저(응용프로그램)과 커널 사이를 이어주는 인터페이스)
+		-----------
+		리눅스 커널 ( 프로세스, 메모리, h/w 등을 자원을 관리)
+		-----------
+			h/w
+			
+	3) 쉘 종류
+		$ cat /etc/shells		# 현재 리눅스에 설치된 쉘 목록
+		
+		
+		# /etc/shells: valid login shells
+		/bin/sh				# 표준 ( 기능이 떨어진다 )
+		/usr/bin/sh			# /bin/sh 링크
+		
+		/bin/bash			# 현재 쉘 (sh보다 기능이 많다)
+								ex. 
+									echo {1..10}, arr=(1,2,3) 등 지원됨
+		/usr/bin/bash		# /bin/bash 링크
+		
+		/bin/rbash			# 기능이 제한된 쉘
+		/usr/bin/rbash
+		/usr/bin/dash		# 매우 가볍다, 속도가 빠른 장점이 있다. but bash기능이 지원안됨
+
+	4 ) 쉘 확인
+
+		$ echo $SHELL
+		/bin/bash
+		
+		$ echo $0
+		-bash
+		
+		$ tail -n 5 /etc/passwd
+		gdm:x:120:121:Gnome Display Manager:/var/lib/gdm3:/bin/false
+		nm-openvpn:x:121:122:NetworkManager OpenVPN,,,:/var/lib/openvpn/chroot:/usr/sbin/nologin
+		user1:x:1000:1000:user1:/home/user1:/bin/bash
+		sshd:x:122:65534::/run/sshd:/usr/sbin/nologin
+		user2:x:1001:1001::/home/user2:/bin/sh
+
+2. 쉘(Shell) 스크립트
+
+	1) 개념:
+		- 실행 가능한 텍스트 파일 의미
+		- *.sh 파일형식을 사용
+		- 프로그램언어가 가진 구성요소 포함
+			ex. 변수, 연산자, 제어문, 함수,... 등
+			
+		- 반드시 실행권한이 필요하다
+			ex. rwx  =>  x권한이 필요
+	
+	2) 문법
+		- 반드시 첫라인은 다음과 같아야 한다.
+			#!/bin/bash 		--> 실행할 쉘의 경로를 지정
+			
+			문장 
+			...
 			
 			
+	3) 실행하는 방법	
+		- 권한 변경
+			ex. chmod 700 test.sh
+		
+		- $ ./text.sh		# 그냥 test.sh 는 안된다.
+		- $ bash test.sh
+		- $ souce test.sh
+		
+	4) 변수( variable )
+	
+		가. 변수 선언
+			문법:		변수=값	# 반드시 공백없이 지정해야 된다.(변수 = 값 은 오류) 
+		
+			ex. name=kim
+				 age=30
+		
+		나. 변수 사용
 			
+			문법:		$변수명 또는 ${변수명}		==> 중괄호이다. 지정된 변수명이 없으면 공백이다
+						${변수명:-기본값}				==> 변수병이 없으면 기본값이 사용된다
+						
+			ex.
+				콘솔에 출력	: 	echo $name
+									echo ${age}		
+									
+				포맷지정		: echo "이름:$name"	==>	반드시  ""사용
+								  echo '이름:$name'	==> 	$name을 치완하지 않는다
+								  echo "name: $name , age: $age"
+									
+			# 실습
+				$ name=kim
+				$ age=20
+				$ echo $name
+				kim
+				$ echo ${age}
+				20
+				
+				$ echo "name is $name"
+				name is kim				
+				$ echo 'name is $name'
+				name is $name
+				
+			////////////////////////////////////////////////////
+			
+			$(명령어)		==> 	소괄호
+				- 문법: 변수명=$(date)
+				ex. 
+					today=$(date)
+					list=$(ls)
+					result=$(cat -n /var/log/auth.log | grep -a "authentication failure")
+					pring=$(pring -c 2 8.8.8.8)
+					
+					echo $today
+					echo $list
+					echo $result
+					
+				////////////////////////////////////////////////////
+				
+				키보드 입력받아서 변수에 저장.
+					-문법: read 변수명 
+							 read -p "메시지" 변수명
+					
+					ex.
+						read -p "Input name: " name2
+						read name2
+						
+						echo $name2							
+				
+				////////////////////////////////////////////////////
+
+		다. 변수 조회
+			- 문법: set | grep -w 변수명
+			
+			ex. set | grep -w name
+				 name=kim
+				 
+		라. 변수 삭제 
+			- 문법: nuset 변수명
+			ex. 
+				unset name
+	
+			////////////////////////////////////////////////////
+			
+			 상수:
+				- 문법: readonly 변수=값
+					
+				ex.  
+					readonly PI=3.14
+					echo PI
+					PI=3.14
+					-bash: PI:
+					
+			////////////////////////////////////////////////////
+					
+3. Positional Arguments
+	
+	1) 개념:
+		- 쉘 스크립트 파일 시 동적으로 argument를 전달 할 수 있고
+		  이 argument를 참조하는 방벙.
+			
+		  $0 : 파일명
+		  $1 : 첫번째 argument
+		  $2 : 두번째 argument
+		  ...
+		  
+	# 실습
+		# test2.sh 작성
+			----------------
+			#!/bin/bash
+			
+			echo "file: $0"
+			echo "arg1: $1"
+			echo "arg2: $2"
+			----------------
+		
+		# 권한 부여
+			chmod 700 test2.sh
+		
+		# 입력
+			$ ./test2.sh one two
+			file: ./test2.sh
+			arg1: one
+			arg2: two
+
+4. Special Variable
+
+	1) 개념: 쉘 내부에 미리 정의된 변수 의미. ( 내장 변수 )
+		- $0 : 파일명
+		- $1,$2... : 10부터는 중괄호 지정한다 . ex . ${10},${11}
+		- $# : 스크립트에 전달된 인자의 갯수
+		- $@ : 전달된 모든 인자 전체 ( 개별 항목으로 유지 )
+		- $* : 전달된 모든 인자 전체 ( 모든 인자를 하나의 문자열로 합침 )
+		- $$ : 현재 실행중인 쉘 또는 스크립트의 PID
+		- $? : 바로 직전에 실행한 명령어의 결과코드 ( 성공 , 이외값 실패 )
+		- $! : 가장 최근에 백그라운드로 실행한 프로세스 PID
+		
+	
+	# 실습 
+		# test3.sh 작성
+		------------
+		#!/bin/bash
+
+		echo "file: $0"
+
+		echo "arg1: $1"
+		echo "arg2: $2"
+		echo "$#: $#"		# 인자 갯수
+		echo "$@: $@"		# 인자 모두 전달
+		echo "$*: $*"		# 인자 모두 전달
+		echo "$$: $$" 		# 현재 실행중인 스크립트 PID
+		-------------
+		
+		chmod 700 test3.sh
+		./test3.sh one two		
+		file: ./test3.sh
+		arg1: one
+		arg2: two
+		2: 2
+		one two: one two
+		one two: one two
+		2164: 2164
+		
+	# 실습 . $? 
+		$ ls
+		test2.sh  test3.sh  test.sh		# 명령 성공
+		$ echo $?
+		0				# 이전에 실행한 명령이 성공했음
+		
+		$ ls /temp	# 존재하지 않는 디렉터리 ==> 명령실패
+		ls: cannot access '/temp': No such file or directory
+		$ echo $?
+		2				# 이전 명령이 실패했음 알린다.
+	
+-------------------------------------------------
+
+5. 연산자
+
+	1) 숫자 비교 연산자( 수치 데이터만 가능하다 )
+		
+		- 조건식 문법: [[ 조건식 ]]		# 공백이 필수 이다, [ 조건식 ]은 과거문법
+
+		- eq :	같다
+		- ne :	같지 않다
+		- gt :	크다
+		- lt :	작다
+		- ge :	크거나 같다
+		- le :	작거나 같다
+		
+		ex. 
+			$ num=10
+			$ [[ $num eq 10 ]]		# 성공 / 실패
+			$ echo "result: $?"
+			result: 0
+
+	2) 문자열 비교 연산자
+	
+		- =, ==	:	문자열이 같다
+		- 	!=		:	문자열이 같지 않다
+		- 	-z		:  문자열 길이가 0 이다
+		-	-n		:	문자열길이가 0 이 아니다
+		
+		ex.
+			name=hello		# "hello" 동일
+			[[ $name == "hello" ]]		# 같은가
+			echo "result: $?"
+			
+			[[ $name != "hello"]]		# 같지 않은가
+			echo "result: $?"
+			
+			[[ -z $name ]]		# 길이가 0인가
+			echo "result: $?"
+			
+			[[ -n $name ]]		# 길이가 0이 아닌가
+			echo "result: $?"
+			
+		# 패턴 매칭 가능
+			[[ $name == h* ]]		# h로 시작하는가
+			[[ $name == *o ]]		# o으로 끝나는가
+			
+	3) 논리 연산자
+		
+		- &&	: 그리고( and )
+		- ||	: 또는( or )
+		- !	: 부정( not )
+		
+		ex.
+			n=8
+			[[ $n -eq 10 || $n -lt 10 ]]
+			[[ $n -eq 10 && $n -lt 10 ]]
+			[[ !($n -eq 10) ]]
+	
+	4) 산술연산자
+	
+		: +, -, *, /, %  지원한다
+		
+		문법:		$(( 연산 ))		# 소괄호 두번이다
+		
+		ex. 
+			a=10
+			b=3
+			echo $((a + b))
+			echo $((a - b))
+			echo $((a * b))
+			echo $((a / b))
+			echo $((a % b))
+	
+	5) 증감 연산자
+		: ++ , -- / 전치, 후치 지원한다
+		계산 시	:	$(( 연산 ))
+		
+		ex.
+			$ n=10
+			$ n2=$(( ++n ))
+			$ echo "$n,  $n2"
+			11, 11
+
+			$ x=10
+			$ x2=$(( x++ ))
+			$ echo "$x,  $x2"
+			11, 10
+			
+	6) 파일 검사 연산자
+	
+		- e	: 파일디렉터리가 존재여부
+		- f	:  일반파일 ( 텍스트 , 로그 등 )
+		- d	: 디렉터리 여부
+		- r	: 읽기가능 여부
+		- w	: 쓰기 가능 여부
+		- s	: 크기가 0 보다 크다
+		- L	: 심볼릭 링크 여부
+	
+		ex. 
+			[[ -e test.sh ]]		# test.sh 파일이 있는가
+			echo $?
+			
+			[[ -d tmp/ ]]			# tmp가 디렉토리인가
+			echo $?
+			
+			[[ -s test.sh ]]			# 크기가 0보다 큰가
+			echo $?
+			
+			ln -s test.sh test_copy.sh
+			[[ -L test_copy.sh ]]	# tmp가 디렉토리인가
+			echo $?
+
+-------------------------------------------------------		
+
+6. 조건문
+	# 쉘 스크립트에서는 명령어와 괄호(또는 조건문) 사이에 반드시 공백(띄어쓰기)이 있어야 한다
+	# then 뒤에도 띄어쓰기가 필요하다.
+	
+	1) if 문
+	
+	- 단일 if 문:			
+					if [[ 조건식 ]]; then 
+						문장
+					fi		
+	- if ~ else : 	
+					if [[ 조건식 ]]; then 
+						문장1
+					else
+						문장2		
+					fi
+		
+	- 다중  if문 :
+					if [[ 조건식 ]]; then 
+						문장1
+					elif [[ 조건식 ]]; then 
+						문장2		
+					fi
+	
+				# 실습 . test5.sh 작성
+				: 키보드로 점수를 입력 받고 학접을 출력하시오 
+				90 ~ 100 :  A학점
+				80 ~ 89 :  B학점
+				70 ~ 79 :  C학점
+				나머지  :  F
+				
+				#!/bin/bash
+
+				read -p "input grade: " grade
+				echo $grade
+
+				if [[ $grade -ge 90  ]]; then
+						  echo "A grade"
+				elif [[ $grade -ge 80 ]]; then
+						  echo "B grade"
+				elif [[ $grade -ge 70 ]]; then
+						  echo "c grade"
+				else
+						  echo "F grade"
+				fi
+				
+7. case 문
+
+	- 문법:
+			
+			case 변수 in
+			
+			패턴1) 
+				문장
+				;;
+				
+			패턴2) 
+				문장
+				;;	
+				
+			*) 
+				문장
+				;;
+			
+			esac
+			
+			
+			ex. 
+				fruit="apple"
+				case $fruit in 
+				apple)
+					echo "apple"
+					;;
+				banana)
+					echo "banana"
+					;;
+				*)
+					echo "default"
+					;;
+				esac
+
+8. 반복문
+
+	- 문법1 : 반복할 목록이 있는 경우
+	
+		for 변수 in 목록		# 목록 : 1 2 3 ... /  {1..5}  / A B "C D" / ...
+		do
+			문장
+		done
+		
+		ex.
+			for n in 1 2 3 4 5 
+			do 
+				echo $n
+			done
+		
+			for n in {2..5}	# 범위지정, {1..10..2} 1부터 10까지 2씩 올라가며
+			do 
+				echo $n
+			done
+			
+			for n in A B "C D"
+			do 
+				echo $n
+			done
+	
+	- 문법2 : 일반 for
+			
+		for ((i=1;i<=5;i++))
+		do
+			echo $i
+		done
+				
+	- 문법3 : 일반 for + break
+		
+		for ((i=1;i<=5;i++))
+		do
+			if [[ $i == 3 ]]; then 
+			fi
+			echo $i
+		done
+
+8. 반복문2 - while 문
+
+	- 문법1:
+		
+		while [[ 조건식 ]]
+		do
+			문장
+		done
+		
+		ex.
+			x=1
+			while [[ $x -le 5 ]]
+			do 
+				echo $x
+				x=$((++X))
+			done
+			
+9. 함수 
+	
+	- 문법1: function
+		function 함수명(){
+			실행문
+			[return 숫자값]	
+		}
+		#	숫자값만 return, 문자열은 echo
+		
+	- 문법2: 함수명
+		함수명(){
+			실행문
+			[return 숫자값]	
+		}
+		
+	- 호출: 함수명	
+	
+	# 실습1.
+		
+		function f1(){
+			echo "f1"
+		}
+		f1 	==> 호출
+		
+		f2(){
+			echo "f2"
+		}
+		f2		==> 호출
+		
+	- 파라미터 :
+
+		- $1 : 첫 번째 인자		
+		- $2 : 두 번째 인자		
+		- $# : 인자 개수		
+		- $@: 전체 인자
+		
+	- 문법3: 파라미터 전달
+		
+		function 함수명(){
+			echo "$1 $2 ..."		# 첫번째 파라미터, 두번 파라미터
+		}
+		
+		함수명 값1 값2 ...
+		
+		ex.
+			function f3() {
+				echo "$1, $2, $#, $@"
+			}
+			
+			f3 one two
+			
+	- 문법4: 리턴
+		가. 숫자를 리턴하는 경우
+		
+			function 함수명() {
+				return 숫자
+			}
+			
+			리턴값 받기:
+				
+				함수명
+				변수=$?  /  echo $? 
+				
+		# 실습
+			function f6(){
+				return 100
+			}
+			
+			$ f6
+			$ result=$?
+			$ echo $result
+			
+			$f6
+			$ result=$?+100   # 100 + 100 이 출력됨
+			$ result=$(($?+100))		# 200 출력
+			
+			
+		나. 문자를 리턴하는 경우
+			function 함수명() {				
+				echo "문자"					
+			}
+			
+			리턴값 받기:
+				
+				변수명=$(함수명)		# $(명령어) 소괄호 문법 이용
+				
+			ex.
+				$ function f7(){
+					echo "f7 exe"
+				}
+				$ result=$(f7)
+				$ echo=$result			# 결과:  f7 exe
+
+-------------------------------------------------				
+10. 배열
+
+	1) 문법:
+		변수=(값 1 값 2 값 3) 		# 공백이 구분자, 인덱스는 0 부터
+	
+	2) 참조
+		인덱스이용	: ${변수명[인덱스]}			# 0부터 지정.
+		모두 조회	: ${변수명 [@]}, ${변수명 [*]}  
+		슬라이싱		: echo "${변수명 [@]:시작위치}" 		
+							ex. ${arr[@]:2} 		# 인덱스 2부터 끝까지
+							
+						  echo "${변수명 [@]:시작위치:갯수}"	
+							ex. ${arr[@]:2:3}		# 인덱스 2부터 3 개
+		
+		배열길이 	: ${#변수명[*]}
+		인덱스조회 	: ${!변수명[*]}
+	
+	
+	3) 배열 삭제
+	
+		- 문법:	unset 변수명[인덱스]		# 지정된 인덱스만 삭제 
+					
+					unset 변수명				# 변수명 배열 삭제
+		
+	
+	4) 추가
+	
+		- 문법: 변수명[인덱스]=값
+				  
+				  변수명+=(값 값2)		# 공백이 없어야 한다
+
+-------------------------------------------------								  
+11. select
+
+	가. 개념: 사용자가 선택할 수 있는 메뉴 제공
+	
+	나. 문법:
+		
+		select 변수 in 목록
+		do 
+			문장			
+		done
+		
+	다. 특징:
+		- 자동으로 번호 메뉴 생성		
+		- 사용자가 번호 입력		
+		- 기본적으로 무한루프로 동작 ( Ctrl + c 중단 )
+		- 선택 번호는 $REPLY	
+

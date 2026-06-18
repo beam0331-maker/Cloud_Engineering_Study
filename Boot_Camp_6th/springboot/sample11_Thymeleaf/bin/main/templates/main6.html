@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<link rel="stylesheet" type="text/css" th:href="@{/css/test.css}">
+</head>
+<body>
+<h1>6. 화면재사용</h1>
+<p>안녕하세요</p>
+<hr>
+<div th:replace="~{include/top :: copy}"></div>
+<div th:replace="~{include/top :: header}"></div>
+</body>
+</html>

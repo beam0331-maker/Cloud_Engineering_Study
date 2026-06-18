@@ -1,0 +1,563 @@
+-------------------------------------------------------------------
+2026.06.16
+
+	5) Pod 내의 컨테이너에서 실행되는 어플리케이션( ex. SpringBoot) 로그 출력
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/
+	
+		- 개념
+		  : 컨테이너에서 실행되는 어플리케이션( ex. SpringBoot)의 정상로그(표준출력) 와 오류로그(표준에러)를 출력하는 명령어
+		
+		- 문법: kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER]
+		
+			-f, --follow	: 인텔리제이 로그처럼 실시간으로 로그 출력 가능.
+			-p, --previous	: If true, print the logs for the previous instance of the container in a pod if it exists.
+			-c  CONTAINER	: 컨테이너명 지정			
+			--tail n		: 마지막 로그중 n개 만큼 출력
+			--timestamps	: 시간출력
+			-p, --previous	: 만약 파드에 이전에 존재 했던 컨테이너가 있다면, 로그를 프린트해라
+							  ex. CrashLoopBackOff 발생시 필수로 봐야된다
+			-l, --selector string	: 필터링
+			--since duration		: 지정된 시간 이후 로그만 출력 ( 단위 : 2s, 2m, 2h )
+			
+		ex.
+			kubectl logs nginx-pod
+			kubectl logs nginx-pod --tail 10
+			kubectl logs nginx-pod --since=1m
+			kubectl logs nginx-pod -c nginx-container
+			
+	==> 최종적으로 정리 
+	
+		kubectl get		: 상태확인용.
+		kubectl describe: Events 확인용
+		kubectl logs	: 사용하는 어플리케이션 (ex.  SpringBoot, Vuejs) 로그값 출력
+
+	6) 실행 중 Pod 수정 
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_edit/
+	
+		- 개념: K8s에서 실행 중인 상태에서 Pod를 직접 수정하는 명령어.
+				Pod가 생성된 후에는 대부분이 수정이 불가능함(*)
+				극히 일부분의 속성만 변경 가능 ( ex. label, annotation )
+				Deployments에서 주로 사용된다
+				
+		- 문법: kubectl edit (RESOURCE/NAME | -f FILENAME)
+		
+			명령어를 지정하면 윈도우환경에서는 메모장이 열림. ( 메모장에서 수정 후 저장 및 창닫기 하면 반영이 됨 )	
+	
+		ex. 
+			kubectl edit nginx-pod
+			kubectl edit -f app.yaml	
+	
+		# 실습4. eidt 실습
+		
+			1) yaml 작성 ( pod4.yaml )
+			
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: pod4
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2			  
+
+			2) Pod 생성 및 조회			
+				> kubectl apply -f pod4.yaml 
+				pod/pod4 created
+				
+				> kubectl get pods --show-labels                            
+				NAME   READY   STATUS    RESTARTS   AGE     LABELS
+				pod4   1/1     Running   0          5m11s   <none>					
+				
+			3) label 수정
+				> kubectl edit pods pod4
+				
+				명령어를 지정하면 윈도우환경에서 메모장이 열림. ( 메모장에서 수정 후 저장 및 창닫기 하면 반영 된다)
+				name: pod4
+				labels:
+				  app: nginx
+				  env: dev			
+				
+			4) Pod 조회
+				> kubectl get pods --show-labels
+				NAME   READY   STATUS    RESTARTS   AGE   LABELS
+				pod4   1/1     Running   0          12m   app=nginx,env=dev
+			
+	---------------------------------------------------------------------	
+	7) Pod안 컨테이너에 명령어 실행 ( docker exec 같은 기능 ) 
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_exec/
+	
+		- 개념: 실행 중인 Pod 안의 컨테이너에 명령어를 실행하는 명령어
+		
+		- 문법: kubectl exec (POD | TYPE/NAME) [-c CONTAINER] [flags] -- COMMAND [args...]
+		
+			-c, --container string	: 컨테이너명 지정.
+			-i, --stdin		: 표준입력 활성화
+			-t, --tty		: 모니터 활성화
+			
+		ex.	
+			kubectl exec nginx-container -- date
+			kubectl exec nginx-container -- pwd(ls)
+			kubectl exec -it nginx-container -- bash		# 직접 접속
+	
+		# 실습5. 컨테이너에 명령어 실행 실습
+		
+			1) yaml 작성 ( pod5.yaml)
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: pod5
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2
+					  command: ["sh", "-c", "touch abc.txt && nginx -g 'daemon off;'"]
+					  
+			2) pod 실행
+				> kubectl apply -f pod5.yaml
+				pod/pod5 created
+				
+				> kubectl get pods
+				
+			3) 컨테이너에 접속				
+				> kubectl exec pod5 -- ls
+				> kubectl exec -it pod5 -- bash
+				root@pod5:/# ls
+				abc.txt  bin  boot	...
+				
+	---------------------------------------------------------------------	
+	8) Label CRUD
+		
+		- 개념: label을 추가/수정/삭제/조회 하는 명령어
+		- 문법: 
+			kubectl label [--overwrite] (-f FILENAME | TYPE NAME) KEY_1=VAL_1 ... KEY_N=VAL_N [--resource-version=version]
+
+		- 옵션
+			--overwrite		: 기존 라벨 덮어쓰기 ( 수정 ) 
+			--all			: 모든 리소스 선택
+							  ex. kubectl label pods --all key=value	# 모든 pod에 라벨 지정
+			-f FILENAME		: 지정된 파일의 리소스에 라벨 추가.
+			--list			: 라벨 출력
+			key-			: 라벨 삭제		ex. kubectl label pods pod4 app-  , env-
+			
+		ex.
+			kubectl label pods nginx-container unhealthy=true		# 라벨추가
+			kubectl label pods --all status=unhealthy				# 모든 pod에 라벨 추가
+			kubectl label --overwrite pods nginx-container status=unhealthy		# 라벨수정
+			kubectl label pods nginx-container bar-					# 라벨 삭제
+			
+			# 라벨 출력
+			kubectl label pods nginx-container --list 	# 라벨 출력
+			kubectl get pods --show-labels				# 라벨 출력
+			kubectl get pods -L app,env					# 지정된 라벨을 column 으로 출력
+			kubectl get pods -l app=nginx				# 지정된 라벨에 해당하는 pod 출력
+			
+			kubectl get pods -o yaml	
+			kubectl get pods -o json
+			
+		# 실습6. pod 안에서 label CRUD
+			
+			1) yaml 작성 (pod6.yaml)
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: pod6
+				  labels:
+					app: nginx
+					env: dev
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2
+			
+			2) pod 실행
+				> kubectl apply -f pod6.yaml
+				pod/pod6 created
+				> kubectl get pods
+			
+			3) pod 조회
+				kubectl get pods
+				kubectl get pods -o wide
+				kubectl get pods -o yaml	# 라벨 출력됨
+				kubectl get pods -o json	# 라벨 출력됨
+				
+			4) 라벨 조회
+				
+				>kubectl label pods pod6 --list 		# 라벨 출력
+				env=dev
+				app=nginx				
+				
+				
+				> kubectl get pods --show-labels		# 라벨 출력		
+				NAME   READY   STATUS    RESTARTS   AGE     LABELS
+				pod6   1/1     Running   0          6m58s   app=nginx,env=dev
+				
+				
+				> kubectl get pods pod6 -L app,env		# 지정된 라벨을 column 으로 출력	
+				NAME   READY   STATUS    RESTARTS   AGE     APP     ENV
+				pod6   1/1     Running   0          7m39s   nginx   dev
+				
+				
+				> kubectl get pods -l app=nginx   		# 지정된 라벨에 해당하는 pod 출력	
+				NAME   READY   STATUS    RESTARTS   AGE
+				pod6   1/1     Running   0          8m53s
+				
+			5) 라벨 추가 
+			
+				> kubectl label pods pod6 version=v1		# version 라벨 추가
+				
+				> kubectl label pods pod6 version=v2 --overwrite # version 라벨 수정
+				pod/pod6 labeled
+			
+			7) 라벨 삭제 
+				> kubectl label pods pod6 version- 			# version 라벨 삭제
+				
+			8) pod 삭제
+				> kubectl delete -f pod6.yaml
+				
+	---------------------------------------------------------------------	
+	9) 포트 포워딩
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_port-forward/
+	
+	- 개념: 외부에서 직접 Pod를 접근하지 못하기 때문에 외부에서 접근할 수 있도록 포트 매핑하는 명령어 
+			임시로 사용가능하다
+	
+	- 문법: kubectl port-forward TYPE/NAME [options] [LOCAL_PORT:]REMOTE_PORT [...[LOCAL_PORT_N:]REMOTE_PORT_N]
+
+	- 용도: 개발/테스트용, 실제는 Service 이용함.
+	
+	ex.
+		kubectl port-forward pod/nginx 8080:80
+		
+	# 실습7. 포트 포워딩
+		
+		1) yaml 작성 (pod7.yaml)
+		
+			apiVersion: v1
+			kind: Pod
+			metadata:
+			  name: pod7
+			  labels:
+				app: nginx
+				env: dev
+			spec:
+			  containers:
+				- name: nginx-container
+				  image: nginx:1.14.2
+				  ports:
+				  - containerPort: 80		# doceer의 EXPOSE 용도. 문서화 기능, 실질적인 영향을 끼치진 않는다.
+	 				  
+		2) pod 생성 
+		
+			> kubectl apply -f pod7.yaml
+			> kubectl get pods
+			
+		3) 포트 포워드
+		
+			> kubectl port-forward pod/pod7 8080:80
+			Forwarding from 127.0.0.1:8080 -> 80
+			Forwarding from [::1]:8080 -> 80
+			Handling connection for 8080
+			
+			Ctrl+c 실행하면 종료됨.( 휘발성 )
+
+		4) 호스트에서 요청 
+		
+		   http://localhost:8080
+			
+	---------------------------------------------------------------------	
+	10) 리소스(파일) 교체
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_replace/
+	
+		- 개념: K8s의 리소스(a.yaml)을 새로운 리소스 (a_new.yaml)로 교체하는 명령어.
+		- 특징: 반드시 전체 리소스 spec을 제공해야 된다. 일부가 누락되면 교체안됨.
+				# 숨겨진 모든 spec이 명시 되어야 한다.
+				# 숨겨진 스펙 확인 : > kubectl get TYPE NAME -o yaml
+				
+				
+				
+		- 문법: kubectl replace -f FILENAME
+		
+		ex. 
+			 kubectl replace -f a-new.yaml
+			 
+		# 실습8. 리소스 교체
+		
+		1) yaml 작성 (pod8.yaml)
+			apiVersion: v1
+			kind: Pod
+			metadata:
+			  name: pod8
+			  labels:
+				app: nginx
+				env: dev
+			spec:
+			  containers:
+				- name: nginx-container
+				  image: nginx:1.14.2
+				  ports:
+					- containerPort: 80
+					
+		2) pod 생성 및 조회
+		
+			> kubectl apply -f pod8.yaml
+			> kubectl get pods --show-labels
+			
+		3) 새로운 yaml 작성 ( pod8-new.yaml )
+		   => 반드시 기존 파일의 숨겨진 spec까지 새로운 파일에 포함시켜야 됨
+			
+			# 숨겨진 스펙 복사
+			>  kubectl get pods pod8 -o yaml > ./pod8-new.yaml
+			
+		4) 새로운 pod89-new.yaml 수정
+			
+			label 변경
+			app: nginx	-->	nginx-app
+			env: dev	--> prod
+			
+			image 변경
+			image:nginx:1.14.2	--> 1.30.2
+			
+		5) yaml 교체 
+			>  kubectl replace -f pod8-new.yaml
+			pod/pod8 replaced
+			
+		6) 변경사항 확인
+			> kubectl describe pod pod8
+			
+	---------------------------------------------------------------------	
+	11) 빠른 pod 생성
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_run/
+	
+		- 개념: 빠른 방법으로 pod를 생성하는 명령어
+				실무에서는 yaml이용
+		
+		- 문법:
+		kubectl run NAME --image=image [--env="key=value"] [--port=port] [--dry-run=server|client] [--overrides=inline-json] [--command] -- [COMMAND] [args...]
+		
+		- 옵션
+			--image	: 컨테이너로 만들 base 이미지명
+			--env	: 환경변수
+			--port 	: 문서화 기능 			
+			-it		: 표준입력, 모니터 활성화 
+			--rm	: 종료시 삭자
+			--dry-run	: 실제 생성하지 않고 YAML 확인가능
+			--command 	: 명령어 지정
+			-- 명령어	: 컨테이너에서 실생할 명령어 지정	
+			--image-pull-policy	: ImagePullPolicy 지정( Always, IfNotPresent, Never)
+			--restart	: restartPolicy 지정가능 (Always, OnFailure, Never)
+			
+		ex. 
+			kubectl run nginx --image=nginx
+			kubectl run nginx --image=nginx --dry-run=client -o yaml	# 실행되지 않고 yaml로 실행됨
+			kubectl run nginx --image=nginx --restart=Never --port=79
+			kubectl run nginx --image=nginx --env="DNS_DOMAIN=cluster"
+			kubectl run -it pod9 nginx --image=nginx -- bash
+			
+			kubectl run pod9 nginx --image=nginx --rm 
+			
+		# 실습9. 빠른 pod 생성
+		
+		1) pod 생성
+			> kubectl run pod9 --image=nginx:1.14.2
+			> kubectl run pod10 --image=nginx:1.14.2 --dry-run=client -o yaml		# yaml 파일 형식으로 -o ( 출력 )
+			> kubectl run pod11 --image=nginx:1.14.2 --restart=Never --port=79
+			> kubectl run pod12 --image=nginx:1.14.2 --env="DNS_DOMAIN=cluster"
+			> kubectl run -it pod13 --image=nginx:1.14.2 -- bash
+			
+			> kubectl run -it pod14 --image=nginx:1.14.2 --rm -- bash
+			root> exit 	# exit 실행시 --rm 으로 pod 삭제
+			
+		2) 삭제 
+			kubectl delete pods pod9, pod11
+			kubectl delete all --all 	# 모든 Pod와 Service 삭제됨.
+			
+	---------------------------------------------------------------------	
+	12) 리소스 CPU와 Memory 조회
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_top/
+	
+		- 개념:	K8s의 실시간 CPU/Memory 사용량 조회.
+		- 문법:	kubectl top [flags]
+
+		- 사용방법:
+		
+			가. metric-server 설치.
+			kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+			kubectl delete -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+			
+			나. 로컬 환경 ( Docker Desktop/ / Minikube ) 필수 설정	           
+			kubectl edit deployment metrics-server -n kube-system
+
+			다. 수정
+			kubectl patch deployment metrics-server -n kube-system --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--kubelet-insecure-tls"}]'
+
+			라. 수정 후 재시작
+				
+			kubectl rollout restart deployment metrics-server -n kube-system
+
+			마. 정상 동작 확인
+
+			kubectl get pod -n kube-system
+			 
+			바. Node 자원 확인
+			kubectl top node
+			
+	---------------------------------------------------------------------	
+	13) K8s events 조회
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_events/
+	
+		- 문법: 
+		kubectl events [(-o|--output=)json|yaml|kyaml|name|go-template|go-template-file|template|templatefile|jsonpath|jsonpath-as-json|jsonpath-file] [--for TYPE/NAME] [--watch] [--types=Normal,Warning]
+		
+		--watch		: 실시간 확인
+		--types=Normal,Warning	: 타입에 따른 구분 ( Warning : 오류 )
+		
+		ex. 
+			kubectl events 
+			
+/////////////////////////////////////////
+7장 Pod의 리소스 자원 (CPU/Memory) 관리
+/////////////////////////////////////////
+https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits
+
+1. 개념	: 여러 Pod들이 Node의 CPU와 Memory를 공유해서 사용한다. 
+		  특정 Pod가 과도하게 자원을 점유하면 다른 Pod데 문제가 발생
+		  ==> CPU, Memory 사용량에 대한 제한을 설정한다
+	
+	---------------------------
+	Node ( PC )
+	
+	-----
+	pod( SpringBoot )	- 희망 자원 : 최소한의 필요자원 지정 ( ex. CPU:1, Memory: 1Gi )
+	-----				- 제한 자원 : 최대 사용할 수 있는 자원지정 ( ex. CPU:2, Memory: 3Gi )	  
+									  CPU를 초과사용으로 사용제한 ( Throttling )
+	-----							  Memory 초과사용으로 종료 ( OOMKill )		
+	pod( MySql, Redis )
+	-----
+	
+	CPU 자원 (ex. I7 12core)
+	Memory 자원 (32g)
+	---------------------------
+
+2. 설정 방법
+
+	spec:
+	  containers:
+		resources:
+		  requests:		# 희망자원
+			memory: "64Mi"
+			cpu: "250m"
+		  limits:		# 제한자원
+			memory: "128Mi"
+			cpu: "500m"
+			
+3. 단위
+
+	가. CPU 단위	( MilliCPU )
+		- 1000m = 1 CPU == 1 Core
+		ex. 100m = 0.1 CPU
+			250m = 0.25 CPU
+			500m = 0.5 CPU
+			1000m = 1 CPU
+			
+	나. Memory 단위
+	
+		- ki : kibi byte 	( 1ki = 1024 byte )
+		- mi : mibi byte	( 1Mi = 1024^2 byte )
+		- Gi : Gibi byte	( 1Gi = 1024^3 byte )
+		
+		ex. 1Gi = 1024MB
+			128Mi = 128MB
+			
+4. requests
+	- 개념 : 최소 보장 자원
+			 ( 최소한 이 정도의 CPU와 Memory가 필요하다)
+			 
+	- 용도 : scheduler가 Pod를 어느 node에 올릴지 결정하는 기준이 된다.
+			 중요한 것은 실행했을 때 필요한 자원이 기준이 아님. 
+			  requests에 부합되지 않는 Node에는 배치되지 않는다.
+			  
+5. limits
+	- 개념: 최대 사용 자원
+	- 용도: 리소스(Pod) 보호.
+			특정 Pod가 자원을 독접하지 못하도록 제한함.
+			
+	- 동작: 
+		CPU가 초과되면 Throttling 발생 ( 최대 상한선에서 사용되도록 강제 )
+		Memory가 초과 되면 강제종료 ( OOMKill 라고 부름 )
+		
+	
+	# 실습1. CPU 실습
+		
+		1) yaml 작성( pod9.yaml )
+			
+			apiVersion: v1
+			kind: Pod
+			metadata:
+			  name: stress-cpu
+			spec:
+			  restartPolicy: Never
+			  containers:
+				- name: stress
+				  image: polinux/stress
+				  args: ["stress", "--cpu", "1", "--timeout", "120s", "--verbose"]
+				  # args: ["stress", "--vm", "1", "--vm-bytes", "300M", "--timeout", "120s", "--verbose"]
+				  resources:
+					requests:
+					  cpu: "200m"
+					  memory: "64Mi"
+					limits:
+					  cpu: "500m"
+					  memory: "128Mi"
+					  
+		args: ["stress", "--cpu", "1", "--timeout", "120s", "--verbose"]
+		==> CPU 1개를 이용해서 엄청낙 많은 연산작업을 수행함.
+			120초 이후에는 연산작업을 끝냄.
+		
+		2) Pod 생성
+			> kubectl apply -f pod9.yaml
+			
+		3) Pod 자원 확인 			
+			> kubectl top pods
+			NAME         CPU(cores)   MEMORY(bytes)   
+			stress-cpu   465m         0Mi  				# 최대 CPU 점유율이 500Mi를 넘지 않는다
+			
+	
+	# 실습2. Memory 실습
+		
+		1) yaml 작성( pod9.yaml )
+			
+			apiVersion: v1
+			kind: Pod
+			metadata:
+			  name: stress-cpu
+			spec:
+			  restartPolicy: Never
+			  containers:
+				- name: stress
+				  image: polinux/stress
+				  # args: ["stress", "--cpu", "1", "--timeout", "120s", "--verbose"]
+				  args: ["stress", "--vm", "1", "--vm-bytes", "300M", "--timeout", "120s", "--verbose"]
+				  resources:
+					requests:
+					  cpu: "200m"
+					  memory: "64Mi"
+					limits:
+					  cpu: "500m"
+					  memory: "128Mi"
+					  
+		args: ["stress", "--vm", "1", "--vm-bytes", "300M", "--timeout", "120s", "--verbose"]
+		==> Memory가 300M 필요하도록 스트레스 부하
+			120초 이후에는 작업을 끝냄.
+			이때 limits:memory: "128Mi" 이므로 OOMKill 된다
+		
+		2) Pod 생성 
+			> kubectl apply -f pod9.yaml
+			
+		3) Pod 상태 확인		
+			> kubectl get pods           
+			NAME         READY   STATUS      RESTARTS   AGE
+			stress-cpu   0/1     OOMKilled   0          13s
+			
+			
+	
+	

@@ -1,0 +1,426 @@
+-------------------------------------------------
+2026.06.11
+
+					networks: 명시적으로 네트워트 지정  #  docker network create 동일.
+							  생성과 사용이 분리되어 사용됨.
+					environment:  환경변수 설정. Key는 대문자 권장.
+					env_file: .env 파일로 환경변수 설정하고 한번에 사용.
+					volumes: 영속성 위한 방법.
+					         생성과 사용이 분리되어 사용됨.
+
+					depends_on: 서비스 실행 순서 지정.
+					working_dir: 서비스의 작업 디렉터리. 여러 명령어들의 기준위치 역할.
+					healthcheck: 서비스의 상태 검사 ( 서비스 제공 여부 확인용 )
+					restart: 서비스 재시작 정책 ( restart policy )
+					
+	-------------------------------------------------
+	2) image 속성.
+		- 사용할 Docker 이미지 (base image), 없으면 다운로드
+		ex.
+			services:
+				web: # 서비스명
+					image: nginx:latest
+					container_name: my-nginx 	# docker run --name my-nginx nginx
+					
+	3) build 속성
+		- Dockerfile 파일 이용해서 직접 이미지 생성
+		
+		ex. 
+			services:
+				backend:
+					build:
+						context: . | ./backend 	# 이미지를 만들 때 필요한 파일등이 있는 경로 지정
+												  docker-compose.yaml 기준
+						dockerfile: Dockerfile | ../my-Dockerfile	# 빌드에 사용할 Dockerfile 이름지정
+																	  Dockerfile 파일인 경우 생략가능
+					image: springboot-app		# 생성할 이미지명
+					
+		만약 다음과 같은 디렉터리 구조라면?
+		
+		project/							services:
+			- docker-compose.yaml				backend:
+			- backend/				==>  			build:
+				- Dockerfile							context: ./backend
+				- ...							frontend:
+			frontend/								build:
+				- Dockerfile							context: ./frontend			
+				- ...								
+	
+	4) command 속성
+		- 명령어, Dockerfile의 CMD와 동일. 덮어쓰기 가능.
+		- 컨테이너 실행시 shell 명령어를 사용할려면 /bin/sh -c '명령어'
+		
+		ex.
+			command: bundle exec thin -p 3000
+			command: /bin/sh -c 'echo "hello $$HOSTNAME"'
+			command: sh -c 'echo "hello $$HOSTNAME"'
+			
+	5) entrypoint 속성( 고정 명령어용)
+		- 명령어. Dockerfile의 entrypoint와 동일, 덮어쓰기 불가.
+		
+		ex. entrypoint: /code.entrypoint.sh
+		
+	-------------------------------------------------------------------------	
+	6) prots 속성
+		- 실제 포트 연결 기능(**********)
+		- 문자열로 지정하자.
+		  (HOST:CONTAINER should always be specified as a (quoted) string, to avoid conflicts with YAML base-60 float.)
+		
+		ex. 
+			ports:
+				- "3000"
+				- "3000-3005"
+				- "8000:8000"
+				
+	-------------------------------------------------------------------------			
+	7) expose 속성
+		- 포트 문서화, Dockerfiledml EXPOSE와 동일
+		  즉 실제 포트 연결 기능 없음(***)
+		- 문자열로 지정.
+		
+		ex. 
+			expose:
+			  - "3000"
+			  - "8000"
+			  - "8080-8085/tcp"
+			  
+	-------------------------------------------------------------------------		  
+	8) environment 속성
+		- 환경변수 설정
+		- key는 대문자 권장
+		
+		ex. 
+			environment:
+			  RACK_ENV: development
+			  SHOW: "true"
+			  USER_INPUT:
+				
+			- 컨테이너 내부에서 사용됨
+				
+				$ env
+				$ printenv
+				
+				$ echo $RACK_ENV 
+				
+			- SpringBoot 에서 사용 방법,
+				
+				spring:
+					profiles:
+						activ: ${RACK_ENV:prod}
+						
+	-------------------------------------------------------------------------				
+	9) env_file 속성
+	
+		https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/
+
+		- .env 파일로 환경변수 설정하고 한번에 사용.
+		- environment가 우선권이 높다
+		
+		ex. 
+			# .env 파일내용
+			DB_HOST=localhost
+			DB_USER=root
+			BOOT_PROFILES=dev
+			
+			env_file: .env		#	.env 파일로 작성하면 자동으로 인식된다
+								#	==> 지정하지 않아도 된다
+			
+			- 컨테이너 내부에서 사용됨
+				
+				$ env
+				$ printenv
+				
+				$ echo $DB_HOST 
+				
+			- SpringBoot 에서 사용 방법,
+				
+				spring:
+					profiles:
+						activ: ${BOOT_PROFILES:dev}
+						
+	-------------------------------------------------------------------------					
+	10) networks 속성
+		- 기본적으로 docker-compose는 동일 네트워크에서 자동으로 묶임.
+		  따라서 서비스명으로 접근이 가능함
+		- 명시적으로 지정도 가능( 이유는 네트워크 분리 ) 
+		
+		ex. 
+			networks:	# 네트워크 생성
+				some-network:
+				other-network:
+				
+				
+		ex. front/backend/mysql
+		
+			# 네트워크 생성과 사용을 구분해야 한다
+			networks:  
+				db-net:
+				web-net:
+				
+			services:
+				mysql:
+					image: mysql:8.3
+					..
+					networks:
+						- db-net			# 네트워크 사용
+				backend:
+					image: springboot:4.5
+					..
+					networks:
+						- db-net
+				front:
+					image: vue.js:4.6
+					..
+					networks:
+						- web-net
+						
+	-------------------------------------------------------------------------					
+	11) volumes
+		- 영속성 유지 목적
+		
+		ex.
+			volumes:			# 볼륨 생성
+				db-data:
+			services:
+				mysql:
+					image: mysql:8.3
+					
+					volumes:	# 볼륨 사용
+						db-data:/var/lib/mysql
+					
+					networks:
+						- db-net
+						
+	-------------------------------------------------------------------------					
+	12) depends_on
+		- 서비스 순서 지정
+		- 실제 db와 redis가 정상적으로 실행될때까지 기다리지 않음
+		  따라서 healthcheck로 서비스 여부 확인필요
+		
+		ex.
+			services:
+			  web:
+				build: .
+				depends_on:		# web 보다 먼저  db와 redis가 실행됨
+				  - db
+				  - redis
+			  redis:
+				image: redis
+			  db:
+				image: myslq:8.3
+				
+	-------------------------------------------------------------------------
+	13) healthcheck 속성
+		- 서비스가 정상인지 검사 
+	
+		ex. 
+			healthcheck:
+			  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+			  interval: 1m30s
+			  timeout: 10s
+			  retries: 3
+			  start_period: 40s
+			  start_interval: 5s
+			  
+		ex.
+			services:
+			  web:
+				build: .
+				depends_on:		# web 보다 먼저  db와 redis가 실행됨
+				  - db
+				  - redis
+				  
+				healthcheck:
+				  test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+				  interval: 1m30s
+				  timeout: 10s
+				  retries: 3
+				  start_period: 40s
+				  start_interval: 5s				 
+				  
+			  redis:
+				image: redis
+			  db:
+				image: myslq:8.3
+
+	-------------------------------------------------------------------------
+	14) restart 속성
+		- 서비스가 종료된 경우, 이후에 재시작 정책임
+		
+		ex.
+			restart: "no"				# 기본, 자동 재시작 안함.
+			restart: always				# 항상 재시작
+			restart: on-failure			# 오류 발생되어 종료된 경우에만 재시작
+			restart: on-failure:3		# 오류 종료시 3번 까지만 재시작
+			restart: unless-stopped		# 사용자가 중지하기 전까지 재시작
+			
+	-------------------------------------------------------------------------
+6. Compose 관련 명령어
+	
+	1) 실행 명령어
+	
+		docker compose up			# 포그라운드 실행 ( 기존 이미지 사용 )
+		docker compose up -d		# 백그라운드 실행 ( 기존 이미지 사용 )
+		docker compose up -build	# 백그라운드로 실행 ( 새로운 이미지 생성)
+		docker compose up 서비스명	# 특정 서비스만 실행(선택 실행)
+		
+	2) 중지 명령어
+		docker compose down			# 컨테이너 중지 + 삭제
+		docker compose down -v		# volume 포함해서 삭제
+		
+		docker compose down --rmi	# 이미지까지 삭제됨.
+		
+		docker compose down 서비스명	# 특정 서비스만 종료 
+		
+	3) 상태 및 로그
+
+		docker compose ps 상태 확인 # healthcheck(running, healthy, exited) 확인
+		docker compose logs			# 모든 서비스 로그 (디버깅용)
+		docker compose logs 서비스명	# 특정 서비스만 로그 (서비스 로그 분리)
+		
+		
+	--------------------------------------------------------------------------------
+	# 실습 sample12_TodoAPP2_SpringSecurity
+		
+		step1. healthcheck 없이 실행 
+			
+			1) docker-compose.yaml
+			
+				networks:
+				  todoapp2-net:
+
+				volumes:
+				  todoapp2-volume:			
+
+				services:
+				  mysql:
+					image: mysql:8.3
+					container_name: mysql-todoapp2
+					environment:
+					  MYSQL_ROOT_PASSWORD: 1234
+					  MYSQL_DATABASE: testdb
+					volumes:
+						- todoapp2-volume:/var/bin/mysql
+					networks:
+						- todoapp2-net
+
+				  backend:
+					build:
+					  context: .
+					  dockerfile: Dockerfile
+					image: spring-mysql-todoapp2
+					container_name: spring-mysql-todoapp2
+					ports:
+						- "8080:8080"
+					networks:
+						- todoapp2-net
+				    depends_on:
+						- mysql
+						
+			2) sprintboot 에서 application.yml을 맞춰 준다	 	# 위 설정에 맞춰서 세팅한다 고정값 x
+				url: jdbc:mysql://mysql-todoapp2:3306/testdb
+			
+			3) jar 파일 생성
+				./gradlew clean build -x test 
+				
+			4) docker compose up -d --build
+			
+			5) docker ps로 확인
+			
+			7) 요청
+				
+				GET http://localhost:8080/home
+				
+		step2. mysql에 healthcheck 적용 실행
+		
+			1) docker-compose.yaml
+			
+				networks:
+				  todoapp2-net:
+
+				volumes:
+				  todoapp2-volume:			
+
+				services:
+				  mysql:
+					image: mysql:8.3
+					container_name: mysql-todoapp2
+					environment:
+					  MYSQL_ROOT_PASSWORD: 1234
+					  MYSQL_DATABASE: testdb
+					volumes:
+						- todoapp2-volume:/var/bin/mysql
+					networks:
+						- todoapp2-net
+					healthcheck:
+						test: 명령어는 찾아서 적용할것 <==  확인 docekr ps 
+															성공: healthy 표기,  backend 실행됨
+															실패: unhealthy 표기됨, bacekend 실행됨
+															
+						test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1234" ]
+						#	test: ["CMD", "mysql", "-uroot", "-p1234", "-e", "SELECT 1"]
+						#	원래 test 대로 진행하면 실패로 돌아오는 값도 mysqladmin이 정상접속으로 판단한다
+						# 	개선된 내용은 찾아서 알아볼것
+						interval: 5s
+						timeout: 5s
+						retries: 5
+						start_period: 10s
+						start_interval: 5s				 
+
+				  backend:
+					build:
+					  context: .
+					  dockerfile: Dockerfile
+					image: spring-mysql-todoapp2
+					container_name: spring-mysql-todoapp2
+					ports:
+						- "8080:8080"
+					networks:
+						- todoapp2-net
+				    depends_on:
+						- mysql
+					healthcheck:
+						# 백엔드 컨테이너 내부에서 8080 포트(메인 루트 주소)로 웹 요청을 보내서 조용히(--silent) 성공(200 OK) 응답이 오는지 확인합니다.
+						test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+						interval: 10s     # 스프링 부트는 뜨는 데 시간이 걸리므로 10초 주기로 검사
+						timeout: 5s       # 5초 이내에 응답 안 오면 실패 처리
+						retries: 3        # 3번 연속 실패하면 unhealthy 판단
+						start_period: 15s # 스프링 부트 톰캣 엔진이 완전히 부팅될 때까지 첫 15초는 실패해도 눈감아줌
+						start_interval: 5s
+						
+			2) sprintboot 에서 application.yml을 맞춰 준다	 	# 위 설정에 맞춰서 세팅한다 고정값 x
+				url: jdbc:mysql://mysql-todoapp2:3306/testdb
+			
+			3) jar 파일 생성
+				./gradlew clean build -x test 
+				
+			4) docker compose up -d --build
+			
+			5) docker ps로 확인
+			
+			7) 요청
+				
+				GET http://localhost:8080/home
+	--------------------------------------------------------------------------------
+	#  실습2. 보안 처리 
+	
+		1) .env 파일 작성 
+			MYSQL_ROOT_PASSWORD=1234
+		
+		2) application.yaml 과 docker-compose 수정
+			- docker-compose	: MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+			- application.yaml	: password: ${MYSQL_ROOT_PASSWORD}
+			
+		3) .env 파일은 .gitignore에 지정
+		
+		4) jar 파일 생성
+				./gradlew clean build -x test 
+				
+		5) docker compose up -d --build
+		
+		6) docker ps로 확인
+		
+		7) 요청
+			
+			GET http://localhost:8080/home
+	

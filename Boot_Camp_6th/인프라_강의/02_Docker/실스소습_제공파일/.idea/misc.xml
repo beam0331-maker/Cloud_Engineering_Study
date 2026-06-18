@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile" />
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile2_volume" />
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile3_ENV" />
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile4_Multi_stage" />
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile4_Network_mysql1_host" />
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile4_Network_mysql2_container" />
+    <file type="web" url="file://$PROJECT_DIR$/boot_Dockerfile4_Network_mysql3_network" />
+    <file type="web" url="file://$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="24" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>

@@ -1,0 +1,47 @@
+networks:
+  todoapp2-net:
+
+volumes:
+    todoapp2-volume:
+
+services:
+  mysql:
+    image: mysql:8.3
+    container_name: mysql-todoapp2
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: testdb
+    volumes:
+        - todoapp2-volume:/var/lib/mysql
+    networks:
+        - todoapp2-net
+    healthcheck:
+      test: ["CMD", "mysql", "-uroot", "-p1234", "-e", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 5s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring-mysql-todoapp2
+    container_name: spring-mysql-todoapp2
+    env_file: .env
+    ports:
+      - "8080:8080"
+    networks:
+      - todoapp2-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      # 백엔드 컨테이너 내부에서 8080 포트(메인 루트 주소)로 웹 요청을 보내서 조용히(--silent) 성공(200 OK) 응답이 오는지 확인합니다.
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/" ]
+      interval: 10s     # 스프링 부트는 뜨는 데 시간이 걸리므로 10초 주기로 검사
+      timeout: 5s       # 5초 이내에 응답 안 오면 실패 처리
+      retries: 3        # 3번 연속 실패하면 unhealthy 판단
+      start_period: 15s # 스프링 부트 톰캣 엔진이 완전히 부팅될 때까지 첫 15초는 실패해도 눈감아줌
+      start_interval: 5s

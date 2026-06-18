@@ -1,0 +1,32 @@
+#spring.application.name=demo
+
+spring:
+  application:
+    name: demo
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/testdb
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1234
+
+  sql:
+    init:
+      mode: always
+
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+mybatis:
+  mapper-locations: com/exam/config/*.xml
+  type-aliases-package: com.exam.dto
+
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 개발단계에서 SQL 확인
+
+logging:
+  level:
+    mapper패지키명: DEBUG

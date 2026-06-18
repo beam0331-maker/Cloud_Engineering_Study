@@ -60,10 +60,18 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity1_Dockerfile" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity" />
+            <option value="$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity1_Dockerfile" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity2_Compose" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/sample12_TodoAPP2_SpringSecurity2_Compose" />
           </set>
         </option>
       </GradleProjectSettings>

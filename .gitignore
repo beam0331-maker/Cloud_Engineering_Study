@@ -28,8 +28,7 @@ tmp/
 # 외부 라이브러리 및 압축 파일 (직접 추가된 항목)
 *.jar
 *.zip
-*.pdf
-
+*.tar
 
 # Eclipse 프로그램 자체 (프로젝트 폴더 내 설치 방지)
 **/eclipse/
@@ -60,7 +59,6 @@ tmp/
 # !**/알고리즘 공부용 프롬프트.txt
 # !Velog_Backup/프롬프터/
 
-*.jar
-*.zip
+
 *.iso
-*.tar
+.env

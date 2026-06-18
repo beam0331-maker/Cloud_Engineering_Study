@@ -1,0 +1,524 @@
+-------------------------------------------------------------------
+2026.06.18
+
+	--------------------------------------------------------------	
+	# 실습5. 롤백 실습
+	
+		1) 이미지 수정 ( 이미지 tag 가 없는 경우 - ImagePullBackOff 발생 )
+			
+			# 이미지 버전이 존재 하지 않는 시나리오
+			> kubectl set image deploy deploy-pod nginx-container=nginx:9.99
+			
+			> kubectl get pods
+			NAME                          READY   STATUS             RESTARTS   AGE
+			deploy-pod-6d5cdc89c8-t7hcc   0/1     ImagePullBackOff   0          20s
+			deploy-pod-7bd448f87f-cl99z   1/1     Running            0          9m10s
+			deploy-pod-7bd448f87f-n5sqh   1/1     Running            0          9m11s
+			deploy-pod-7bd448f87f-r4xs9   1/1     Running            0          9m9s
+			
+			> kubectl rollout history deploy deploy-pod                    
+			deployment.apps/deploy-pod 
+			REVISION  CHANGE-CAUSE
+			1         <none>		# nginx:1.14.2
+			2         <none>		# nginx:1.31.1
+			3         <none> 		# nginx:9.99,	ImagePullBackOff
+			
+		2) 이전 버전으로 롤백
+			> kubectl rollout undo deploy deploy-pod		# 새로운 REVISION이 추가된다
+			deployment.apps/deploy-pod rolled back
+			
+			> kubectl get pods                         
+			NAME                          READY   STATUS    RESTARTS   AGE
+			deploy-pod-7bd448f87f-cl99z   1/1     Running   0          20m
+			deploy-pod-7bd448f87f-n5sqh   1/1     Running   0          20m
+			deploy-pod-7bd448f87f-r4xs9   1/1     Running   0          20m
+			
+			> kubectl rollout history deploy deploy-pod                    
+			deployment.apps/deploy-pod 
+			REVISION  CHANGE-CAUSE
+			1         <none>		# nginx:1.14.2
+			3         <none>		# nginx:9.99,	ImagePullBackOff
+			4         <none>		# nginx:1.31.1
+			
+		3) 특정 REVISION으로 롤백
+			
+			# 현재 이미지 정보 ( 롤백 전 이미지 버전 )
+			> kubectl describe deploy deploy-pod
+			Image:         nginx:1.31.1
+			
+			> kubectl rollout undo deploy deploy-pod --to-revision=1
+			deployment.apps/deploy-pod rolled back
+			
+			> kubectl rollout history deploy deploy-pod                    
+			deployment.apps/deploy-pod 
+			REVISION  CHANGE-CAUSE
+			3         <none>		# nginx:9.99,	ImagePullBackOff
+			4         <none>		# nginx:1.31.1
+			5         <none>		# nginx:1.14.2
+			
+			# 현재 이미지 정보 ( 롤백 후 이미지 버전 )
+			> kubectl describe deploy deploy-pod
+			Image:         nginx:1.14.2
+			
+	--------------------------------------------------------------	
+	# 실습6. pause와 resume 실습
+		
+		1) pause 실행 
+		
+			> kubectl rollout pause deployment/deploy-pod
+			deployment.apps/deploy-pod paused
+			
+		2) 이미지 변경 및 상태확인 ( 반영되지 않음 )
+		
+			> kubectl set image deploy deploy-pod nginx-container=nginx:1.28
+			deployment.apps/deploy-pod image updated
+			
+			> kubectl rollout status deploy deploy-pod
+			Waiting for deployment "deploy-pod" rollout to finish: 0 out of 3 new replicas have been updated...
+			
+		3) resume 실행 ( 변경이 반영됨 )
+			> kubectl rollout resume deployment/deploy-pod
+			deployment.apps/deploy-pod resumed
+			
+			> kubectl rollout status deploy deploy-pod
+			Waiting for deployment spec update to be observed...
+			Waiting for deployment "deploy-pod" rollout to finish: 0 out of 3 new replicas have been updated...
+			
+			
+		4) 이력보기 
+			> kubectl rollout history deploy deploy-pod    
+			deployment.apps/deploy-pod 
+			REVISION  CHANGE-CAUSE
+			3         <none>
+			4         <none>
+			5         <none>
+			6         <none
+			
+		5) 모두 삭제 
+			
+			# 삭제 전 모든 자원 확인 
+			> kubectl get all
+			
+			# deployment가 생성한 자원 모두 삭제
+			> kubectl delete -f deployment1.yaml
+			
+			# 삭제 후 모든 자원 확인 ( deployment1.yaml 로 생성된 자원 모두 삭제 ) 
+			> kubectl get all
+	--------------------------------------------------------------
+		
+/////////////////////////////////////////
+7장. K8s 네트워크
+/////////////////////////////////////////
+
+1. 개념
+	- 클러스터 내의 모든 pod를 하나의 네트워크로 묶어서 관리하는 구조
+	- Node 단위가 아닌 클러스터 단위의 네트워크이다 
+	  ==> Node는 pod가 실행되는 머신뿐일 뿐이다. 
+	
+	--------------------------------------
+	가능한 이유:
+	쿠버네티스는 CNI 플러그인이 노드 간에 VPN과 유사한 터널링을 구성하기 때문에, 
+	물리적으로 다른 네트워크에 있는 파드끼리도 사설 IP로 직접 통신이 가능하다.
+	CNI가 터널링으로 오버레이 네트워크를 구성해서 하나의 가상 네트워크처럼 동작하기 때문에 별도의 라우팅 설정 없이 어떻게 서로 다른 네트워크 간 통신이 가능
+	
+	아래 터널링 방식을 이용해서 통신한다.
+
+	All cluster nodes form a mesh of tunnels using the UDP-based encapsulation protocols VXLAN or Geneve. 
+
+	https://docs.cilium.io/en/stable/network/concepts/routing/
+	--------------------------------------		
+
+2. K8s의 네트워크 규칙 
+	
+	1) 모든 Pod는 고유한 IP를 갖는다.
+	2) 모든 Pod는 NAT 없이 통신이 가능해야 된다.
+	3) Node 에서 Pod를 접근할 수 있어야 된다. ( Pod IP 이용 )
+	4) Pod에서 외부접근이 가능해야 한다
+
+3. K8s 일반적인 통신 형태  
+
+	1) WWWW 통신 ( 기본적으로 가능 )
+	
+		pod -------------------> 인터넷
+		
+	2) Pod와 Pod 통신 ( 기본적으로 가능 )
+		- 각 Pod가 Node가 달라도 가능( ***** )
+		  NAT, Port forward 등 추가 기능이 필요 없음 ( **** )
+		
+		- 권장하지 않음 ( Pod ip는 고정이 아니다, node에 따라 Pod가 죽었다 살아나면 ip도 변경됨 )
+			ex.
+						Pod ip 이용
+				Pod -----------------------> Pod
+			
+	3) Pod와 Service 통신( 일반적인 방법 ) 
+				  
+		 Service 이름 이용		label로 접근
+		Pod ---------> Service -----------> Pod
+		
+		- pod ip 대신 Service 이름으로 통신
+		- Pod는 Service에 이름으로 접근하고, Service는 label을 통해 pod에 접근한다
+		  ==> pod의 ip가 바껴도 네트워크를 유지할 수 있다
+		  
+	4) 외부에서 Pod 접근 ( 추가작업 필요 )
+		
+		- K8s 에서 기본적으로 Pod ip를 활용해서 직접 접근이 불가능함. ( ***** )
+		
+		- 추가 작업:
+			- 포트포워딩
+			ex. kubectl port-forwad TYPE/NAME
+			
+			- Service 이용
+			
+	K8s Cluseter
+	---------------------------------------------------
+	
+		Node1 (192.168.65.3)						# node ip 조회	:  kubectl get node -o wide
+		-------------------------
+		|	Pod (10.1.1.10)							# Pod ip 조회	:  kubectl get pods -o wide
+		|	--------------------
+		|	|	Container-A ( 10.1.1.10:3306 )		# Container들은 Pod의 IP를 공유한다
+		|	|	Container-B ( 10.1.1.10:80 )		# Container는 Port를 통해 구분된다
+		|	|										# 1) 같은 Pod안의 컨테이너 통신방법: localhost:포트번호
+		|	|	shared Network	
+		|	|	shared Volume						# 2) Pod간의 통신방법: PodIP로 접근 ( Node가 달라도 무관 )
+		|	--------------------					
+		-------------------------					# 3) Pod 안에서 외부 인터넷 통신 방법: http://google.com	
+		
+		
+		Node2 (192.168.66.10)						
+		-------------------------
+		|	Pod (10.1.2.10)
+		|	--------------------
+		|	|	Container-A ( 10.1.2.10:3306 )		
+		|	|	Container-B ( 10.1.2.10:80 )		
+		|	|										
+		|	|	shared Network
+		|	|	shared Volume
+		|	--------------------
+		-------------------------	
+	---------------------------------------------------
+	
+	---------------------------------------------------
+	# 실습1. Pod안에서 외부 인터넷 통신 실습
+		
+		1) ubuntu pod 작성 ( run을 사용한 빠른 pod 작성 ) 
+			> kubectl run ubuntu-test --image=ubuntu -it -- bash
+			root@ubuntu-test:/# apt update && full-upgrade -y
+			root@ubuntu-test:/# apt install curl -y
+			root@ubuntu-test:/# curl https://www.google.com
+			
+		2) 종료 
+			> kubectl delete pod ubuntu-test
+	---------------------------------------------------
+	# 실습2. Pod와 Pod 통신 실습 ( 기본적으로 Pod IP로 통신이 가능함 )
+	
+		Pod -------------------> Pod
+	(ubuntu)					(nginx)
+	
+		1) ubuntu Pod 생성 ( 빠른 Pod 작성방법 이용 ) 			
+			> kubectl run ubuntu-test --image=ubuntu -it -- bash
+			root@ubuntu-test:/# apt update && full-upgrade -y
+			root@ubuntu-test:/# apt install curl -y
+			
+		2) nginx Pod 생성 ( 빠른 Pod 작성방법 이용 ) 
+			> kubectl run nginx-test --image=nginx
+		
+		3) Pod ip 조회	
+			> kubectl get pods -o wide
+			NAME          READY   STATUS    RESTARTS   AGE     IP           NODE             NOMINATED NODE   READINESS GATES
+			nginx-test    1/1     Running   0          2m49s   10.1.0.123   docker-desktop   <none>           <none>
+			ubuntu-test   1/1     Running   0          3m33s   10.1.0.122   docker-desktop   <none>           <none>
+			
+		4) ubuntu에서 nginx의 Pod IP 이용해서 접근
+			root@ubuntu-test:/# curl http://10.1.0.123
+			<!DOCTYPE html>
+			<html>
+			<head>
+			<title>Welcome to nginx!</title>
+		
+		5) Pod 종료
+			> kubectl delete pod nginx-test, ubuntu-test 
+		
+	---------------------------------------------------
+	# 실습3. 같은 Pod안의 컨테이너 통신방법( localhost:포트번호 )
+	
+		1) yaml 작성
+		# multi-container-pod.yaml
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		  name: multi-container-pod
+		spec:
+		  containers:
+			- name: nginx-container
+			  image: nginx:1.14.2
+
+			- name: ubuntu-container
+			  image: ubuntu
+			  command: ["sh", "-c", "apt update && full-upgrade -y && apt install curl -y && sleep 3600"]
+			  
+			  
+		2) Pod 생성 
+			> kubectl get pods -o wide
+			NAME                  READY   STATUS    RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
+			multi-container-pod   2/2     Running   0          30s   10.1.0.124   docker-desktop   <none>           <none>
+						  
+		3) ubuntu에서 nginx로 요청하기
+		
+			# 다중 컨테이너의 경우 첫번째 컨테이너로 exec 한다
+			# ubuntu를 yaml에서 첫번째 container로 올리거나, 아래 처럼 -c 옵션을 통해 container를 지정해 줘야 한다			
+			>  kubectl exec -it multi-container-pod -c ubuntu-container -- bash	
+			root@multi-container-pod:/# curl http://localhost:80
+			<!DOCTYPE html>
+			<html>
+			<head>
+			<title>Welcome to nginx!</title>
+			
+	---------------------------------------------------
+	# 실습4. 외분에서 pod 접근 ( 기본적으로 접근 불가, 추가 작업이 필요 )
+	
+		가. port forward 이용
+		
+		나. Service 이용.
+	---------------------------------------------------
+	
+/////////////////////////////////////////
+8장. Service
+/////////////////////////////////////////
+https://kubernetes.io/docs/concepts/services-networking/service/
+
+1. 개념
+	- Pod는 외부에서 직접 접근이 불가능 하기 때문에 Service를 통해 Pod에 접근할 수 있음
+	
+2. 용도 2가지 
+	
+	1) Pod를 외부에서 접근하도록하기 위함
+	
+	2) Pod와 Pod간 연동할 때, Pod IP는 변동될 수 있기 때문에 고정된 값을 가진 Service를 사용함
+	
+3. 역할
+	
+	1) 고정 IP 역할 
+	2) DNS 제공						K8s의 CoreDNS
+		ex. http://hello-service	--------------->	IP 번호
+	3) 로드 밸런싱(Loal Balancing) 역할
+	
+4. Service가 Pod 선택
+	
+	# service yaml 샘플
+	
+	apiVersion: v1				# API Version
+	kind: Service				# 리소스 종류
+	metadata:					
+	  name: my-service			# 서비스 명
+	spec:
+	  selector:							
+		app.kubernetes.io/name: MyApp		# app.kubernetes.io/name: MyApp 값으로 설젇정된 라벨의 Pod 선택( 여러 Pod 선택 가능)
+	  ports:												
+		- protocol: TCP
+		  port: 80				# Service의 포트 
+		  targetPort: 9376		# Service가 접근하는 Pod의 포트 
+	  type: ClusterIP
+	  
+	가. Pod ( label 이용 ) 
+		labels:
+		  x: y
+	
+	나. Service ( selecctor 이용 )		
+		spec:
+		  selecctor:
+		    x: y
+			
+5. Service 타입 3가지
+	
+	1) CluseterIP
+		가. 개념 
+			- Service를 외부에서 접근이 아닌 클러스터 내부에서만 요청해서 사용할 때 설정
+			- type: 을 지정하지 않았을때 default 이다
+			
+		나. 구조
+		
+		--------------------------------------------------- 클러스터 
+				  호출( pod ) : front-end(Vue.js)
+				   |
+				Service (svc)
+				
+	
+		  pod 	  pod 	  pod	: back-end ( SpringBoot ) 		
+		---------------------------------------------------
+		
+		다. yaml
+		
+			apiVersion: v1
+			kind: Service
+			metadata:					
+			  name: my-service
+			spec:
+			  selector:							
+				app.kubernetes.io/name: MyApp
+			  ports:													
+				- port: 80				# Service의 포트 
+				  targetPort: 9376		# Service가 접근하는 Pod의 포트 
+			  type: ClusterIP			# 클러스터 내부에서만 Service 호출 가능
+			  
+	----------------------------------------------------------------------------
+	# 실습1. CluseterIP
+	
+										 port: 80							targetPort: 80
+			http://service명			 80					 			    80
+		Pod ---------------------------> Service -------------------------> Pod
+		(test, ubuntu)														(nginx)
+		
+		1) nginx pod yaml 작성
+		
+			# nginx pod.yaml
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: nginx-pod			
+				  labels:
+				    app: web
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2
+					  ports:
+						- containerPort: 80
+					
+		2) 생성 및 확인 
+			> kubectl apply -f nginx-pod.yaml          
+			pod/pod7 created
+			
+			> kubectl get pods -o wide
+			NAME   READY   STATUS    RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
+			pod7   1/1     Running   0          19s   10.1.0.127   docker-desktop   <none>           <none>
+			
+		3) Service yaml 작성
+			# clusterip-service.yaml
+				apiVersion: v1
+				kind: Service
+				metadata:
+				  name: nginx-clusterip-service
+				spec:
+				  selector:
+					app: web
+				  ports:
+					- port: 80				# Service 포트
+					  targetPort: 80		# Service가 접근할 Pod의 포트 여기서는 
+				  type: ClusterIP
+		
+		4) Service 생성 및 확인
+			> kubectl apply -f clusterip-service.yaml
+			> kubectl get svc -o wide		# svc: service 리소스 축약어			
+			NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+			kubernetes                ClusterIP   10.96.0.1       <none>        443/TCP   6d    <none>
+			nginx-clusterip-service   ClusterIP   10.105.142.91   <none>        80/TCP    7s    app.kubernetes.io/name=MyApp
+			
+		5) Test Pod 생성 ( 빠른 Pod 생성 ) 
+			> kubectl run ubuntu-test --image=ubuntu -it -- bash
+			root@ubuntu-test:/# apt update && apt full-upgrade -y
+			root@ubuntu-test:/# apt install curl -y
+			root@ubuntu-test:/# curl http://nginx-clusterip-service		( **** )
+		
+		6) 삭제 
+			> kubectl delete svc/nginx-clusterip-service
+			> kubectl delete pod/nginx-pod			
+
+	----------------------------------------------------------------------------
+	
+	2) NodePort
+		가. 개념 
+			- 각 Node의 포트를 이용해서 외부에서 접근하는 방식
+			
+		나. 구조 
+				  외부	( 웹 브라우저 )
+				   | 	접근: NodeIP:Port ( kubectl get node -o wide로 확인 가능 nodeip 조회)
+				   |	  ex. http://NodeIP:30007
+				   |	현재환경: ( docker-desktop에서는 nodeip가 localhost로 매핑되어 있다 )
+				   |	  ex. http://localhost:30007
+		-----------|--------------------------------------- 클러스터 
+				   |
+				Node(port 오픈) nodePort:30007
+				   |
+				Service (svc)	port: 80				
+	
+		  pod 	  pod 	  pod	: back-end ( SpringBoot ) 	
+								  targetPort: 80
+		---------------------------------------------------
+		
+		다. YAML 파일 구조 
+		# yaml sample
+			apiVersion: v1
+				kind: Service
+				metadata:					
+				  name: my-service
+				spec:
+				  selector:							
+					app.kubernetes.io/name: MyApp
+				  ports:												
+					- port: 80				
+					  targetPort: 9376
+					  # will allocate a port from a range (default: 30000-32767)
+					  nodePort: 30007			
+				  type: NodePort
+		
+		라. 용도 
+			- 실습용
+	----------------------------------------------------------------------------
+	실습2. NodePort
+	
+		
+			http://localhost:Nodeport    port: 80						  targetPort: 80
+		웹브라우저 --------------------> Service -------------------------> Pod
+
+		1)	nginx yaml 작성
+		
+			# nginx pod.yaml
+				apiVersion: v1
+				kind: Pod
+				metadata:
+				  name: nginx-pod
+				  labels:
+					app: web
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2
+					  ports:
+						- containerPort: 80
+
+			
+		2) 생성 및 확인 
+			> kubectl apply -f nginx-pod.yaml          
+			pod/pod7 created			
+			> kubectl get pods -o wide
+		
+		3) Service yaml 작성
+			# nodeport-service.yaml
+				apiVersion: v1
+				kind: Service
+				metadata:
+				  name: nginx-nodeport-service
+				spec:
+				  selector:
+					app: web
+				  ports:
+					- port: 80
+					  targetPort: 80
+					  nodePort: 30007
+				  type: NodePort
+		
+		4) Service 생성 및 확인
+			> kubectl apply -f nodeport-service.yaml
+			> kubectl get svc -o wide
+	
+		5) 웹브라우저에 요청
+			http://localhost:30007
+			
+		6) Service가 요청해야되는 Pod IP와 Port 정보 확인
+			> kubectl get EndpointSlice             
+			NAME                           ADDRESSTYPE   PORTS   ENDPOINTS      AGE
+			kubernetes                     IPv4          6443    192.168.65.3   6d1h
+			nginx-nodeport-service-cpc5x   IPv4          80      10.1.0.132     8m28s
+		
+	3) LoadBalancer

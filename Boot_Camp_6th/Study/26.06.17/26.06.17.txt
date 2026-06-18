@@ -1,0 +1,680 @@
+-------------------------------------------------------------------
+2026.06.17
+
+/////////////////////////////////////////
+6장 K8s 주요객체2 - Namespace
+/////////////////////////////////////////
+https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+https://kubernetes.io/docs/reference/kubernetes-api/core/namespace-v1/
+
+1. 개념
+	- 하나의 K8s의 클러스터를 논리적으로 어러개 분리해서 관리하는 기능임
+	
+2. 목적
+	- K8s의 클러스터에 있는 여러 리솟스들을 용이하게 관리하기 위함
+	( 자바의 패키지 기능과 비슷 )
+
+3. 특징 
+	- 하나의 리소스는 하나의 Namespace에 속함
+	- 같은 Namespace 안에서는 리소스 이름이 유일, 
+	  다른 Namespace 간에는 리소스 이름 중복가능
+	- default Namespace가 제공된다 
+	- 모든 리소스가 Namespace를 사용하는 것은 아니다.
+		
+		# kubectl api-resources의 NAMESPACED로 확인 가능
+		
+		> Namespace 적용가능한 리소스
+		  : Pod, Service, Deployment, ReplicaSet, ConfigMap, Secret, PVC(PersistentVolumeClaim), StatefulSet, Job, CronJob, Ingress
+		
+		> Namespace 적용이 불가능한 리소스(클러스터 단위)
+		  : Node, Namespace, PersistentVolume
+		  
+	- Namespace를 삭제하면 그 안에 있는 리소스(pod, service 등)들도 같이 삭제가 된다.(**)
+	- 리소스를 조회할 때, 반드시 Namespace 명을 지정해야 된다.
+	  ex. kubectl get pods						# default Namespace에서 찾음
+		  kubectl get pods -n 네임스페이스명 	# 지정된 Namespace에서 찾음
+												# -n, --namespace 는 상위 옵션이다
+												
+	- 기본으로 제공되는 Namespace
+	  : kube-node-lease, kube-public, kube-system
+	  
+4. Namespace 관련 주요 명령어
+	
+	1) Namespace 생성
+		가. 명령형 ( Imperative )
+		https://kubernetes.io/docs/reference/kubectl/generated/kubectl_create/kubectl_create_namespace/
+			
+			- 문법: kubectl create namespace NAME [--dry-run=server|client|none]
+				ex. kubectl create namespace my-namespace --dry-run=client -o yaml
+				# --dry-run=client 사용하는 이유
+				# 오직 사용자의 컴퓨터(kubectl 도구) 내부에서 명령어의 문법이 올바른지, 리소스 객체가 문법에 맞게 만들어지는 검증하기위해
+
+		나. 선언형 ( Declarative: yaml + kubectl apply )
+		https://kubernetes.io/docs/tasks/administer-cluster/namespaces/
+			
+			# namespace.yaml
+				apiVersion: v1
+				kind: Namespace
+				metadata:
+				  name: <insert-namespace-name-here>
+			  
+			kubectl apply -f namespace.yaml
+			
+	2) Namespace 보기 
+		
+		kubectl get namespace
+		kubectl get ns
+		
+	3) Namespace 자세히 보기
+		
+		kubectl describe namespace
+		kubectl describe namespace my-name
+		
+	4) Namespace 삭제 
+	
+		kubectl delete namespace my-namespace
+		kubectl delete ns my-namespace
+		
+	5) Namespace 별 리소스 조회
+		kubectl get pods 					# default 네임스페이스에서 찾음
+		kubectl get -n my-namespace 		# default 네임스페이스에서 찾음
+		
+		kubectl get pods -A					# 모든 네임스페이스에서 찾음
+		kubectl get pods --all-namespace	# 모든 네임스페이스에서 찾음
+	
+	--------------------------------------------------------------	
+	# 실습1. Namespace 생성
+		
+		# 명령형 생성 ( Imperative )
+			kubectl create namespace dev
+			
+			
+		# 선언형 생성 ( Declarative )
+			
+		1) yaml 작성
+			# namespace1.yaml
+			apiVersion: v1
+			kind: Namespace
+			metadata:
+			  name: prod	
+
+		2) namespace 생성
+			kubectl create -f namespace1.yaml
+	--------------------------------------------------------------
+	# 실습2. Pod에 namespace 적용
+	
+		# 명령형 ( Imperative ) 
+		
+		1) pod 선언 
+		
+			# namespace2-pod1.yaml
+			apiVersion: v1
+			kind: Pod
+			metadata:
+			  name: pod1
+			spec:
+			  containers:
+				- name: nginx-container
+				  image: nginx:1.14.2
+				  
+		2) kubectl apply + namespace 지정.
+			> kubectl apply -f namespace2-pod1 -n dev
+			> kubectl apply -f namespace2-pod1 --namespace dev
+	
+		3) 조회 
+			> kubectl get pods -n dev
+			> kubectl describe pods pod1 -n dev
+			
+		# 선언형 ( Declarative )
+		
+		1) pod.yaml 작성
+			# namespace2-pod2.yaml
+			apiVersion: v1
+			kind: Pod
+			metadata:
+			  name: pod2
+			  namespace: dev		# namespace 지정
+			spec:
+			  containers:
+				- name: nginx-container
+				  image: nginx:1.14.2
+		
+		2)  pod 생성
+			> kubectl apply -f namespace2-pod2.yaml
+			
+		3) 조회 
+			> kubectl get pods -n dev
+			> kubectl describe pods pod2 -n dev
+		
+		4) 삭제 
+			> kubectl delete -f namespace2-pod1.yaml
+			> kubectl delete -f namespace2-pod2.yaml
+			
+			또는			
+			> kubectl delete ns dev
+	--------------------------------------------------------------
+
+/////////////////////////////////////////
+6장 K8s 주요객체3 - ReplicaSet
+/////////////////////////////////////////			
+https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+https://kubernetes.io/docs/reference/kubernetes-api/apps/replica-set-v1/
+
+1. 개념
+	- 지정한 갯수만큼 Pod를 생성해주는 리소스
+	  만약에 하나의 Pod가 장애로 인해 종료되면, current state와 desired state 비교해서 
+	  desire state 상태로 만듬.
+	- ReplicaSet 삭제하면 관련된 Pod들도 같이 삭제된다
+
+2. 목적 
+	- Pod 갯수 유지 ( desired state 유지 )
+	- 고가용성 보장
+	
+	# sample.yaml 
+		apiVersion: apps/v1			# API Version. kubectl api-resources 확인 가능
+		kind: ReplicaSet
+		metadata:
+		  name: frontend			# ReplicaSet 이름
+		  labels:					# Label 지정
+			app: guestbook
+			tier: frontend		
+		spec:
+		  # modify replicas according to your case
+		  replicas: 3				# Pod 개수 지정, Desired stste
+		  selector:					# 접근하고자 하는 리소스를 찾을 떄 사용하는 속성
+			matchLabels:
+			  tier: frontend		# selector가 match 하려는 라벨(*)
+			  
+		  template:					# ReplicaSet이 만들어야 되는 Pod 정보를 지정하는 영역
+			metadata:
+			  labels:
+				tier: frontend		# selector가 접근할 리소스, matchLabels와 같은 라벨이어야 한다(*)
+			spec:
+			  containers:
+			  - name: php-redis		# 컨테이너이름
+				image: us-docker.pkg.dev/google-samples/containers/gke/gb-frontend:v5		# Pod의 base 이미지명
+		
+		==> selector.matchLabels 값과 template.metadata.labels의 값은 반드시 같아야 한다 (***)
+	
+	--------------------------------------------------------------	
+	# 실습1. replicaset 생성/조회
+	
+	1) replicaset.yaml 작성
+		# replicaSet-pod.yaml
+			apiVersion: apps/v1
+			kind: ReplicaSet
+			metadata:
+			  name: rs-pod
+			spec:
+			  # modify replicas according to your case
+			  replicas: 3
+			  selector:
+				matchLabels:
+				  app: web
+			  template:
+				metadata:
+				  labels:
+					app: web
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2
+					  
+	2)	생성
+		
+		> kubectl apply -f replicaset-pod.yaml
+		> kubectl get pods
+		NAME           READY   STATUS    RESTARTS   AGE
+		rs-pod-475bs   1/1     Running   0          12s
+		rs-pod-gqrd9   1/1     Running   0          12s
+		rs-pod-mtkgh   1/1     Running   0          12s
+		
+		==> NAME값은 ReplicaSet의 이름(rs-pod)를 prefix로 사용한다
+		
+	3) replicaset 조회 
+	
+		> kubectl get replicasets
+		> kubectl get replicaset
+		> kubectl get rs
+		
+	4) replicaset 상세 조회 
+	
+		> kubectl describe rs rs-pod
+		...
+		# 다음 내용이 제일 중요
+		Replicas:     3 current / 3 desired
+		Pods Status:  3 Running / 0 Waiting / 0 Succeeded / 0 Failed
+	--------------------------------------------------------------	
+	# 실습2. replicaset 자동 복구
+	
+	1) 인위적으로 실행중이 pod 삭제
+		
+		> kubectl get pods
+		NAME           READY   STATUS    RESTARTS   AGE
+		rs-pod-475bs   1/1     Running   0          12s
+		rs-pod-gqrd9   1/1     Running   0          12s
+		rs-pod-mtkgh   1/1     Running   0          12s
+		
+		> kubectl delete pods rs-pod-475bs			# replicaset 으로 생성된 Pod(rs-pod-475bs) 삭제
+		pod "rs-pod-475bs" deleted from default namespace
+		
+		> kubectl get pods                
+		NAME           READY   STATUS    RESTARTS   AGE
+		rs-pod-cbxzr   1/1     Running   0          4s
+		rs-pod-gqrd9   1/1     Running   0          8m42s
+		rs-pod-mtkgh   1/1     Running   0          8m42s
+		
+		# rs-pod-475bs 삭제 후 자동으로 rs-pod-cbxzr라는 새로운 Pod가 생성된다
+	--------------------------------------------------------------	
+	# 실습3. replicaset 스케일링 변경
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_scale/
+	
+		- 문법
+		  : kubectl scale [--resource-version=version] [--current-replicas=count] --replicas=COUNT (-f FILENAME | TYPE NAME)
+ 
+		# 1. 스케일 증가 ( Imperative : 명령형 )
+			> kubectl scale -f foo.yaml --replicas=5
+			> kubectl scale rs rs-pod --replicas=5
+			
+			> kubectl get pods                     
+			NAME           READY   STATUS    RESTARTS   AGE
+			rs-pod-22vpw   1/1     Running   0          5s
+			rs-pod-4qxs7   1/1     Running   0          5s
+			rs-pod-cbxzr   1/1     Running   0          97m
+			rs-pod-gqrd9   1/1     Running   0          106m
+			rs-pod-mtkgh   1/1     Running   0          106m
+			
+		# 2. 스케일 감소( Imperative : 명령형 ) 
+			> kubectl scale rs rs-pod --replicas=2
+			> kubectl get pods
+			> kubectl get pods                    
+			NAME           READY   STATUS    RESTARTS   AGE
+			rs-pod-gqrd9   1/1     Running   0          107m
+			rs-pod-mtkgh   1/1     Running   0          107m
+			
+		# 3. yaml 변경 ( Declarative : 선언형 )
+			replicas: 10 변경 후 저장 
+			> kubectl apply rs -f replicaset-pod.yaml		# 새성/ 수정
+			> kubectl get pods
+	--------------------------------------------------------------	
+	# 실습4. 현재 Pod를 관리하는 replicaset 정보보기	
+		> kubectl get pods
+		NAME           READY   STATUS    RESTARTS   AGE
+		rs-pod-gqrd9   1/1     Running   0          107m
+		rs-pod-mtkgh   1/1     Running   0          107m
+		
+		> kubectl get pods rs-pod-gqrd9 -o yaml
+		...
+		 ownerReferences:
+		  - apiVersion: apps/v1
+			blockOwnerDeletion: true
+			controller: true
+			kind: ReplicaSet
+			name: rs-pod
+			uid: 314f4ed9-ee7e-4675-8c42-f6f7b30bd712
+		...
+	--------------------------------------------------------------	
+	# 실습5. ReplicaSet으로 부터 특정 Pod 제외
+	https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#isolating-pods-from-a-replicaset
+		
+		- 개념: ReplicaSet이 관리하는 Pod로부터 제외시키는 방법
+		- 용도: 제외시켜서 디버깅, 데이터 회복 등 으로 활용 가능
+		- 방법: 실행중인 Pod의 라벨을 변경하면 제외됨.
+		
+		
+		1) label 수정
+		
+			> kubectl get pods                    
+			NAME           READY   STATUS    RESTARTS   AGE
+			rs-pod-8qn8l   1/1     Running   0          3s
+			rs-pod-gqrd9   1/1     Running   0          132m
+			rs-pod-mtkgh   1/1     Running   0          132m
+			
+			> kubectl label pods rs-pod-8qn8l app=web2 --overwrite	# app 라벨 수정
+			
+		2) label 확인
+			> kubectl get pods --show-labels                       
+			NAME           READY   STATUS    RESTARTS   AGE    LABELS
+			rs-pod-2djr9   1/1     Running   0          41s    app=web
+			rs-pod-8qn8l   1/1     Running   0          20m    app=web2 		# replicaset이 관리하지 않는다
+			rs-pod-gqrd9   1/1     Running   0          152m   app=web
+			rs-pod-mtkgh   1/1     Running   0          152m   app=web
+			
+		3) 모두 가제 
+			> kubectl delete rs --all		# ReplicaSet을 삭제하면 관리하는 Pods도 삭제된다.
+			> kubectl delete rs rs-pod --cascade=orphan	
+			# ReplicaSet 삭제해도 관리하고 있는 pod는 삭제되지 않고 orphan으로 유지
+	--------------------------------------------------------------	
+			
+/////////////////////////////////////////
+6장 K8s 주요객체3 - Deployments ( *** )
+/////////////////////////////////////////
+https://kubernetes.io/docs/concepts/workloads/controllers/deployment
+
+1. 개념 : pod와 ReplicaSet 기능을 포함 및 추가 기능을 지원하는 리소스		
+
+2. 추가기능
+	- pod 자동복구
+	- 버전관리 지원
+	- 롤백 ( 특정 버전으로 돌아갈 수 있다 )
+	- scaling 가능 
+	- 무중단 업데이트 가능 ( 롤링 업데이트: Rolling -update )
+	https://discuss.kubernetes.io/t/rollingupdate-order-in-deployments-and-statefulsets/31998
+	# 롤링 업데이트: Rolling -update
+	# 기본 Pod를 일부분 삭제하고, 새로운 Pod를 일부분 생성하면서 전체를 새로운 Pod로 업데이트하는 방법
+	# ==> 전체를 내리고 업데이트 하지 않으므로 서비스 중단이 없다
+
+	
+3. 기본 Deployment.yaml
+	
+	# sample
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	  name: nginx-deployment	# Deploymet 이름
+	  labels:					# Label 이름
+		app: nginx
+	spec:
+	  replicas: 3
+	  selector:
+		matchLabels:
+		  app: nginx			# ( ***** )
+		  
+	  template:					# Deployment 내의 ReplicaSet이 관리하는 Pod 정보
+		metadata:			
+		  labels:
+			app: nginx			# ( ***** )
+		spec:
+		  containers:
+		  - name: nginx
+			image: nginx:1.14.2
+			ports:
+			- containerPort: 80
+
+	==> selector.matchLabels 값과 template.metadata.labels의 값은 반드시 같아야 한다 ( **** )
+
+4. Pod 교체 전략
+
+	1) 개념
+		- K8s의 Pod를 교체하는 방법이다
+		
+	2) 2가지 방버 
+		
+		가. 롤링 업데이트 방식
+		https://discuss.kubernetes.io/t/rollingupdate-order-in-deployments-and-statefulsets/31998
+			- 구버전 Pod를 삭제, 신버전 Pod를 생성하면서 업데이트하는 방식
+			- 서비스 중단 없음
+				단점: 배포 시간이 길어짐. 
+					  버전들이 혼재함.
+			
+			# 샘플
+			...
+			replicas: 10
+			...
+			strategy:
+			rollingUpdate:
+			  maxSurge: 0
+			  maxUnavailable: 2		==>	전체의 20v%를 삭제 할 수 있따
+			type: RollingUpdate
+			
+			- maxSurge			: replicaset 보다 추가로 더 만들 수 있는 pod 비율
+			- maxUnavailable	: 업데이트 중에 삭제할 수 있는 pod 비율
+			
+		-------------------------------------------------------------
+		# yaml 파일	
+			replicas: 10		
+			maxSurge: 3
+			maxUnavailable: 2		==>	전체의 20v%를 삭제 할 수 있따
+			type: RollingUpdate
+			
+		# step1. 새로운 Pod 3개 생성 
+			구버전: 10개 
+			신버전: 3개 
+			총	  : 13개 ( maxSurge )
+		
+		# step2. 구버전 2개 삭제 
+			구버전: 8개 
+			신버전: 3개 
+			총	  : 11개 ( maxUnavailable )
+			
+		# step3. 새로운 Pod 2개 생성 
+			구버전: 8개 
+			신버전: 5개 
+			총	  : 13개 ( maxSurge )
+			
+		# step4. 구버전 2개 삭제 
+			구버전: 6개 
+			신버전: 5개 
+			총	  : 11개 ( maxUnavailable )
+		
+		# step5. 새로운 Pod 2개 생성 
+			구버전: 6개 
+			신버전: 7개 
+			총	  : 13개 ( maxSurge )
+			
+		# step6. 구버전 2개 삭제 
+			구버전: 4개 
+			신버전: 7개 
+			총	  : 11개 ( maxUnavailable )
+		
+		# step7. 새로운 Pod 2개 생성 
+			구버전: 4개 
+			신버전: 9개 
+			총	  : 13개 ( maxSurge )
+			
+		# step8. 구버전 2개 삭제 
+			구버전: 2개 
+			신버전: 9개 
+			총	  : 11개 ( maxUnavailable )	
+		
+		# step9. 새로운 Pod 1개 생성 	# replicas: 10 이므로 신버전은 10개를 넘어갈 필요가 없다.
+			구버전: 2개 
+			신버전: 10개 
+			총	  : 12개 ( maxSurge )
+			
+		# step8. 구버전 2개 삭제 
+			구버전: 0개 
+			신버전: 10개 
+			총	  : 10개 ( maxUnavailable )					
+		-------------------------------------------------------------
+		
+		나. 재생성 방식
+			- 개념: 구버전 pod를 모두 삭제하고 나중에 신버전 pod생성.
+			- 장점: 배포시간이 짧음, 버전충돌이 없음
+			  단점: 서비스 중단 발생( downtime 발생됨 )
+		
+5. Deployment 주요 명령어
+	
+	1) Deployment 생서 
+		> kubectl apply -f deployment.yaml
+		
+	2) Deployment 보기 
+		
+		> kubectl get deployments
+		> kubectl get deployment		
+		> kubectl get deploy
+		
+	3) Deployment 상세 보기 
+	
+		> kubectl describe deploy NAME
+		
+	4) rollout 명령어
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/
+	https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/#see-also
+	
+		- 개념:
+		- 문법: kubectl rollout SUBCOMMAND
+		
+		ex.
+			# kubectl rollout history (TYPE NAME | TYPE/NAME) [flags]
+			kubectl rollout history 	# 배포 이력 조회
+			--revision=int	: revision 버전을 자세하게 확인 가능
+			
+			# kubectl rollout status (TYPE NAME | TYPE/NAME) [flags]
+			kubectl rollout status 		# 배포 상태 조회			
+
+			kubectl rollout restart		# 배포 재시작
+			
+			kubectl rollout undo 		# 배포 롤백 ( 바로 이전 또는 특정 버전으로 롤백 )			
+			# kubectl rollout undo (TYPE NAME | TYPE/NAME) [flags]
+			# 이전 버전으로 롤백 : kubectl rollout undo deployment/abc	
+			# 특정 버전으로 롤백 : kubectl rollout undo daemonset/abc --to-revision=3
+			
+			kubectl rollout pause 		# 배포 일시중지		
+			# kubectl rollout pause RESOURCE
+			# kubectl rollout pause deployment/nginx
+			
+			kubectl rollout resume		# 배포 다시 시작
+			# kubectl rollout resume RESOURCE
+			# kubectl rollout resume deployment/nginx
+			
+	--------------------------------------------------------------	
+	# 실습1.  Deployment 생성 및 조회( 상세 )
+	
+		1) yaml 파일 작성
+		https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+		
+		# deployment1.yaml
+
+			apiVersion: apps/v1
+			kind: Deployment
+			metadata:
+			  name: deploy-pod
+			spec:
+			  replicas: 3
+			  selector:
+				matchLabels:
+				  app: web
+			  template:
+				metadata:
+				  labels:
+					app: web
+				spec:
+				  containers:
+					- name: nginx-container
+					  image: nginx:1.14.2
+					  ports:
+						- containerPort: 80
+		
+		2) 생성
+			> kubectl apply  -f deployment1.yaml
+		
+		3) 조회
+			
+			kubectl get deployments
+			kubectl get deployment
+			kubectl get deploy
+			
+		4) 상세 조회
+			> kubectl describe deploy deploy-pod
+			Annotations:            deployment.kubernetes.io/revision: 1
+			Selector:               app=web
+			Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
+			StrategyType:           RollingUpdate
+			MinReadySeconds:        0
+			RollingUpdateStrategy:  25% max unavailable, 25% max surge
+		
+		5) 배포 상태 확인 
+			> kubectl rollout status deploy/deploy-pod
+			> kubectl rollout status deploy deploy-pod
+			deployment "deploy-pod" successfully rolled out
+			
+		6) 배포 이력 조회
+			> kubectl rollout history ( deploy/deploy-pod | deploy deploy-pod )
+			deployment.apps/deploy-pod 
+			REVISION  CHANGE-CAUSE
+			1         <none>
+	--------------------------------------------------------------	
+	# 실습2. 자동 복구 실습
+	
+		1) 특정 pod 삭제 
+			> kubectl get pod
+			NAME                          READY   STATUS    RESTARTS   AGE
+			deploy-pod-6b64db89dc-4pw9f   1/1     Running   0          23m
+			deploy-pod-6b64db89dc-7ztlc   1/1     Running   0          23m
+			deploy-pod-6b64db89dc-rqkxk   1/1     Running   0          23m
+			
+			> kubectl delete pod deploy-pod-6b64db89dc-4pw9f
+		
+		2) 다시 확인
+			> kubectl get pod                               
+			NAME                          READY   STATUS    RESTARTS   AGE
+			deploy-pod-6b64db89dc-22bcg   1/1     Running   0          4s		# 새롭게 생성된 Pod
+			deploy-pod-6b64db89dc-7ztlc   1/1     Running   0          25m
+			deploy-pod-6b64db89dc-rqkxk   1/1     Running   0          25m
+	--------------------------------------------------------------	
+	# 실습3. scaling
+	
+		> kubectl get pod
+		NAME                          READY   STATUS    RESTARTS   AGE
+		deploy-pod-6b64db89dc-22bcg   1/1     Running   0          4s		
+		deploy-pod-6b64db89dc-7ztlc   1/1     Running   0          25m
+		deploy-pod-6b64db89dc-rqkxk   1/1     Running   0          25m
+	 
+		# 1. 스케일 증가/갑소 ( Imperative : 명령형 )		
+			> kubectl scale deploy deploy-pod --replicas=5
+
+			> kubectl get pod                            
+			NAME                          READY   STATUS    RESTARTS   AGE
+			deploy-pod-6b64db89dc-22bcg   1/1     Running   0          6m12s
+			deploy-pod-6b64db89dc-7ztlc   1/1     Running   0          31m
+			deploy-pod-6b64db89dc-9h6tx   1/1     Running   0          3s
+			deploy-pod-6b64db89dc-nc7tt   1/1     Running   0          3s
+			deploy-pod-6b64db89dc-rqkxk   1/1     Running   0          31m
+		
+		# 2. yaml 변경 ( Declarative : 선언형 )
+			replicas: 10 변경 후 저장 
+			> kubectl apply -f deployment1.yaml		# 생성 / 수정
+			deployment.apps/deploy-pod configured
+			
+			> kubectl get deployments          
+			NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+			deploy-pod   10/10   10           10          33m
+		
+	--------------------------------------------------------------	
+	# 실습4. 배포이력 추가 ( 이미지 변경해서 배포 이력 추가 )
+	
+		구버전 : nginx:1.14.2
+		신버전 : nginx:1.31.1
+		
+		1) 이미지 변경
+			https://kubernetes.io/docs/reference/kubectl/generated/kubectl_set/kubectl_set_image/
+			
+			문법:
+			kubectl set image (-f FILENAME | TYPE NAME) CONTAINER_NAME_1=CONTAINER_IMAGE_1 ... CONTAINER_NAME_N=CONTAINER_IMAGE_N
+			
+			> kubectl describe deploy deploy-pod
+			...
+			Image:         nginx:1.14.2
+			
+			> kubectl set image deploy deploy-pod nginx-container=nginx:1.31.1
+			deployment.apps/deploy-pod image updated
+			
+		2) 배포 상태 확인 ( RollingUpdate 이력 확인 가능 )
+			> kubectl rollout status deploy deploy-pod
+			deployment "deploy-pod" successfully rolled out
+			
+			> kubectl event 		# RollingUpdate 이력 자세하게 확인 가능
+			
+		3) 배포 이력 조회
+			> kubectl describe deploy deploy-pod
+			...
+			Image:         nginx:1.31.1
+			
+			> kubectl rollout history deploy deploy-pod
+			deployment.apps/deploy-pod 
+			REVISION  CHANGE-CAUSE
+			1         <none>
+			2         <none>
+			
+			> kubectl rollout history deploy deploy-pod --revision=1
+			deployment.apps/deploy-pod with revision #1
+			Image:      nginx:1.14.2
+			...
+			
+			> kubectl rollout history deploy deploy-pod --revision=2
+			deployment.apps/deploy-pod with revision #2
+			...
+			Image:      nginx:1.31.1
+			
+

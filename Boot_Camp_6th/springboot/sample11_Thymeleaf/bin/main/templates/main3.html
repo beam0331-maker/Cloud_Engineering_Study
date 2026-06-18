@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .xxx{
+            color:red;
+            }
+        .yyy{
+            color:blue;
+            }
+
+    </style>
+</head>
+<body>
+<h1>3. scpoe에 개체 저장하고 html에서 보여주기</h1>
+<h2>가. 조건문(단일 if)</h2>
+<p th:if="${login.userid == 'testID1'}">
+    참1
+</p>
+<p th:if="${login2.userid == null}">
+    참2
+</p>
+
+<h2>나. 3항 연산자</h2>
+<p th:text="${login.userid == 'testID1'}? '참3' : '거짓' ">
+</p>
+<p th:class="${login.userid == 'testID1'}? 'xxx' : 'yyy' ">
+    CSS 적용된 텍스트</p>
+
+<h2>다. switch </h2>
+<div th:switch="${login.userid}">
+    <p th:case="testID1"> testID1 입니다 </p>
+    <p th:case="testID2"> testID2 입니다 </p>
+    <p th:case="*"> default 입니다 </p>
+</div>
+
+<h2>라. 반복문 </h2>
+<div th:each="dto : ${mylist}">
+    <span th:text="|ID: ${dto.userid}   PW: ${dto.password}|"></span>
+</div>
+
+<h2>마. 반복문2 - index, count, first, last  </h2>
+<div th:each="dto, itersts : ${mylist}">
+    <span th:text="|DTO${itersts.count} [ID: ${dto.userid}] [PW: ${dto.password}]  [first: ${itersts.first}]|"></span>
+</div>
+
+</body>
+</html>
